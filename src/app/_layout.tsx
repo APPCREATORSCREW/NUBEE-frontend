@@ -1,2 +1,20 @@
-//  루트 (인증 분기)
-// 로그인 여부에 따라 (auth)로 보낼지 (tabs)로 보낼지 분기
+import { useEffect } from 'react';
+import { SplashScreen, Stack } from 'expo-router';
+import { useFonts } from 'expo-font';
+
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    'Pretendard-Regular': require('../../assets/fonts/Pretendard-Regular.otf'),
+    'Pretendard-Bold': require('../../assets/fonts/Pretendard-Bold.otf'),
+  });
+
+  useEffect(() => {
+    if (loaded || error) SplashScreen.hideAsync();
+  }, [loaded, error]);
+
+  if (!loaded && !error) return null;
+
+  return <Stack screenOptions={{ headerShown: false }} />;
+}
