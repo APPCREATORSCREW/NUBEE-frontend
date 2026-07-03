@@ -4,7 +4,7 @@ import { useFonts } from 'expo-font';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+const RootLayout = () => {
   const [loaded, error] = useFonts({
     'Pretendard-Regular': require('../../assets/fonts/Pretendard-Regular.otf'),
     'Pretendard-Bold': require('../../assets/fonts/Pretendard-Bold.otf'),
@@ -18,3 +18,4 @@ export default function RootLayout() {
 
   return <Stack screenOptions={{ headerShown: false }} />;
 }
+export default RootLayout;
