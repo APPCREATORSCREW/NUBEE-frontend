@@ -6,8 +6,8 @@ SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
   const [loaded, error] = useFonts({
-    'Pretendard-Regular': require('../../assets/fonts/Pretendard-Regular.otf'),
-    'Pretendard-Bold': require('../../assets/fonts/Pretendard-Bold.otf'),
+    'Pretendard-Regular': require('../../assets/fonts/pretendard-Regular.otf'),
+    'Pretendard-Bold': require('../../assets/fonts/pretendard-Bold.otf'),
   });
 
   useEffect(() => {
