@@ -29,6 +29,7 @@ const TabsLayout = () => {
         tabBarLabelStyle: {
           fontFamily: fonts.family.regular,
           fontSize: fonts.size.caption,
+          letterSpacing: fonts.letterSpacing.caption, 
         },
       }}
     >
