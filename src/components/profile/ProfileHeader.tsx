@@ -99,14 +99,14 @@ const styles = StyleSheet.create({
     username: {
       fontFamily: fonts.family.bold,
       fontSize: fonts.size.title,
-      letterSpacing: fonts.letterSpacing.body,
+      letterSpacing: fonts.letterSpacing.title,
       color: colors.black,
       marginBottom: 8,
     },
     email: {
       fontFamily: fonts.family.regular,
       fontSize: fonts.size.caption,
-      letterSpacing: fonts.letterSpacing.body,
+      letterSpacing: fonts.letterSpacing.caption,
       color: colors.black,
     }
   });
