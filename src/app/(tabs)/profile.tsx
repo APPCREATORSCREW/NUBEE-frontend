@@ -1,33 +1,43 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { colors } from "../../constants/colors";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import { StarShine } from "../../components/icons";
 import { fonts } from "../../constants/fonts";
 import SkinList from "../../components/profile/SkinList";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MenuList from "../../components/profile/MenuList";
 
 const Profile = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 프로필 헤더 */}
-      <ProfileHeader username="눈송이" email="nubee@example.com" />
-      {/* 스탯 카드 */}
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* 프로필 헤더 */}
+        <ProfileHeader username="눈송이" email="nubee@example.com" />
+        {/* 스탯 카드 */}
 
-      {/* 아이콘 + 텍스트 */}
-      <View style={styles.starTextContainer}>
-        <StarShine />
-        <Text style={styles.starText}>레벨 업으로 꿀벌 스킨을 모아보세요!</Text>
-      </View>
-      {/* 스킨 보관함 */}
-      <SkinList />
+        {/* 아이콘 + 텍스트 */}
+        <View style={styles.starTextContainer}>
+          <StarShine />
+          <Text style={styles.starText}>
+            레벨 업으로 꿀벌 스킨을 모아보세요!
+          </Text>
+        </View>
+        {/* 스킨 보관함 */}
+        <SkinList />
+        {/* 메뉴 리스트 */}
+        <MenuList />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 export default Profile;
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
     alignItems: "center",
     gap: 12,
     paddingHorizontal: 20,

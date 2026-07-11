@@ -27,15 +27,10 @@ const SKINS = [
 
 const SkinList = () => {
   return (
-    <View>
-      <FlatList
-        data={SKINS}
-        numColumns={4}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => <SkinItem skin={item} />}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.list}
-      />
+    <View style={styles.grid}>
+      {SKINS.map((skin) => (
+        <SkinItem key={skin.id} skin={skin} />
+      ))}
     </View>
   );
 };
@@ -43,10 +38,9 @@ const SkinList = () => {
 export default SkinList;
 
 const styles = StyleSheet.create({
-  row: {
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 10,
-  },
-  list: {
-    gap: 14,
   },
 });
