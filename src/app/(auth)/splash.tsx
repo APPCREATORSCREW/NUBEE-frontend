@@ -26,7 +26,7 @@ const SplashScreen = () => {
         <Button label="로그인" variant="filled" onPress={() => router.push('/login')} />
         <Button label="회원가입" variant="outlined" onPress={() => router.push('/signup')} />
         <Pressable style={({ pressed }) => [styles.kakaoButton, pressed && { opacity: 0.8 }]}>
-          <Text style={styles.kakaoLabel}>카카오 로그인 자리</Text>
+          <Text style={styles.kakaoLabel}>--- (임시) 카카오 로그인 자리 ---</Text>
         </Pressable>
       </View>
     </LinearGradient>

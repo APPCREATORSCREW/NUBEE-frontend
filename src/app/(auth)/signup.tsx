@@ -422,6 +422,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   parentTitle: {
+    marginTop: 20,
     fontFamily: fonts.family.bold,
     fontSize: fonts.size.title,
     letterSpacing: fonts.letterSpacing.title,

@@ -16,6 +16,7 @@ import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CircleLeft, VisibilityOn, VisibilityOff } from '../../components/icons';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
 
@@ -55,6 +56,7 @@ const FindPasswordScreen = () => {
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
+  const emailValid = EMAIL_REGEX.test(email);
   const newPasswordValid = PASSWORD_REGEX.test(newPassword);
   const confirmNewPasswordValid =
     confirmNewPassword.length > 0 && confirmNewPassword === newPassword;
@@ -110,26 +112,36 @@ const FindPasswordScreen = () => {
               keyboardType="email-address"
               autoCapitalize="none"
               rightElement={
-                <Pressable style={styles.pillButton} onPress={handleSendEmail}>
+                <Pressable
+                  style={[styles.pillButton, !emailValid && styles.pillButtonDisabled]}
+                  onPress={handleSendEmail}
+                  disabled={!emailValid}
+                >
                   <Text style={styles.pillButtonLabel}>전송</Text>
                 </Pressable>
               }
             />
             {emailSent && (
-              <Text style={styles.helperText}>인증번호가 전송되었습니다.</Text>
+              <Text style={styles.helperText}>인증번호가 이메일로 전송되었습니다.</Text>
             )}
 
-            <Field
-              label="인증번호"
-              placeholder="인증번호를 입력해주세요"
-              value={authCode}
-              onChangeText={setAuthCode}
-              rightElement={
-                <Pressable style={styles.pillButton} onPress={handleVerifyCode}>
-                  <Text style={styles.pillButtonLabel}>확인</Text>
-                </Pressable>
-              }
-            />
+            {emailSent && (
+              <Field
+                label="인증번호"
+                placeholder="인증번호를 입력해주세요"
+                value={authCode}
+                onChangeText={setAuthCode}
+                rightElement={
+                  <Pressable
+                    style={[styles.pillButton, !authCode && styles.pillButtonDisabled]}
+                    onPress={handleVerifyCode}
+                    disabled={!authCode}
+                  >
+                    <Text style={styles.pillButtonLabel}>확인</Text>
+                  </Pressable>
+                }
+              />
+            )}
           </>
         ) : (
           <>
@@ -259,6 +271,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
+  },
+  pillButtonDisabled: {
+    backgroundColor: colors.gray400,
   },
   pillButtonLabel: {
     fontFamily: fonts.family.bold,
