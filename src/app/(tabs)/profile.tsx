@@ -6,15 +6,25 @@ import { fonts } from "../../constants/fonts";
 import SkinList from "../../components/profile/SkinList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MenuList from "../../components/profile/MenuList";
+import StatCard from "../../components/profile/StatCard";
 
 const Profile = () => {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          alignItems: "center",
+          paddingHorizontal: 20,
+          paddingTop: 80,
+          paddingBottom: 24,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* 프로필 헤더 */}
         <ProfileHeader username="눈송이" email="nubee@example.com" />
         {/* 스탯 카드 */}
-
+        <StatCard streak={3} level={10} points={15} />
         {/* 아이콘 + 텍스트 */}
         <View style={styles.starTextContainer}>
           <StarShine />
@@ -38,10 +48,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   container: {
+    flexGrow: 1,
     alignItems: "center",
-    gap: 12,
     paddingHorizontal: 20,
     paddingTop: 80,
+    paddingBottom: 24,
     backgroundColor: colors.background,
   },
   starTextContainer: {
@@ -51,6 +62,7 @@ const styles = StyleSheet.create({
     alignContent: "center",
     paddingHorizontal: 8,
     paddingVertical: 5,
+    marginTop: 36,
     marginBottom: 18,
     backgroundColor: colors.yellow100,
     borderRadius: 16,

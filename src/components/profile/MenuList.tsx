@@ -42,8 +42,8 @@ export default MenuList;
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 50,
-    marginBottom: 90,
+    paddingTop: 50,
+    paddingBottom: 90,
   },
   item: {
     height: 50,
