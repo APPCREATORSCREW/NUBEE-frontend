@@ -71,19 +71,19 @@ const FindPasswordScreen = () => {
 
   const handleSendEmail = () => {
     if (!name || !email) return;
-    // UI 작업 단계, 인증 API 연동 후 처리
+    // API 연동 후 처리
     setEmailSent(true);
   };
 
   const handleVerifyCode = () => {
     if (!authCode) return;
-    // UI 작업 단계, 인증 API 연동 후 처리
+    // API 연동 후 처리
     setStep('reset');
   };
 
   const handleResetPassword = () => {
     if (!newPasswordValid || !confirmNewPasswordValid) return;
-    // UI 작업 단계, 비밀번호 재설정 API 연동 후 처리
+    // API 연동 후 처리
     router.replace('/login');
   };
 

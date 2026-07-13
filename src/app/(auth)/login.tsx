@@ -52,7 +52,7 @@ const LoginScreen = () => {
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    // UI 작업 단계, 로그인 API 연동 후 처리
+    // API 연동 후 처리
     router.replace('/home');
   };
 

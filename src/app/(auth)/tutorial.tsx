@@ -2,7 +2,6 @@ import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 
-// TODO: Figma/기능 명세서 수정필요 - 튜토리얼 화면 시안 및 기능 명세 전달되면 구현
 const TutorialScreen = () => {
   return (
     <View style={styles.container}>
