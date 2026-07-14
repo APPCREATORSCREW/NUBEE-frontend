@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Dimensions,
+  Easing,
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -11,7 +13,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
@@ -30,7 +32,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const ILLUSTRATION_WIDTH = SCREEN_WIDTH;
 const ILLUSTRATION_HEIGHT = ILLUSTRATION_WIDTH * (631 / 393);
 
-const START_BUTTON_DELAY_MS = 5000;
+const START_BUTTON_DELAY_MS = 3000;
 
 // 임시 // api 연동
 const PAGES = [
@@ -67,7 +69,7 @@ const PAGES = [
   {
     type: 'content' as const,
     title: '복습하기',
-    subtitle: '내가 학습한 뉴스를 다시 볼 수 있어요',
+    subtitle: '내가 학습한 뉴스를 다시 볼 수 있어요\n',
     image: tutorial5,
   },
   {
@@ -84,6 +86,7 @@ const TutorialScreen = () => {
   const setCurrentPage = useTutorialStore((state) => state.setCurrentPage);
   const scrollRef = useRef<ScrollView>(null);
   const [showStartButton, setShowStartButton] = useState(false);
+  const startButtonAnim = useRef(new Animated.Value(0)).current;
 
   const isLastPage = currentPage === PAGES.length - 1;
   const page = PAGES[currentPage];
@@ -96,6 +99,19 @@ const TutorialScreen = () => {
     const timer = setTimeout(() => setShowStartButton(true), START_BUTTON_DELAY_MS);
     return () => clearTimeout(timer);
   }, [isLastPage]);
+
+  useEffect(() => {
+    if (!showStartButton) {
+      startButtonAnim.setValue(0);
+      return;
+    }
+    Animated.timing(startButtonAnim, {
+      toValue: 1,
+      duration: 500,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [showStartButton, startButtonAnim]);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
@@ -115,11 +131,7 @@ const TutorialScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Pressable
-        style={styles.skipButton}
-        onPress={goToSelectKeyword}
-        disabled={page.type === 'welcome'}
-      >
+      <Pressable style={styles.skipButton} onPress={goToSelectKeyword}>
         <Text style={styles.skipText}>건너뛰기</Text>
       </Pressable>
 
@@ -132,8 +144,6 @@ const TutorialScreen = () => {
         style={styles.scrollView}
       >
         {PAGES.map((p, index) => (
-          // 스와이프는 도트 인디케이터 영역을 제외한 전체(텍스트 포함)에서 인식되고,
-          // 탭하면 다음 페이지로 넘어감 (스와이프는 ScrollView가 그대로 처리)
           <Pressable key={index} style={styles.slide} onPress={goToNextPage}>
             {p.type === 'welcome' ? (
               <View style={styles.welcomeTextBlock}>
@@ -170,17 +180,33 @@ const TutorialScreen = () => {
       </View>
 
       {isLastPage && showStartButton && (
-        <>
-          <BlurView
-            intensity={40}
-            tint="light"
+        <Animated.View
+          style={[
+            styles.overlayGroup,
+            {
+              opacity: startButtonAnim,
+              transform: [
+                {
+                  translateY: startButtonAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [40, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+          pointerEvents="box-none"
+        >
+          <LinearGradient
+            colors={['rgba(255,252,247,0.3)', 'rgba(255,252,247,0.5)', colors.background]}
+            locations={[0, 0.5, 1]}
             style={styles.blurBackdrop}
             pointerEvents="none"
           />
           <View style={styles.startButtonWrapper}>
             <Button label="누비 시작하기" variant="filled" onPress={goToSelectKeyword} />
           </View>
-        </>
+        </Animated.View>
       )}
     </View>
   );
@@ -286,12 +312,19 @@ const styles = StyleSheet.create({
   dotActive: {
     backgroundColor: colors.yellow400,
   },
-  blurBackdrop: {
+  overlayGroup: {
     position: 'absolute',
+    top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    height: 140,
+  },
+  blurBackdrop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   startButtonWrapper: {
     position: 'absolute',
