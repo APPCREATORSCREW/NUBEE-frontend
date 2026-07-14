@@ -4,6 +4,7 @@ export { default as CheckEnabled } from "./CheckEnabled";
 export { default as CircleLeft } from "./CircleLeft";
 export { default as DropDown } from "./DropDown";
 export { default as Lock } from "./Lock";
+export { default as NubeeIcon } from "./NubeeIcon";
 export { default as SentimentSatisfied } from "./SentimentSatisfied";
 export { default as SentimentStressed } from "./SentimentStressed";
 export { default as StarShine } from "./StarShine";
