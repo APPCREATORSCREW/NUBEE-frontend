@@ -92,11 +92,29 @@ const FindPasswordScreen = () => {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
-          <Pressable onPress={handleBack}>
-            <CircleLeft />
-          </Pressable>
+          <View style={styles.backButton}>
+            <Pressable onPress={handleBack}>
+              <View style={{
+                width: 45,
+                height: 45,
+                borderWidth: 1.5,
+                borderColor: colors.gray100,
+                borderRadius: 999,
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'visible',
+                backgroundColor: 'transparent',
+              }}>
+                <CircleLeft width={50} height={50} style={{ position: 'absolute', zIndex: -1 }} />
+              </View>
+            </Pressable>
+          </View>
           <Text style={styles.headerTitle}>비밀번호 찾기</Text>
         </View>
 
@@ -188,16 +206,19 @@ const FindPasswordScreen = () => {
               }
             />
 
-            <View style={styles.buttonContainer}>
-              <Button
-                label="비밀번호 재설정"
-                variant={newPasswordValid && confirmNewPasswordValid ? 'filled' : 'disabled'}
-                onPress={handleResetPassword}
-              />
-            </View>
           </>
         )}
       </ScrollView>
+
+      {step === 'reset' && (
+        <View style={styles.buttonContainer}>
+          <Button
+            label="비밀번호 재설정"
+            variant={newPasswordValid && confirmNewPasswordValid ? 'filled' : 'disabled'}
+            onPress={handleResetPassword}
+          />
+        </View>
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -216,15 +237,27 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 38,
+    marginTop: 55,
+    marginBottom: 70,
+    justifyContent: 'center',
+    position: 'relative',
+
   },
   headerTitle: {
     fontFamily: fonts.family.bold,
     fontSize: fonts.size.header,
     letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
-    marginLeft: 12,
+    position: 'absolute',    
+    left: 0,
+    right: 0,                
+    textAlign: 'center',   
+    zIndex: -1,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 10,
+    zIndex: 10,
   },
   fieldContainer: {
     marginBottom: 24,
@@ -273,7 +306,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   pillButtonDisabled: {
-    backgroundColor: colors.gray400,
+    backgroundColor: colors.gray100,
   },
   pillButtonLabel: {
     fontFamily: fonts.family.bold,
@@ -282,6 +315,9 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   buttonContainer: {
-    marginTop: 30,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 80,
+    backgroundColor: colors.background,
   },
 });
