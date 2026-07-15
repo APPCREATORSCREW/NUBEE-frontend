@@ -5,8 +5,7 @@ import { fonts } from '../../constants/fonts';
 import { PolygonBlue, PolygonGreen, PolygonPink, PolygonYellow } from '../../components/icons';
 import Button from '../../components/common/Button';
 import { useUserStore } from '../../store/useUserStore';
-
-const mascot = require('../../../assets/skins/skin_origin.png');
+import { useSkinStore, getSkinById } from '../../store/useSkinStore';
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
 
@@ -30,6 +29,8 @@ const HomeScreen = () => {
   const settings = useUserStore((state) => state.settings);
   const visitedKeywords = useUserStore((state) => state.visitedKeywords);
   const markKeywordVisited = useUserStore((state) => state.markKeywordVisited);
+  const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
+  const mascot = getSkinById(selectedSkinId).image;
 
   // 임시 (user 없을 때 폴백값) // api 연동
   const level = user?.level ?? 2;
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   streakBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 3,
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+    marginBottom: -4,
   },
   streakTitle: {
     fontFamily: fonts.family.bold,
