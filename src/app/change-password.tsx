@@ -15,6 +15,7 @@ import { colors } from "../constants/colors";
 import { fonts } from "../constants/fonts";
 import Button from "../components/common/Button";
 import { CircleLeft, VisibilityOn, VisibilityOff } from "../components/icons";
+import { Shadow } from "react-native-shadow-2";
 
 // 영어, 숫자, 특수문자 포함 10자 이상
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
@@ -78,7 +79,11 @@ const ChangePassword = () => {
       >
         <View style={styles.header}>
           <Pressable onPress={() => router.back()}>
-            <CircleLeft />
+            <Shadow distance={2} startColor="#00000020">
+              <View style={styles.iconRadius}>
+                <CircleLeft />
+              </View>
+            </Shadow>
           </Pressable>
           <Text style={styles.headerTitle}>비밀번호 변경</Text>
           <View style={styles.headerSpacer} />
@@ -171,6 +176,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 10,
     marginBottom: 38,
+  },
+  iconRadius: {
+    borderRadius: 23,
   },
   headerTitle: {
     flex: 1,
