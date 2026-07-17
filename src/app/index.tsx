@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../constants/colors';
 import { fonts } from '../constants/fonts';
 import Button from '../components/common/Button';
-import { NubeeIcon } from '../components/icons';
+
+const nubeeIcon = require('../../assets/icons/nubee-icon.png');
 
 // 여기에 인증 분기 ...?
 // 테스트용 임시 라우팅, merge 시 변경 필요
@@ -14,7 +15,7 @@ const Index = () => {
     <View style={styles.container}>
 
       <View style={styles.iconContainer}>
-        <NubeeIcon />
+        <Image source={nubeeIcon} style={styles.icon} resizeMode="contain" />
       </View>
 
       <View style={styles.buttonGroup}>
@@ -49,6 +50,11 @@ const styles = StyleSheet.create({
     padding: 20,
     overflow: 'visible',
     marginBottom: 140,
+  },
+  icon: {
+    width: 158,
+    height: 198,
+    alignSelf: 'center',
   },
   buttonGroup: {
     position: 'absolute',
