@@ -33,6 +33,7 @@ interface UserState {
   selectedSkin: Skin | null;
   settings: UserSettings;
   visitedKeywords: string[];
+  quizAnswers: Record<string, number>;
 
   login: (user: User, token: string) => void;
   logout: () => void;
@@ -40,6 +41,7 @@ interface UserState {
   setProfileImage: (uri: string) => void;
   setSettings: (settings: Partial<UserSettings>) => void;
   markKeywordVisited: (keyword: string) => void;
+  answerQuiz: (keyword: string, optionIndex: number) => void;
 }
 
 export const useUserStore = create<UserState>()(
@@ -56,6 +58,7 @@ export const useUserStore = create<UserState>()(
         notificationTime: "17:30",
       },
       visitedKeywords: [],
+      quizAnswers: {},
 
       login: (user, token) => set({ user, accessToken: token, isLoggedIn: true }),
       logout: () =>
@@ -80,12 +83,22 @@ export const useUserStore = create<UserState>()(
             ? state
             : { visitedKeywords: [...state.visitedKeywords, keyword] }
         ),
+      answerQuiz: (keyword, optionIndex) =>
+        set((state) =>
+          state.quizAnswers[keyword] !== undefined
+            ? state
+            : { quizAnswers: { ...state.quizAnswers, [keyword]: optionIndex } }
+        ),
     }),
     {
       name: "user-storage",
       storage: createJSONStorage(() => AsyncStorage),
-      // 방문한 키워드만 영속화 (로그인 상태 등은 유지 대상 아님)
-      partialize: (state) => ({ visitedKeywords: state.visitedKeywords }),
+      // 방문한 키워드/키워드 설정/퀴즈 응답만 영속화 (로그인 상태 등은 유지 대상 아님)
+      partialize: (state) => ({
+        visitedKeywords: state.visitedKeywords,
+        settings: state.settings,
+        quizAnswers: state.quizAnswers,
+      }),
     }
   )
 );
