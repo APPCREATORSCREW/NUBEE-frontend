@@ -10,6 +10,7 @@
     "icons": "svgr --native --typescript --out-dir src/components/icons assets/icons"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/datetimepicker": "8.4.4",
     "@react-native-picker/picker": "2.11.1",
     "expo": "~54.0.34",
