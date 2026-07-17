@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -43,6 +43,33 @@ const formatDate = (date: Date) => {
 };
 
 const daysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
+
+// 인증번호 유효시간 (전송/재전송 시점부터 5분)
+const RESEND_INTERVAL_MS = 5 * 60 * 1000;
+
+const useResendTimer = () => {
+  const [sentAt, setSentAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (sentAt === null) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [sentAt]);
+
+  const remainingMs = sentAt === null ? 0 : Math.max(RESEND_INTERVAL_MS - (now - sentAt), 0);
+  const expired = sentAt !== null && remainingMs === 0;
+  const minutes = Math.floor(remainingMs / 60000);
+  const seconds = Math.floor((remainingMs % 60000) / 1000);
+  const label = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+  const start = () => {
+    setSentAt(Date.now());
+    setNow(Date.now());
+  };
+
+  return { expired, label, start };
+};
 
 const clampToRange = (date: Date, minimumDate: Date, maximumDate: Date) => {
   if (date < minimumDate) return minimumDate;
@@ -146,6 +173,7 @@ const BirthDateScreen = () => {
   const [parentEmailSent, setParentEmailSent] = useState(false);
   const [parentAuthCode, setParentAuthCode] = useState('');
   const [parentVerified, setParentVerified] = useState(false);
+  const parentEmailTimer = useResendTimer();
 
   const [touched, setTouched] = useState({ parentEmail: false });
   const markTouched = (field: keyof typeof touched) => () =>
@@ -175,6 +203,7 @@ const BirthDateScreen = () => {
     if (!parentEmailValid) return;
     // api 연동
     setParentEmailSent(true);
+    parentEmailTimer.start();
   };
 
   const handleVerifyParentEmail = () => {
@@ -196,15 +225,17 @@ const BirthDateScreen = () => {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>{title}</Text>
 
-        <Pressable style={styles.fieldContainer} onPress={openPicker}>
-          <Text style={styles.label}>생년월일</Text>
-          <View style={styles.inputWrapper}>
-            <Text style={birthDate ? styles.input : styles.placeholderText}>
-              {birthDate || 'YYYY-MM-DD'}
-            </Text>
-            {birthDateValid ? <CheckEnabled /> : <CheckDisabled />}
-          </View>
-        </Pressable>
+        {!isMinor && (
+          <Pressable style={styles.fieldContainer} onPress={openPicker}>
+            <Text style={styles.label}>생년월일</Text>
+            <View style={styles.inputWrapper}>
+              <Text style={birthDate ? styles.input : styles.placeholderText}>
+                {birthDate || 'YYYY-MM-DD'}
+              </Text>
+              {birthDateValid ? <CheckEnabled /> : <CheckDisabled />}
+            </View>
+          </Pressable>
+        )}
 
         {isMinor && (
           <View style={styles.parentSection}>
@@ -227,7 +258,9 @@ const BirthDateScreen = () => {
                   onPress={handleSendParentEmail}
                   disabled={!parentEmailValid}
                 >
-                  <Text style={styles.pillButtonLabel}>전송</Text>
+                  <Text style={styles.pillButtonLabel}>
+                    {parentEmailTimer.expired ? '재전송' : '전송'}
+                  </Text>
                 </Pressable>
               }
             />
@@ -252,6 +285,13 @@ const BirthDateScreen = () => {
                     </Pressable>
                   }
                 />
+                {!parentVerified && (
+                  <Text style={parentEmailTimer.expired ? styles.timerTextExpired : styles.helperText}>
+                    {parentEmailTimer.expired
+                      ? '인증번호가 만료되었어요. 재전송해주세요.'
+                      : `남은 시간 ${parentEmailTimer.label}`}
+                  </Text>
+                )}
                 {parentVerified && (
                   <Text style={styles.helperText}>동의가 완료되었습니다.</Text>
                 )}
@@ -367,6 +407,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.caption,
     color: colors.gray400,
+  },
+  timerTextExpired: {
+    marginTop: -16,
+    marginBottom: 24,
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.caption,
+    color: colors.red400,
   },
   parentSection: {
     marginBottom: 24,
