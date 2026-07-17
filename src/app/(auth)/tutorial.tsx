@@ -32,7 +32,7 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 const ILLUSTRATION_WIDTH = SCREEN_WIDTH;
 const ILLUSTRATION_HEIGHT = ILLUSTRATION_WIDTH * (631 / 393);
 
-const START_BUTTON_DELAY_MS = 3000;
+const START_BUTTON_DELAY_MS = 300;
 
 // 임시 // api 연동
 const PAGES = [
@@ -204,7 +204,7 @@ const TutorialScreen = () => {
             pointerEvents="none"
           />
           <View style={styles.startButtonWrapper}>
-            <Button label="누비 시작하기" variant="filled" onPress={goToSelectKeyword} />
+            <Button label="확인했어요!" variant="filled" onPress={goToSelectKeyword} />
           </View>
         </Animated.View>
       )}
