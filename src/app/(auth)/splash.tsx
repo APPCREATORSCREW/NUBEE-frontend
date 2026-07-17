@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   mascot: {
-    width: 150,
-    height: 150,
+    width: 135,
+    height: 135,
   },
   welcome: {
     fontFamily: fonts.family.bold,

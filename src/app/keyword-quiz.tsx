@@ -5,6 +5,7 @@ import { colors } from '../constants/colors';
 import { fonts } from '../constants/fonts';
 import Button from '../components/common/Button';
 import { useSkinStore, getSkinById } from '../store/useSkinStore';
+import { useUserStore } from '../store/useUserStore';
 
 interface KeywordContent {
   title: string;
@@ -134,21 +135,21 @@ const KeywordQuizScreen = () => {
     ? content.title.slice(activeKeyword.length)
     : content.title;
 
+  const quizAnswers = useUserStore((state) => state.quizAnswers);
+  const answerQuiz = useUserStore((state) => state.answerQuiz);
+  const selectedIndex = quizAnswers[activeKeyword] ?? null;
+
   const [step, setStep] = useState<'explanation' | 'quiz'>('explanation');
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   const answered = selectedIndex !== null;
   const isCorrect = selectedIndex === content.quiz.correctIndex;
 
   const goToQuiz = () => setStep('quiz');
-  const goToExplanation = () => {
-    setSelectedIndex(null);
-    setStep('explanation');
-  };
+  const goToExplanation = () => setStep('explanation');
 
   const handleSelect = (index: number) => {
-    // 임시 테스트용 // if (answered) return;
-    setSelectedIndex(index);
+    if (answered) return; // 전역 상태로 1회 제한 관리
+    answerQuiz(activeKeyword, index);
   };
 
   const getOptionStyle = (index: number) => {
@@ -212,7 +213,7 @@ const KeywordQuizScreen = () => {
             key={option}
             style={[styles.option, getOptionStyle(index)]}
             onPress={() => handleSelect(index)}
-            // disabled={answered} // 테스트용: 1회 제한 임시 해제
+            disabled={answered}
           >
             <Text style={[styles.optionText, isOptionActive(index) && styles.optionTextActive]}>
               {option}
@@ -238,9 +239,7 @@ const KeywordQuizScreen = () => {
       <View style={styles.spacer} />
       {answered && (
         <View style={styles.buttonGroup}>
-          {!isCorrect && (
-            <Button label="키워드 다시보기" variant="outlined" onPress={goToExplanation} />
-          )}
+          <Button label="키워드 다시보기" variant="outlined" onPress={goToExplanation} />
           <Button label="뉴스 보기" variant="filled" onPress={() => router.push('/news')} />
         </View>
       )}
