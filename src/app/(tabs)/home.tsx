@@ -39,7 +39,7 @@ const HomeScreen = () => {
   const KEYWORDS = ALL_KEYWORDS.slice(0, settings.keywordCount);
 
   const handlePressKeyword = (keyword: string) => {
-    if (visitedKeywords.includes(keyword)) return;
+    // 임시 테스트 용 // if (visitedKeywords.includes(keyword)) return;
     markKeywordVisited(keyword);
     router.push({ pathname: '/keyword-quiz', params: { keyword } });
   };
@@ -58,7 +58,7 @@ const HomeScreen = () => {
             key={keyword}
             style={[styles.hexagon, isVisited && styles.hexagonVisited]}
             onPress={() => handlePressKeyword(keyword)}
-            disabled={isVisited}
+            disabled={false} // isVisited -> false 임시 테스트
           >
             <Polygon width={HEX_WIDTH} height={HEX_HEIGHT} />
             <Text style={styles.hexagonLabel}>{keyword}</Text>
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 80,
   },
   topRow: {
     flexDirection: 'row',
