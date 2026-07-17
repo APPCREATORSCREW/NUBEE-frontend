@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import MenuArrow from "../icons/MenuArrow";
+import { useUserStore } from "../../store/useUserStore";
 
 const MENUS = [
   { label: "비밀번호 변경", route: "/change-password" },
@@ -12,10 +13,15 @@ const MENUS = [
 
 const MenuList = () => {
   const router = useRouter();
+  const logout = useUserStore((state) => state.logout);
 
   const handlePress = (route: string | null) => {
-    if (route) router.push(route as any);
-    // 로그아웃 로직은 추후 스토어 연동
+    if (route) {
+      router.push(route as any);
+      return;
+    }
+    logout();
+    router.replace("/login");
   };
 
   return (
