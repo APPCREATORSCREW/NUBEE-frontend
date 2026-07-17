@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,33 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
 
 type Step = 'verify' | 'reset';
+
+// 인증번호 유효시간 (전송/재전송 시점부터 5분)
+const RESEND_INTERVAL_MS = 5 * 60 * 1000;
+
+const useResendTimer = () => {
+  const [sentAt, setSentAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (sentAt === null) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [sentAt]);
+
+  const remainingMs = sentAt === null ? 0 : Math.max(RESEND_INTERVAL_MS - (now - sentAt), 0);
+  const expired = sentAt !== null && remainingMs === 0;
+  const minutes = Math.floor(remainingMs / 60000);
+  const seconds = Math.floor((remainingMs % 60000) / 1000);
+  const label = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+  const start = () => {
+    setSentAt(Date.now());
+    setNow(Date.now());
+  };
+
+  return { expired, label, start };
+};
 
 interface FieldProps extends TextInputProps {
   label: string;
@@ -47,6 +74,7 @@ const FindPasswordScreen = () => {
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [authCode, setAuthCode] = useState('');
+  const emailTimer = useResendTimer();
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
@@ -73,6 +101,7 @@ const FindPasswordScreen = () => {
     if (!name || !email) return;
     // API 연동 후 처리
     setEmailSent(true);
+    emailTimer.start();
   };
 
   const handleVerifyCode = () => {
@@ -135,7 +164,7 @@ const FindPasswordScreen = () => {
                   onPress={handleSendEmail}
                   disabled={!emailValid}
                 >
-                  <Text style={styles.pillButtonLabel}>전송</Text>
+                  <Text style={styles.pillButtonLabel}>{emailTimer.expired ? '재전송' : '전송'}</Text>
                 </Pressable>
               }
             />
@@ -144,21 +173,28 @@ const FindPasswordScreen = () => {
             )}
 
             {emailSent && (
-              <Field
-                label="인증번호"
-                placeholder="인증번호를 입력해주세요"
-                value={authCode}
-                onChangeText={setAuthCode}
-                rightElement={
-                  <Pressable
-                    style={[styles.pillButton, !authCode && styles.pillButtonDisabled]}
-                    onPress={handleVerifyCode}
-                    disabled={!authCode}
-                  >
-                    <Text style={styles.pillButtonLabel}>확인</Text>
-                  </Pressable>
-                }
-              />
+              <>
+                <Field
+                  label="인증번호"
+                  placeholder="인증번호를 입력해주세요"
+                  value={authCode}
+                  onChangeText={setAuthCode}
+                  rightElement={
+                    <Pressable
+                      style={[styles.pillButton, !authCode && styles.pillButtonDisabled]}
+                      onPress={handleVerifyCode}
+                      disabled={!authCode}
+                    >
+                      <Text style={styles.pillButtonLabel}>확인</Text>
+                    </Pressable>
+                  }
+                />
+                <Text style={emailTimer.expired ? styles.timerTextExpired : styles.helperText}>
+                  {emailTimer.expired
+                    ? '인증번호가 만료되었어요. 재전송해주세요.'
+                    : `남은 시간 ${emailTimer.label}`}
+                </Text>
+              </>
             )}
           </>
         ) : (
@@ -298,6 +334,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.caption,
     color: colors.gray400,
+  },
+  timerTextExpired: {
+    marginTop: -16,
+    marginBottom: 24,
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.caption,
+    color: colors.red400,
   },
   pillButton: {
     backgroundColor: colors.yellow400,
