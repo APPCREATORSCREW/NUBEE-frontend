@@ -39,7 +39,7 @@ const SelectKeywordScreen = () => {
               key={option.count}
               style={[
                 styles.card,
-                { backgroundColor: option.background },
+                { backgroundColor: isSelected ? option.border : option.background },
                 isSelected && { borderColor: option.border },
               ]}
               onPress={() => setSelectedCount(option.count)}
