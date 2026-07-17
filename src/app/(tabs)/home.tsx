@@ -5,8 +5,7 @@ import { fonts } from '../../constants/fonts';
 import { PolygonBlue, PolygonGreen, PolygonPink, PolygonYellow } from '../../components/icons';
 import Button from '../../components/common/Button';
 import { useUserStore } from '../../store/useUserStore';
-
-const mascot = require('../../../assets/skins/skin_origin.png');
+import { useSkinStore, getSkinById } from '../../store/useSkinStore';
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
 
@@ -30,6 +29,8 @@ const HomeScreen = () => {
   const settings = useUserStore((state) => state.settings);
   const visitedKeywords = useUserStore((state) => state.visitedKeywords);
   const markKeywordVisited = useUserStore((state) => state.markKeywordVisited);
+  const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
+  const mascot = getSkinById(selectedSkinId).image;
 
   // 임시 (user 없을 때 폴백값) // api 연동
   const level = user?.level ?? 2;
@@ -38,7 +39,7 @@ const HomeScreen = () => {
   const KEYWORDS = ALL_KEYWORDS.slice(0, settings.keywordCount);
 
   const handlePressKeyword = (keyword: string) => {
-    if (visitedKeywords.includes(keyword)) return;
+    // 임시 테스트 용 // if (visitedKeywords.includes(keyword)) return;
     markKeywordVisited(keyword);
     router.push({ pathname: '/keyword-quiz', params: { keyword } });
   };
@@ -57,7 +58,7 @@ const HomeScreen = () => {
             key={keyword}
             style={[styles.hexagon, isVisited && styles.hexagonVisited]}
             onPress={() => handlePressKeyword(keyword)}
-            disabled={isVisited}
+            disabled={false} // isVisited -> false 임시 테스트
           >
             <Polygon width={HEX_WIDTH} height={HEX_HEIGHT} />
             <Text style={styles.hexagonLabel}>{keyword}</Text>
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-    paddingBottom: 40,
+    paddingBottom: 80,
   },
   topRow: {
     flexDirection: 'row',
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
   streakBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 3,
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
@@ -195,6 +196,7 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+    marginBottom: -4,
   },
   streakTitle: {
     fontFamily: fonts.family.bold,
