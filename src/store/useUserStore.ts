@@ -30,12 +30,14 @@ interface UserState {
   isLoggedIn: boolean;
   selectedSkin: Skin | null;
   settings: UserSettings;
+  visitedKeywords: string[];
 
   login: (user: User, token: string) => void;
   logout: () => void;
   setSelectedSkin: (skin: Skin) => void;
   setProfileImage: (uri: string) => void;
   setSettings: (settings: Partial<UserSettings>) => void;
+  markKeywordVisited: (keyword: string) => void;
 }
 
 export const useUserStore = create<UserState>((set) => ({
@@ -43,11 +45,13 @@ export const useUserStore = create<UserState>((set) => ({
   accessToken: null,
   isLoggedIn: false,
   selectedSkin: null,
+  // 임시
   settings: {
     keywordCount: 3,
     notificationEnabled: true,
     notificationTime: "17:30",
   },
+  visitedKeywords: [],
 
   login: (user, token) => set({ user, accessToken: token, isLoggedIn: true }),
   logout: () =>
@@ -66,4 +70,10 @@ export const useUserStore = create<UserState>((set) => ({
     set((state) => ({
       settings: { ...state.settings, ...newSettings },
     })),
+  markKeywordVisited: (keyword: string) =>
+    set((state) =>
+      state.visitedKeywords.includes(keyword)
+        ? state
+        : { visitedKeywords: [...state.visitedKeywords, keyword] }
+    ),
 }));
