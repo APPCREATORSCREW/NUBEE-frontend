@@ -11,7 +11,7 @@ export interface Skin {
 }
 
 // 레벨 5단위로 해금
-// 임시 순서: 오리지널 > 용사 > 마인크래프트 > 천사 > 로블록스 > 악마 > 갸루 
+// 오리지널 > 천사 > 엘리트 > 악마 > 베이비 > 공룡 > 마법사 > 블록 > 갸루 > 네모 > 파이어 > 홀로그램
 export const SKINS: Skin[] = [
   {
     id: 'origin',
@@ -20,40 +20,70 @@ export const SKINS: Skin[] = [
     requiredLevel: 1,
   },
   {
-    id: 'brave',
-    name: '용사',
-    image: require('../../assets/skins/temp/skin_brave.png'),
+    id: 'angel',
+    name: '천사',
+    image: require('../../assets/skins/skin_angel.png'),
     requiredLevel: 5,
   },
   {
-    id: 'minecraft',
-    name: '마인크래프트',
-    image: require('../../assets/skins/temp/skin_minecraft.png'),
+    id: 'elite',
+    name: '엘리트',
+    image: require('../../assets/skins/skin_elite.png'),
     requiredLevel: 10,
-  },
-  {
-    id: 'angel',
-    name: '천사',
-    image: require('../../assets/skins/temp/skin_angel.png'),
-    requiredLevel: 15,
-  },
-  {
-    id: 'roblox',
-    name: '로블록스',
-    image: require('../../assets/skins/temp/skin_roblox.png'),
-    requiredLevel: 20,
   },
   {
     id: 'devil',
     name: '악마',
-    image: require('../../assets/skins/temp/skin_devil.png'),
+    image: require('../../assets/skins/skin_devil.png'),
+    requiredLevel: 15,
+  },
+  {
+    id: 'baby',
+    name: '베이비',
+    image: require('../../assets/skins/skin_baby.png'),
+    requiredLevel: 20,
+  },
+  {
+    id: 'dino',
+    name: '공룡',
+    image: require('../../assets/skins/skin_dino.png'),
     requiredLevel: 25,
+  },
+  {
+    id: 'wizard',
+    name: '마법사',
+    image: require('../../assets/skins/skin_wizard.png'),
+    requiredLevel: 30,
+  },
+  {
+    id: 'block',
+    name: '블록',
+    image: require('../../assets/skins/skin_block.png'),
+    requiredLevel: 35,
   },
   {
     id: 'gyaru',
     name: '갸루',
-    image: require('../../assets/skins/temp/skin_gyaru.png'),
-    requiredLevel: 30,
+    image: require('../../assets/skins/skin_gyaru.png'),
+    requiredLevel: 40,
+  },
+  {
+    id: 'square',
+    name: '네모',
+    image: require('../../assets/skins/skin_square.png'),
+    requiredLevel: 45,
+  },
+  {
+    id: 'fire',
+    name: '파이어',
+    image: require('../../assets/skins/skin_fire.png'),
+    requiredLevel: 50,
+  },
+  {
+    id: 'hologram',
+    name: '홀로그램',
+    image: require('../../assets/skins/skin_hologram.png'),
+    requiredLevel: 55,
   },
 ];
 
@@ -80,7 +110,7 @@ export const useSkinStore = create<SkinState>()(
     (set, get) => ({
       // 연동 테스트용 임시값 여기에 작성
       level: 32,
-      selectedSkinId: 'minecraft',
+      selectedSkinId: 'wizard',
 
       setLevel: (level: number) => set({ level }),
 
