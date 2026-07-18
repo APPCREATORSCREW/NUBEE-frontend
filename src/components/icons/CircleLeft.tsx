@@ -5,8 +5,9 @@ import type { SvgProps } from "react-native-svg";
 const SvgCircleLeft = (props: SvgProps) => (
   <Svg
     xmlns="http://www.w3.org/2000/svg"
-    width={43}
-    height={43}
+    width={46}
+    height={46}
+    viewBox="0 0 46 46"
     fill="none"
     {...props}
   >

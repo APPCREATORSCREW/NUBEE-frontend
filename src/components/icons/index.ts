@@ -4,7 +4,6 @@ export { default as CheckEnabled } from "./CheckEnabled";
 export { default as CircleLeft } from "./CircleLeft";
 export { default as DropDown } from "./DropDown";
 export { default as Lock } from "./Lock";
-export { default as NubeeIcon } from "./NubeeIcon";
 export { default as PolygonBlue } from "./PolygonBlue";
 export { default as PolygonGreen } from "./PolygonGreen";
 export { default as PolygonPink } from "./PolygonPink";
