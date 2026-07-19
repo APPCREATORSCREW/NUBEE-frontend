@@ -4,14 +4,14 @@ import SvgProfilePolygon1 from "../icons/ProfilePolygon1";
 import { fonts } from "../../constants/fonts";
 import { colors } from "../../constants/colors";
 import SvgProfilePolygon2 from "../icons/ProfilePolygon2";
+import { useUserStore } from "../../store/useUserStore";
 
-type Props = {
-  streak: number;
-  level: number;
-  points: number;
-};
+const StatCard = () => {
+  const user = useUserStore((state) => state.user);
+  const streak = user?.streak ?? 0;
+  const level = user?.level ?? 0;
+  const points = user?.points ?? 0;
 
-const StatCard = ({ streak, level, points }: Props) => {
   return (
     <View style={styles.container}>
       {/* 연속학습 */}

@@ -24,7 +24,7 @@ const Profile = () => {
         {/* 프로필 헤더 */}
         <ProfileHeader username="눈송이" email="nubee@example.com" />
         {/* 스탯 카드 */}
-        <StatCard streak={3} level={10} points={15} />
+        <StatCard />
         {/* 아이콘 + 텍스트 */}
         <View style={styles.starTextContainer}>
           <StarShine />
