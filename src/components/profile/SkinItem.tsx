@@ -1,33 +1,37 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { Text, StyleSheet, Image, Pressable } from "react-native";
 import React from "react";
 import { Lock } from "../icons";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
-
-type Skin = {
-  id: number;
-  skinName: string;
-  level: number;
-  image?: any;
-  locked: boolean;
-};
+import type { Skin } from "../../store/useSkinStore";
 
 type Props = {
   skin: Skin;
+  locked: boolean;
+  selected?: boolean;
+  onPress?: () => void;
 };
 
-const SkinItem = ({ skin }: Props) => {
+const SkinItem = ({ skin, locked, selected, onPress }: Props) => {
   return (
-    <View style={[styles.container, !skin.locked && styles.unlocked]}>
-      {skin.locked ? (
+    <Pressable
+      style={[
+        styles.container,
+        !locked && styles.unlocked,
+        selected && styles.selected,
+      ]}
+      onPress={onPress}
+      disabled={locked}
+    >
+      {locked ? (
         <>
           <Lock />
-          <Text style={styles.levelText}>Level {skin.level}</Text>
+          <Text style={styles.levelText}>Level {skin.requiredLevel}</Text>
         </>
       ) : (
         <Image source={skin.image} style={styles.image} />
       )}
-    </View>
+    </Pressable>
   );
 };
 
@@ -45,6 +49,10 @@ const styles = StyleSheet.create({
   unlocked: {
     backgroundColor: colors.yellow100,
   },
+  selected: {
+    borderWidth: 2,
+    borderColor: colors.yellow400,
+  },
   image: {
     width: 80,
     height: 80,
@@ -55,6 +63,4 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.label,
     color: colors.gray400,
   },
-
-  // 현재 선택에 따른 변화 -> border 색상 yellow 굵기 2
 });
