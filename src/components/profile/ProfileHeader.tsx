@@ -1,17 +1,14 @@
 import { View, Text, Image, StyleSheet, Pressable } from 'react-native'
-import React, { useState } from 'react'
+import React from 'react'
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import * as ImagePicker from 'expo-image-picker';
 import Edit from '../icons/Edit';
+import { useUserStore } from '../../store/useUserStore';
 
-type Props = {
-  username: string,
-  email: string,
-}
-
-const ProfileHeader = ({ username, email }: Props) => {
-  const [imageUri, setImageUri] = useState<string | null>(null);
+const ProfileHeader = () => {
+  const user = useUserStore((state) => state.user);
+  const setProfileImage = useUserStore((state) => state.setProfileImage);
 
   const pickImage = async () => {
 
@@ -32,7 +29,7 @@ const ProfileHeader = ({ username, email }: Props) => {
     });
 
     if (!result.canceled) {
-      setImageUri(result.assets[0].uri); 
+      setProfileImage(result.assets[0].uri);
     }
   }
 
@@ -44,12 +41,12 @@ const ProfileHeader = ({ username, email }: Props) => {
         <View style={styles.imageWrapper} >
 
           {/* Image */}
-          <Image source={ 
-          imageUri
-          ? { uri: imageUri } 
+          <Image source={
+          user?.profileImage
+          ? { uri: user.profileImage }
           : require("../../../assets/skins/skin_origin.png")
-          } 
-          style={[styles.image, !imageUri && styles.originImage]}
+          }
+          style={[styles.image, !user?.profileImage && styles.originImage]}
           />
 
           {/* Icon */}
@@ -60,8 +57,8 @@ const ProfileHeader = ({ username, email }: Props) => {
       </Pressable>
 
       {/* user 프로필 정보 */}
-      <Text style={styles.username}>{username}</Text>
-      <Text style={styles.email}>{email}</Text>
+      <Text style={styles.username}>{user?.name ?? ''}</Text>
+      <Text style={styles.email}>{user?.email ?? ''}</Text>
     </View>
   )
 }

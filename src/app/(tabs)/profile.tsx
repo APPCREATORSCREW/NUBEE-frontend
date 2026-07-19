@@ -22,7 +22,7 @@ const Profile = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* 프로필 헤더 */}
-        <ProfileHeader username="눈송이" email="nubee@example.com" />
+        <ProfileHeader />
         {/* 스탯 카드 */}
         <StatCard />
         {/* 아이콘 + 텍스트 */}
