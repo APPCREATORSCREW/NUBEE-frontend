@@ -18,6 +18,11 @@ import { router } from "expo-router";
 import { CircleLeft, DropDown, ToggleOff, ToggleOn } from "../components/icons";
 import Button from "../components/common/Button";
 import { useUserStore } from "../store/useUserStore";
+import {
+  requestNotificationPermission,
+  scheduleDailyStudyNotification,
+  cancelStudyNotification,
+} from "../utils/notifications";
 
 const KEYWORD_OPTIONS = [3, 4, 5, 6];
 
@@ -88,8 +93,22 @@ const StudySettings = () => {
   };
 
   // 저장
-  const handleSave = () => {
-    setSettings({ keywordCount, notificationEnabled, notificationTime });
+  const handleSave = async () => {
+    let enabled = notificationEnabled;
+
+    if (enabled) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        enabled = false;
+        setNotificationEnabled(false);
+      } else {
+        await scheduleDailyStudyNotification(notificationTime);
+      }
+    } else {
+      await cancelStudyNotification();
+    }
+
+    setSettings({ keywordCount, notificationEnabled: enabled, notificationTime });
     // 학습 설정 API 연동은 추후 작업
     router.back();
   };
