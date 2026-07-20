@@ -7,8 +7,13 @@ import SkinList from "../../components/profile/SkinList";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MenuList from "../../components/profile/MenuList";
 import StatCard from "../../components/profile/StatCard";
+import ProgressBar from "../../components/profile/ProgressBar";
+import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
 
 const Profile = () => {
+  const points = useUserStore((state) => state.user?.points ?? 0);
+  const level = useUserStore((state) => state.user?.level ?? 0);
+
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
       <ScrollView
@@ -23,6 +28,8 @@ const Profile = () => {
       >
         {/* 프로필 헤더 */}
         <ProfileHeader />
+        {/* 프로그레스 바 */}
+        <ProgressBar level={level} progress={points / POINTS_PER_LEVEL} />
         {/* 스탯 카드 */}
         <StatCard />
         {/* 아이콘 + 텍스트 */}

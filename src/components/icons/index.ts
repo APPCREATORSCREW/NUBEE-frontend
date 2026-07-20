@@ -8,6 +8,7 @@ export { default as PolygonBlue } from "./PolygonBlue";
 export { default as PolygonGreen } from "./PolygonGreen";
 export { default as PolygonPink } from "./PolygonPink";
 export { default as PolygonYellow } from "./PolygonYellow";
+export { default as QuestionMark } from "./QuestionMark";
 export { default as SentimentSatisfied } from "./SentimentSatisfied";
 export { default as SentimentStressed } from "./SentimentStressed";
 export { default as StarShine } from "./StarShine";

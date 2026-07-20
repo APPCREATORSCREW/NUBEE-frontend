@@ -46,12 +46,22 @@ interface UserState {
 }
 
 // 포인트 50 적립마다 레벨업
-const POINTS_PER_LEVEL = 50;
+export const POINTS_PER_LEVEL = 50;
 
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      user: null,
+      // 연동 테스트용 임시값 여기에 작성
+      user: {
+        id: "test-user",
+        name: "눈송이",
+        email: "nubee@example.com",
+        level: 10,
+        streak: 3,
+        points: 32,
+        profileImage: null,
+        loginType: "email",
+      },
       accessToken: null,
       isLoggedIn: false,
       selectedSkin: null,

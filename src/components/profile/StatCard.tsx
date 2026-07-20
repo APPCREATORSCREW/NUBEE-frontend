@@ -25,7 +25,6 @@ const StatCard = () => {
       </View>
       {/* 레벨 + 포인트 */}
       <View style={styles.polygon2Container}>
-        <Text style={styles.label}>Level {level}</Text>
         <View style={styles.wrapper}>
           <SvgProfilePolygon2 />
           <View style={styles.textContainer}>
@@ -57,7 +56,7 @@ const styles = StyleSheet.create({
   },
   polygon2Container: {
     position: "absolute",
-    top: 50, // 피그마 수치로 조절
+    top: 65, // 피그마 수치로 조절
     right: 0,
     alignItems: "center",
   },
