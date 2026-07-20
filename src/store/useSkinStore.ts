@@ -5,6 +5,7 @@ import type { ImageSourcePropType } from 'react-native';
 
 export interface Skin {
   id: string;
+  apiId: number; // TODO: 백엔드 실제 skinId로 확인 후 교체. 지금은 프론트 배열 순서대로 1~12 임시 배정 (origin=1만 확인됨)
   name: string;
   image: ImageSourcePropType;
   requiredLevel: number;
@@ -15,72 +16,84 @@ export interface Skin {
 export const SKINS: Skin[] = [
   {
     id: 'origin',
+    apiId: 1,
     name: '오리지널',
     image: require('../../assets/skins/skin_origin.png'),
     requiredLevel: 1,
   },
   {
     id: 'angel',
+    apiId: 2,
     name: '천사',
     image: require('../../assets/skins/skin_angel.png'),
     requiredLevel: 5,
   },
   {
     id: 'elite',
+    apiId: 3,
     name: '엘리트',
     image: require('../../assets/skins/skin_elite.png'),
     requiredLevel: 10,
   },
   {
     id: 'devil',
+    apiId: 4,
     name: '악마',
     image: require('../../assets/skins/skin_devil.png'),
     requiredLevel: 15,
   },
   {
     id: 'baby',
+    apiId: 5,
     name: '베이비',
     image: require('../../assets/skins/skin_baby.png'),
     requiredLevel: 20,
   },
   {
     id: 'dino',
+    apiId: 6,
     name: '공룡',
     image: require('../../assets/skins/skin_dino.png'),
     requiredLevel: 25,
   },
   {
     id: 'wizard',
+    apiId: 7,
     name: '마법사',
     image: require('../../assets/skins/skin_wizard.png'),
     requiredLevel: 30,
   },
   {
     id: 'block',
+    apiId: 8,
     name: '블록',
     image: require('../../assets/skins/skin_block.png'),
     requiredLevel: 35,
   },
   {
     id: 'gyaru',
+    apiId: 9,
     name: '갸루',
     image: require('../../assets/skins/skin_gyaru.png'),
     requiredLevel: 40,
   },
   {
     id: 'square',
+    apiId: 10,
     name: '네모',
     image: require('../../assets/skins/skin_square.png'),
     requiredLevel: 45,
   },
   {
     id: 'fire',
+    apiId: 11,
     name: '파이어',
     image: require('../../assets/skins/skin_fire.png'),
     requiredLevel: 50,
   },
   {
     id: 'hologram',
+    apiId: 12,
     name: '홀로그램',
     image: require('../../assets/skins/skin_hologram.png'),
     requiredLevel: 55,
