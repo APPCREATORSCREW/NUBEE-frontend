@@ -105,6 +105,10 @@ const DEFAULT_SKIN_ID = SKINS[0].id;
 export const getSkinById = (skinId: string): Skin =>
   SKINS.find((skin) => skin.id === skinId) ?? SKINS[0];
 
+// 서버 응답의 숫자 skinId(apiId 기준)로 로컬 스킨을 찾을 때 사용 (예: 프로필 조회 응답의 currentSkinId)
+export const getSkinByApiId = (apiId: number): Skin | undefined =>
+  SKINS.find((skin) => skin.apiId === apiId);
+
 export const isSkinUnlocked = (skinId: string, level: number): boolean =>
   getSkinById(skinId).requiredLevel <= level;
 

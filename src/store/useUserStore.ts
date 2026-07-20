@@ -39,6 +39,7 @@ interface UserState {
   logout: () => void;
   setSelectedSkin: (skin: Skin) => void;
   setProfileImage: (uri: string) => void;
+  updateUser: (partial: Partial<User>) => void;
   setSettings: (settings: Partial<UserSettings>) => void;
   markKeywordVisited: (keyword: string) => void;
   answerQuiz: (keyword: string, optionIndex: number) => void;
@@ -86,6 +87,11 @@ export const useUserStore = create<UserState>()(
       setProfileImage: (uri) =>
         set((state) => ({
           user: state.user ? { ...state.user, profileImage: uri } : null,
+        })),
+      // 서버 응답 등으로 유저 정보 일부만 갱신할 때 사용 (로그인 전이면 아무 동작 안 함)
+      updateUser: (partial) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, ...partial } : null,
         })),
       setSettings: (newSettings) =>
         set((state) => ({

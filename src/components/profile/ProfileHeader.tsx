@@ -5,6 +5,7 @@ import { fonts } from '../../constants/fonts';
 import * as ImagePicker from 'expo-image-picker';
 import Edit from '../icons/Edit';
 import { useUserStore } from '../../store/useUserStore';
+import { updateProfileImage } from '../../api/profileAPI';
 
 const ProfileHeader = () => {
   const user = useUserStore((state) => state.user);
@@ -29,7 +30,15 @@ const ProfileHeader = () => {
     });
 
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri);
+      const localUri = result.assets[0].uri;
+      try {
+        // PATCH /api/users/profile-image - 서버에 업로드하고 반환된 URL로 반영
+        const { profileImage } = await updateProfileImage(localUri);
+        setProfileImage(profileImage);
+      } catch (error) {
+        // TODO: 실패 시 에러 UI 처리
+        console.error("프로필 이미지 업로드 실패", error);
+      }
     }
   }
 
