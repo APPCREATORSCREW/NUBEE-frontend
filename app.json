@@ -18,11 +18,8 @@
       "expo-font",
       "expo-router",
       "@react-native-community/datetimepicker",
-<<<<<<< Updated upstream
-      "expo-notifications"
-=======
+      "expo-notifications",
       "expo-secure-store"
->>>>>>> Stashed changes
     ]
   }
 }
