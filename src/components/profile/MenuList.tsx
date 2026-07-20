@@ -21,7 +21,7 @@ const MenuList = () => {
       return;
     }
     logout();
-    router.replace("/login");
+    router.replace("/splash");
   };
 
   return (
