@@ -26,7 +26,7 @@ import {
 import {
   getSettings,
   updateSettings as updateSettingsAPI,
-} from "../api/settingsAPI";
+} from "../apis/settingsAPI";
 
 const KEYWORD_OPTIONS = [3, 4, 5, 6];
 
@@ -146,7 +146,11 @@ const StudySettings = () => {
       console.error("학습 설정 저장 실패", error);
     }
 
-    setSettings({ keywordCount, notificationEnabled: enabled, notificationTime });
+    setSettings({
+      keywordCount,
+      notificationEnabled: enabled,
+      notificationTime,
+    });
     router.back();
   };
 

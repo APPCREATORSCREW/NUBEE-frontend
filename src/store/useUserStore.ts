@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { tokenStorage } from "./tokenStorage";
 
 interface Skin {
   id: number;
@@ -36,7 +37,7 @@ interface UserState {
   quizAnswers: Record<string, number>;
 
   login: (user: User, token: string) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   setSelectedSkin: (skin: Skin) => void;
   setProfileImage: (uri: string) => void;
   updateUser: (partial: Partial<User>) => void;
@@ -75,21 +76,25 @@ export const useUserStore = create<UserState>()(
       visitedKeywords: [],
       quizAnswers: {},
 
+      // 로그인 성공 응답을 그대로 받아서 세팅 (accessToken은 메모리에만, refresh token은 tokenStorage 별도 관리)
       login: (user, token) =>
         set({ user, accessToken: token, isLoggedIn: true }),
-      logout: () =>
+      // 서버 refresh_token 폐기 API 호출은 별개(로그아웃 화면 담당) - 여기선 로컬 정리만 담당
+      logout: async () => {
+        await tokenStorage.removeRefreshToken();
         set({
           user: null,
           accessToken: null,
           isLoggedIn: false,
           selectedSkin: null,
-        }),
+        });
+      },
       setSelectedSkin: (skin) => set({ selectedSkin: skin }),
       setProfileImage: (uri) =>
         set((state) => ({
           user: state.user ? { ...state.user, profileImage: uri } : null,
         })),
-      // 서버 응답 등으로 유저 정보 일부만 갱신할 때 사용 (로그인 전이면 아무 동작 안 함)
+      // 서버 응답 등으로 유저 정보 일부만 갱신할 때 사용 (로그인 전이면 동작 안 함)
       updateUser: (partial) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...partial } : null,

@@ -15,12 +15,12 @@ const MenuList = () => {
   const router = useRouter();
   const logout = useUserStore((state) => state.logout);
 
-  const handlePress = (route: string | null) => {
+  const handlePress = async (route: string | null) => {
     if (route) {
       router.push(route as any);
       return;
     }
-    logout();
+    await logout();
     router.replace("/splash");
   };
 
