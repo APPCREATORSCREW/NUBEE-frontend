@@ -67,3 +67,35 @@ export const applySkin = async (skinId: number) => {
   }>("/api/users/skin", { skinId });
   return data.result;
 };
+
+// PATCH /auth/password - 비밀번호 변경 (프로필 탭에서, 로그인된 상태로 변경)
+interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  newPasswordConfirm: string;
+}
+
+export const changePassword = async (payload: ChangePasswordRequest) => {
+  const { data } = await api.patch<{
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    result: string;
+  }>("/auth/password", payload);
+  return data.result;
+};
+
+// POST /auth/logout - refresh_token 폐기 (revoked_at 갱신)
+interface LogoutRequest {
+  refreshToken: string;
+}
+
+export const logoutAPI = async (payload: LogoutRequest) => {
+  const { data } = await api.post<{
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    result: string;
+  }>("/auth/logout", payload);
+  return data.result;
+};
