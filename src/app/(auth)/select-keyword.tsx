@@ -5,6 +5,10 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { useUserStore } from '../../store/useUserStore';
+import { useSignupDraftStore } from '../../store/useSignupDraftStore';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { SignUpAPI, KeywordCountAPI } from '../../apis/auth';
+
 
 const OPTIONS = [
   { count: 3, background: colors.yellow100, border: colors.yellow400 },
@@ -17,11 +21,65 @@ const SelectKeywordScreen = () => {
   const router = useRouter();
   const setSettings = useUserStore((state) => state.setSettings);
   const [selectedCount, setSelectedCount] = useState<number | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleStart = () => {
-    if (selectedCount === null) return;
-    setSettings({ keywordCount: selectedCount });
-    router.replace('/home');
+  const setDraft = useSignupDraftStore((state) => state.setDraft);
+  const clearDraft = useSignupDraftStore((state) => state.clearDraft);
+  const userflow = useSignupDraftStore((state) => state.draft.flow);
+  const userData = useSignupDraftStore((state) => state.draft);
+
+  // api 연동 - 회원가입 api / 키워드 api
+  const handleStart = async () => {
+    if (selectedCount === null || isLoading) return;
+    
+    if (userflow === 'signup') {
+      setDraft({ preferredKeywordCount: selectedCount });
+      setIsLoading(true);
+      try{
+        const { flow, ...signupPayload } = userData;
+
+        if (
+          !signupPayload.username ||
+          !signupPayload.email ||
+          !signupPayload.password ||
+          !signupPayload.passwordConfirm ||
+          !signupPayload.birthDate
+        ) {
+          console.log('회원가입에 필요한 정보가 부족해요');
+          return;
+        }
+
+        const response = await SignUpAPI({
+          username: signupPayload.username,
+          email: signupPayload.email,
+          password: signupPayload.password,
+          passwordConfirm: signupPayload.passwordConfirm,
+          birthDate: signupPayload.birthDate,
+          preferredKeywordCount: selectedCount,
+          parentEmail: signupPayload.parentEmail ?? null,
+        });
+        clearDraft();
+        // api 연동 - 프로필 조회 api -> 전역 관리
+        router.replace('/home');
+      }catch(error){
+        console.log(error);
+      }finally{
+        setIsLoading(false);
+      }
+    }else{
+      setIsLoading(true);
+      try{
+        const response = await KeywordCountAPI({ preferredKeywordCount: selectedCount });
+        setSettings({ keywordCount: selectedCount });
+        router.replace('/home');
+        // api 연동 - 프로필 조회 api -> 전역관리
+      }catch(error){
+        console.log(error);
+      }finally{
+        setIsLoading(false);
+      }
+    }
   };
 
   return (
@@ -57,6 +115,7 @@ const SelectKeywordScreen = () => {
           onPress={handleStart}
         />
       </View>
+      {isLoading && <LoadingIndicator fullScreen />}
     </View>
   );
 };

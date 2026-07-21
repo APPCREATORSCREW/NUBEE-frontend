@@ -15,6 +15,8 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CircleLeft, VisibilityOn, VisibilityOff } from '../../components/icons';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { PasswordResetAPI, PasswordResetVerifyAPI, PasswordResetConfirmAPI } from '../../apis/auth';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -81,6 +83,7 @@ const FindPasswordScreen = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [touched, setTouched] = useState({ newPassword: false, confirmNewPassword: false });
+
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -88,6 +91,8 @@ const FindPasswordScreen = () => {
   const newPasswordValid = PASSWORD_REGEX.test(newPassword);
   const confirmNewPasswordValid =
     confirmNewPassword.length > 0 && confirmNewPassword === newPassword;
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleBack = () => {
     if (step === 'reset') {
@@ -97,23 +102,49 @@ const FindPasswordScreen = () => {
     router.back();
   };
 
-  const handleSendEmail = () => {
+  // api 연동 - 이메일 전송
+  const handleSendEmail = async () => {
+    if (isLoading) return;
     if (!name || !email) return;
-    // API 연동 후 처리
-    setEmailSent(true);
-    emailTimer.start();
+    setIsLoading(true);
+    try {
+      const response = await PasswordResetAPI({ username: name, email });
+      setEmailSent(true);
+      emailTimer.start();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyCode = () => {
-    if (!authCode) return;
-    // API 연동 후 처리
-    setStep('reset');
+  // api 연동 - 인증번호 확인
+  const handleVerifyCode = async () => {
+    if (!authCode && isLoading) return;
+    setIsLoading(true);
+    try {
+      const response = await PasswordResetVerifyAPI({ email, code: authCode });
+      setStep('reset');
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResetPassword = () => {
+  // api 연동 - 비밀번호 재설정
+  const handleResetPassword = async () => {
+    if (isLoading) return;
     if (!newPasswordValid || !confirmNewPasswordValid) return;
-    // API 연동 후 처리
-    router.replace('/login');
+    setIsLoading(true);
+    try {
+      const response = await PasswordResetConfirmAPI({ email, newPassword, newPasswordConfirm: confirmNewPassword });
+      router.replace('/login');
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -255,6 +286,8 @@ const FindPasswordScreen = () => {
           />
         </View>
       )}
+
+      {isLoading && <LoadingIndicator fullScreen />}
     </KeyboardAvoidingView>
   );
 };

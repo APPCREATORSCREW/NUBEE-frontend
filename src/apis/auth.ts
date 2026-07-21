@@ -1,5 +1,4 @@
 import { api } from "./client";
-import { useUserStore } from "../store/useUserStore";
 
 // 회원가입
 export interface SignUpRequest {
@@ -64,7 +63,6 @@ export interface BirthDateResponse {
 }
 
 export const BirthDateAPI = async (data: BirthDateRequest): Promise<BirthDateResponse> => {
-    const accessToken = useUserStore.getState().accessToken;
     const response = await api.patch<BirthDateResponse>(`/auth/kakao/birthdate`, data,);
     return response.data;
 }
@@ -119,7 +117,6 @@ export interface KeywordCountResponse {
 }
 
 export const KeywordCountAPI = async (data: KeywordCountRequest): Promise<KeywordCountResponse> => {
-    const accessToken = useUserStore.getState().accessToken;
     const response = await api.patch<KeywordCountResponse>(`/auth/keyword-count`, data);
     return response.data;
 }
@@ -198,7 +195,6 @@ export interface RefreshResponse {
 }
 
 export const RefreshAPI = async (data: RefreshRequest): Promise<RefreshResponse> => {
-    const accessToken = useUserStore.getState().accessToken;
     const response = await api.post<RefreshResponse>(`/auth/token/refresh`, data);
     return response.data;
 }

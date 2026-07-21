@@ -14,6 +14,7 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CheckEnabled, CheckDisabled } from '../../components/icons';
+import { useSignupDraftStore } from '../../store/useSignupDraftStore';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -40,29 +41,31 @@ const FieldInput = ({ label, error, valid, rightElement, ...inputProps }: FieldI
 const SignupScreen = () => {
   const router = useRouter();
 
-  const [name, setName] = useState('');
+  const [username, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+
+  const setDraft = useSignupDraftStore((state) => state.setDraft);
 
   const [touched, setTouched] = useState({
     email: false,
     password: false,
-    confirmPassword: false,
+    passwordConfirm: false,
   });
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const nameValid = name.trim().length > 0;
+  const usernameValid = username.trim().length > 0;
   const emailValid = EMAIL_REGEX.test(email);
   const passwordValid = PASSWORD_REGEX.test(password);
-  const confirmPasswordValid = confirmPassword.length > 0 && confirmPassword === password;
+  const passwordConfirmValid = passwordConfirm.length > 0 && passwordConfirm === password;
 
-  const canSubmit = nameValid && emailValid && passwordValid && confirmPasswordValid;
-
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    router.replace('/birth-date');
+  const canSubmit = usernameValid && emailValid && passwordValid && passwordConfirmValid;
+  
+  const handleSubmit =  () => {
+    setDraft({ flow: 'signup', username, email, password, passwordConfirm });
+    router.push({ pathname: '/birth-date' });
   };
 
   return (
@@ -73,7 +76,7 @@ const SignupScreen = () => {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>회원가입</Text>
 
-        <FieldInput label="이름" value={name} onChangeText={setName} valid={nameValid} />
+        <FieldInput label="이름" value={username} onChangeText={setName} valid={usernameValid} />
 
         <FieldInput
           label="이메일"
@@ -101,14 +104,14 @@ const SignupScreen = () => {
 
         <FieldInput
           label="비밀번호 확인"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          onBlur={markTouched('confirmPassword')}
+          value={passwordConfirm}
+          onChangeText={setPasswordConfirm}
+          onBlur={markTouched('passwordConfirm')}
           secureTextEntry
           autoCapitalize="none"
-          valid={confirmPasswordValid}
+          valid={passwordConfirmValid}
           error={
-            touched.confirmPassword && !confirmPasswordValid
+            touched.passwordConfirm && !passwordConfirmValid
               ? '비밀번호가 일치하지 않습니다.'
               : undefined
           }
