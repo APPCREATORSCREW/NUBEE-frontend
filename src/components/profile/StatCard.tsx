@@ -9,7 +9,6 @@ import { useUserStore } from "../../store/useUserStore";
 const StatCard = () => {
   const user = useUserStore((state) => state.user);
   const streak = user?.streak ?? 0;
-  const level = user?.level ?? 0;
   const points = user?.points ?? 0;
 
   return (

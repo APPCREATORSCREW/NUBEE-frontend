@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,10 @@ import {
   scheduleDailyStudyNotification,
   cancelStudyNotification,
 } from "../utils/notifications";
+import {
+  getSettings,
+  updateSettings as updateSettingsAPI,
+} from "../api/settingsAPI";
 
 const KEYWORD_OPTIONS = [3, 4, 5, 6];
 
@@ -69,6 +73,28 @@ const StudySettings = () => {
   });
   const selectViewRef = useRef<View>(null);
 
+  // 화면 진입 시 GET /api/users/settings로 최신 설정 조회
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await getSettings();
+        setKeywordCount(data.preferredKeywordCount);
+        setNotificationEnabled(data.notificationEnabled);
+        setNotificationTime(data.notificationTime);
+        setSettings({
+          keywordCount: data.preferredKeywordCount,
+          notificationEnabled: data.notificationEnabled,
+          notificationTime: data.notificationTime,
+        });
+      } catch (error) {
+        // TODO: 실패 시 에러 UI 처리, 지금은 로컬(스토어) 값 그대로 사용
+        console.error("학습 설정 조회 실패", error);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   // 키워드 수 설정
   const openKeywordMenu = () => {
     selectViewRef.current?.measureInWindow((x, y, width, height) => {
@@ -108,8 +134,19 @@ const StudySettings = () => {
       await cancelStudyNotification();
     }
 
+    try {
+      // PATCH /api/users/settings - 로컬 필드명(keywordCount) -> 서버 필드명(preferredKeywordCount) 매핑
+      await updateSettingsAPI({
+        preferredKeywordCount: keywordCount,
+        notificationEnabled: enabled,
+        notificationTime,
+      });
+    } catch (error) {
+      // TODO: 실패 시 에러 UI 처리, 지금은 로컬 상태만이라도 반영하고 진행
+      console.error("학습 설정 저장 실패", error);
+    }
+
     setSettings({ keywordCount, notificationEnabled: enabled, notificationTime });
-    // 학습 설정 API 연동은 추후 작업
     router.back();
   };
 

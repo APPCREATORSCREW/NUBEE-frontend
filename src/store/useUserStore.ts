@@ -75,7 +75,8 @@ export const useUserStore = create<UserState>()(
       visitedKeywords: [],
       quizAnswers: {},
 
-      login: (user, token) => set({ user, accessToken: token, isLoggedIn: true }),
+      login: (user, token) =>
+        set({ user, accessToken: token, isLoggedIn: true }),
       logout: () =>
         set({
           user: null,
@@ -101,13 +102,13 @@ export const useUserStore = create<UserState>()(
         set((state) =>
           state.visitedKeywords.includes(keyword)
             ? state
-            : { visitedKeywords: [...state.visitedKeywords, keyword] }
+            : { visitedKeywords: [...state.visitedKeywords, keyword] },
         ),
       answerQuiz: (keyword, optionIndex) =>
         set((state) =>
           state.quizAnswers[keyword] !== undefined
             ? state
-            : { quizAnswers: { ...state.quizAnswers, [keyword]: optionIndex } }
+            : { quizAnswers: { ...state.quizAnswers, [keyword]: optionIndex } },
         ),
       addPoints: (amount) =>
         set((state) => {
@@ -130,6 +131,6 @@ export const useUserStore = create<UserState>()(
         settings: state.settings,
         quizAnswers: state.quizAnswers,
       }),
-    }
-  )
+    },
+  ),
 );
