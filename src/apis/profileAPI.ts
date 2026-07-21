@@ -8,8 +8,8 @@ interface Skin {
   skinName: string;
 }
 
-// GET /api/users/profile 응답 (result 기준)
-interface ProfileResponse {
+// GET /api/users/profile 응답의 result
+interface ProfileResult {
   username: string;
   email: string;
   currentLevel: number;
@@ -21,10 +21,17 @@ interface ProfileResponse {
   skins: Skin[];
 }
 
+interface ProfileResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: ProfileResult;
+}
+
 // GET /api/users/profile - 프로필 조회
 export const getProfile = async () => {
   const { data } = await api.get<ProfileResponse>("/api/users/profile");
-  return data;
+  return data.result;
 };
 
 // PATCH /api/users/profile-image - 프로필 이미지 변경
@@ -38,20 +45,25 @@ export const updateProfileImage = async (uri: string) => {
     type: "image/jpeg",
   } as unknown as Blob);
 
-  const { data } = await api.patch<{ profileImage: string }>(
-    "/api/users/profile-image",
-    formData,
-    { headers: { "Content-Type": "multipart/form-data" } },
-  );
-  return data;
+  const { data } = await api.patch<{
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    result: { profileImage: string };
+  }>("/api/users/profile-image", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data.result;
 };
 
 // PATCH /api/users/skin - 스킨 적용 (보유한 스킨 중에서만 선택 가능, User.currentSkinId 갱신)
 // useSkinStore의 Skin.apiId 넘기기
 export const applySkin = async (skinId: number) => {
-  const { data } = await api.patch<{ currentSkinId: number }>(
-    "/api/users/skin",
-    { skinId },
-  );
-  return data;
+  const { data } = await api.patch<{
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    result: { currentSkinId: number };
+  }>("/api/users/skin", { skinId });
+  return data.result;
 };
