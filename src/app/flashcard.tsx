@@ -13,7 +13,6 @@ import { router } from "expo-router";
 import { colors } from "../constants/colors";
 import { fonts } from "../constants/fonts";
 
-// 팀원이 구현한 캐릭터 스킨 스토어 및 유틸 경로 (프로젝트 구조에 맞게 경로 확인 필요)
 import { useSkinStore, getSkinById } from "../store/useSkinStore";
 
 // 아이콘
@@ -34,7 +33,6 @@ export default function FlashCard() {
   const [isFront, setIsFront] = useState(true);
   const [finished, setFinished] = useState(false);
   
-  // 팀원 가이드대로 전역 스토어에서 선택된 스킨 정보 가져오기
   const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
   const skin = getSkinById(selectedSkinId);
 
