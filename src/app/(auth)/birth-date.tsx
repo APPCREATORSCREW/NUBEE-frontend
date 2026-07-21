@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   TextInput,
@@ -20,6 +21,7 @@ import { CheckEnabled, CheckDisabled } from '../../components/icons';
 import { useSignupDraftStore } from '../../store/useSignupDraftStore';
 import { BirthDateAPI, ParentEmailSendAPI, ParentEmailVerifyAPI } from '../../apis/auth';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 // 카카오 리디렉션 시 flow: null
 // 일반 회원가입 flow: SignupFlow
@@ -226,7 +228,7 @@ const BirthDateScreen = () => {
       parentEmailTimer.start();
     }
     catch(error){
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     }
     finally{
       setIsLoading(false);
@@ -247,7 +249,7 @@ const BirthDateScreen = () => {
 
     }
     catch(error){
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     }
     finally{
       setIsLoading(false);
@@ -274,7 +276,7 @@ const BirthDateScreen = () => {
         try {
           const response = await BirthDateAPI({ birthDate });
         } catch (error) {
-          console.log(error);
+          Alert.alert('오류', getErrorMessage(error));
         } finally {
           setIsLoading(false);
         }
@@ -292,7 +294,7 @@ const BirthDateScreen = () => {
         const response = await BirthDateAPI({ birthDate });
       }
       catch(error){
-        console.log(error);
+        Alert.alert('오류', getErrorMessage(error));
       }
       finally{
         setIsLoading(false);

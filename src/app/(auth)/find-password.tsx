@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   TextInput,
@@ -17,6 +18,7 @@ import Button from '../../components/common/Button';
 import { CircleLeft, VisibilityOn, VisibilityOff } from '../../components/icons';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import { PasswordResetAPI, PasswordResetVerifyAPI, PasswordResetConfirmAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -112,7 +114,7 @@ const FindPasswordScreen = () => {
       setEmailSent(true);
       emailTimer.start();
     } catch (error) {
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -126,7 +128,7 @@ const FindPasswordScreen = () => {
       const response = await PasswordResetVerifyAPI({ email, code: authCode });
       setStep('reset');
     } catch (error) {
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +143,7 @@ const FindPasswordScreen = () => {
       const response = await PasswordResetConfirmAPI({ email, newPassword, newPasswordConfirm: confirmNewPassword });
       router.replace('/login');
     } catch (error) {
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }

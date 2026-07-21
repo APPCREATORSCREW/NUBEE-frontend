@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
@@ -8,7 +8,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { useSignupDraftStore } from '../../store/useSignupDraftStore';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import { SignUpAPI, KeywordCountAPI } from '../../apis/auth';
-
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const OPTIONS = [
   { count: 3, background: colors.yellow100, border: colors.yellow400 },
@@ -46,7 +46,7 @@ const SelectKeywordScreen = () => {
           !signupPayload.passwordConfirm ||
           !signupPayload.birthDate
         ) {
-          console.log('회원가입에 필요한 정보가 부족해요');
+          Alert.alert('오류', '회원가입에 필요한 정보가 부족해요.');
           return;
         }
 
@@ -63,7 +63,7 @@ const SelectKeywordScreen = () => {
         // api 연동 - 프로필 조회 api -> 전역 관리
         router.replace('/home');
       }catch(error){
-        console.log(error);
+        Alert.alert('오류', getErrorMessage(error));
       }finally{
         setIsLoading(false);
       }
@@ -75,7 +75,7 @@ const SelectKeywordScreen = () => {
         router.replace('/home');
         // api 연동 - 프로필 조회 api -> 전역관리
       }catch(error){
-        console.log(error);
+        Alert.alert('오류', getErrorMessage(error));
       }finally{
         setIsLoading(false);
       }

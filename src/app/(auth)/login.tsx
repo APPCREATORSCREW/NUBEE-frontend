@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   TextInput,
@@ -17,6 +18,7 @@ import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import { LoginAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 
@@ -62,7 +64,7 @@ const LoginScreen = () => {
       const response = await LoginAPI({ email, password });
       router.replace('/home');
     } catch (error) {
-      console.log(error);
+      Alert.alert('오류', getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
