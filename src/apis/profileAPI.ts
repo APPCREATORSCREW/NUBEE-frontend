@@ -1,4 +1,4 @@
-import { apiClient } from "./client";
+import { api } from "./client";
 
 // 보유 스킨 하나의 정보 (owned: 잠금 해제 여부)
 interface Skin {
@@ -23,7 +23,7 @@ interface ProfileResponse {
 
 // GET /api/users/profile - 프로필 조회
 export const getProfile = async () => {
-  const { data } = await apiClient.get<ProfileResponse>("/api/users/profile");
+  const { data } = await api.get<ProfileResponse>("/api/users/profile");
   return data;
 };
 
@@ -38,7 +38,7 @@ export const updateProfileImage = async (uri: string) => {
     type: "image/jpeg",
   } as unknown as Blob);
 
-  const { data } = await apiClient.patch<{ profileImage: string }>(
+  const { data } = await api.patch<{ profileImage: string }>(
     "/api/users/profile-image",
     formData,
     { headers: { "Content-Type": "multipart/form-data" } },
@@ -49,7 +49,7 @@ export const updateProfileImage = async (uri: string) => {
 // PATCH /api/users/skin - 스킨 적용 (보유한 스킨 중에서만 선택 가능, User.currentSkinId 갱신)
 // useSkinStore의 Skin.apiId 넘기기
 export const applySkin = async (skinId: number) => {
-  const { data } = await apiClient.patch<{ currentSkinId: number }>(
+  const { data } = await api.patch<{ currentSkinId: number }>(
     "/api/users/skin",
     { skinId },
   );

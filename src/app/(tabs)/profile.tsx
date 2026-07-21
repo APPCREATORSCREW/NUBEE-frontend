@@ -11,7 +11,7 @@ import StatCard from "../../components/profile/StatCard";
 import ProgressBar from "../../components/profile/ProgressBar";
 import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
 import { useSkinStore, getSkinByApiId } from "../../store/useSkinStore";
-import { getProfile } from "../../api/profileAPI";
+import { getProfile } from "../../apis/profileAPI";
 
 const Profile = () => {
   const points = useUserStore((state) => state.user?.points ?? 0);

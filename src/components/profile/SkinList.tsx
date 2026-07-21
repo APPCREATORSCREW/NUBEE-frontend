@@ -10,7 +10,7 @@ import {
 import Button from "../common/Button";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
-import { applySkin } from "../../api/profileAPI";
+import { applySkin } from "../../apis/profileAPI";
 
 const SkinList = () => {
   const level = useSkinStore((state) => state.level);
