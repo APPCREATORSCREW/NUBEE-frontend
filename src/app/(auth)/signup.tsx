@@ -8,13 +8,17 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CheckEnabled, CheckDisabled } from '../../components/icons';
-import { useSignupDraftStore } from '../../store/useSignupDraftStore';
+import { SignUpAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+import { useUserStore } from '../../store/useUserStore';
+import { tokenStorage } from '../../utils/tokenStorage';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -46,8 +50,6 @@ const SignupScreen = () => {
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
 
-  const setDraft = useSignupDraftStore((state) => state.setDraft);
-
   const [touched, setTouched] = useState({
     email: false,
     password: false,
@@ -63,8 +65,16 @@ const SignupScreen = () => {
 
   const canSubmit = usernameValid && emailValid && passwordValid && passwordConfirmValid;
   
-  const handleSubmit =  () => {
-    setDraft({ flow: 'signup', username, email, password, passwordConfirm });
+  const handleSubmit =  async() => {
+    try{
+      const response = await SignUpAPI({ username, email, password, passwordConfirm });
+      const { accessToken, refreshToken } = response.result;
+
+      useUserStore.getState().setAccessToken(accessToken);
+      tokenStorage.saveRefreshToken(refreshToken);
+    } catch (error) {
+      Alert.alert('오류', getErrorMessage(error));
+    }
     router.push({ pathname: '/birth-date' });
   };
 

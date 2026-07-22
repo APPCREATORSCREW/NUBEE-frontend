@@ -19,6 +19,8 @@ import Button from '../../components/common/Button';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import { LoginAPI } from '../../apis/auth';
 import { getErrorMessage } from '../../utils/getErrorMessage';
+import { useUserStore } from '../../store/useUserStore';
+import { tokenStorage } from '../../utils/tokenStorage';
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 
@@ -62,6 +64,10 @@ const LoginScreen = () => {
     setIsLoading(true);
     try {
       const response = await LoginAPI({ email, password });
+      const { accessToken, refreshToken } = response.result;
+
+      useUserStore.getState().setAccessToken(accessToken);
+      tokenStorage.saveRefreshToken(refreshToken);
       router.replace('/home');
     } catch (error) {
       Alert.alert('오류', getErrorMessage(error));

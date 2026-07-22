@@ -18,7 +18,6 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CheckEnabled, CheckDisabled } from '../../components/icons';
-import { useSignupDraftStore } from '../../store/useSignupDraftStore';
 import { BirthDateAPI, ParentEmailSendAPI, ParentEmailVerifyAPI } from '../../apis/auth';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
 import { getErrorMessage } from '../../utils/getErrorMessage';
@@ -188,8 +187,6 @@ const BirthDateScreen = () => {
 
   const [touched, setTouched] = useState({ parentEmail: false });
 
-  const setDraft = useSignupDraftStore((state) => state.setDraft);
-  const userflow = useSignupDraftStore((state) => state.draft.flow);
 
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -240,13 +237,8 @@ const BirthDateScreen = () => {
     if (!parentAuthCode || isLoading) return;
     setIsLoading(true);
     try{
-      const response = await ParentEmailVerifyAPI({ email: parentEmail, code: parentAuthCode });
+      const response = await ParentEmailVerifyAPI({ parentEmail, code: parentAuthCode });
       setParentVerified(true);
-
-      if (userflow === 'signup') {
-      setDraft({ parentEmail, birthDate });
-      }
-
     }
     catch(error){
       Alert.alert('오류', getErrorMessage(error));
@@ -269,36 +261,30 @@ const BirthDateScreen = () => {
     if (isNextStep) {
       if (!birthDateValid) return;
 
-      if (userflow === 'signup') {
-        setDraft({ birthDate });
-      } else {
-        setIsLoading(true);
-        try {
-          const response = await BirthDateAPI({ birthDate });
-        } catch (error) {
-          Alert.alert('오류', getErrorMessage(error));
-        } finally {
-          setIsLoading(false);
-        }
+      setIsLoading(true);
+      try {
+        const response = await BirthDateAPI({ birthDate });
+      } 
+      catch (error) {
+        Alert.alert('오류', getErrorMessage(error));
+      } 
+      finally {
+        setIsLoading(false);
       }
+
       setStep('parent');
       return;
     }
 
-    if (userflow === 'signup') {
-      setDraft({ birthDate, parentEmail: null });
+    setIsLoading(true);
+    try{
+      const response = await BirthDateAPI({ birthDate });
     }
-    else{
-      setIsLoading(true);
-      try{
-        const response = await BirthDateAPI({ birthDate });
-      }
-      catch(error){
-        Alert.alert('오류', getErrorMessage(error));
-      }
-      finally{
-        setIsLoading(false);
-      }
+    catch(error){
+      Alert.alert('오류', getErrorMessage(error));
+    }
+    finally{
+      setIsLoading(false);
     }
     handleSubmit();
   };

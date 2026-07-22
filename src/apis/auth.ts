@@ -6,9 +6,6 @@ export interface SignUpRequest {
     email: string;
     password: string;
     passwordConfirm: string;
-    birthDate: string;
-    preferredKeywordCount: number;
-    parentEmail: string | null;
 }
 
 export interface SignUpResponse {
@@ -22,7 +19,6 @@ export interface SignUpResponse {
 }
 
 export const SignUpAPI = async (data: SignUpRequest): Promise<SignUpResponse> => {
-    // 노션 상 url 불일치
     const response = await api.post<SignUpResponse>(`/auth/signup`, data);
     return response.data;
 }
@@ -48,9 +44,10 @@ export const LoginAPI = async (data: LoginRequest): Promise<LoginResponse> => {
     return response.data;
 }
 
-// 카카오 - 생년월일
+
+// 회원가입 및 카카오 로그인 후 생년월일 저장
 export interface BirthDateRequest {
-    birthDate: string
+    birthDate: string;
 }
 
 export interface BirthDateResponse {
@@ -63,11 +60,11 @@ export interface BirthDateResponse {
 }
 
 export const BirthDateAPI = async (data: BirthDateRequest): Promise<BirthDateResponse> => {
-    const response = await api.patch<BirthDateResponse>(`/auth/kakao/birthdate`, data,);
+    const response = await api.patch<BirthDateResponse>(`/auth/birthdate`, data,);
     return response.data;
 }
 
-// 부모님 이메일 send
+// 부모님 이메일 인증 코드 보내기 - 만 14세 미만인 경우
 export interface ParentEmailSendRequest {
     parentEmail: string
 }
@@ -80,14 +77,13 @@ export interface ParentEmailSendResponse {
 }
 
 export const ParentEmailSendAPI = async (data: ParentEmailSendRequest): Promise<ParentEmailSendResponse> => {
-    // 노션 상 url 불일치
     const response = await api.post<ParentEmailSendResponse>(`/auth/parent/email/send`, data);
     return response.data;
 }
 
-// 부모님 이메일 verify
+// 부모님 이메일 인증 확인 - 만 14세 미만인 경우
 export interface ParentEmailVerifyRequest {
-    email: string;
+    parentEmail: string;
     code: string;
 }
 
@@ -99,12 +95,11 @@ export interface ParentEmailVerifyResponse {
 }
 
 export const ParentEmailVerifyAPI = async (data: ParentEmailVerifyRequest): Promise<ParentEmailVerifyResponse> => {
-    // 노션 상 url 불일치
     const response = await api.post<ParentEmailVerifyResponse>(`/auth/parent/email/verify`, data);
     return response.data;
 }
 
-// 키워드 개수
+// 튜토리얼 이후 학습 키워드 개수 설정
 export interface KeywordCountRequest {
     preferredKeywordCount: number;
 }
@@ -121,7 +116,7 @@ export const KeywordCountAPI = async (data: KeywordCountRequest): Promise<Keywor
     return response.data;
 }
 
-// 비밀번호 찾기 - 이메일
+// 비밀번호 찾기 - 이메일 인증 발송
 export interface PasswordResetRequest {
     username: string;
     email: string;
@@ -135,12 +130,11 @@ export interface PasswordResetResponse {
 }
 
 export const PasswordResetAPI = async (data: PasswordResetRequest): Promise<PasswordResetResponse> => {
-    // 노션 상 url 불일치
     const response = await api.post<PasswordResetResponse>(`/auth/password/reset`, data);
     return response.data;
 }
 
-// 비밀번호 찾기 - verify
+// 비밀번호 찾기 - 인증번호 확인
 export interface PasswordResetVerifyRequest {
     email: string;
     code: string;
@@ -154,12 +148,11 @@ export interface PasswordResetVerifyResponse {
 }
 
 export const PasswordResetVerifyAPI = async (data: PasswordResetVerifyRequest): Promise<PasswordResetVerifyResponse> => {
-    // 노션 상 url 불일치
     const response = await api.post<PasswordResetVerifyResponse>(`/auth/password/reset/verify`, data);
     return response.data;
 }
 
-// 비밀번호 재설정
+// 비밀번호 재설정 - 로그인 과정
 export interface PasswordResetConfirmRequest {
     email: string;
     newPassword: string;
@@ -174,7 +167,6 @@ export interface PasswordResetConfirmResponse {
 }
 
 export const PasswordResetConfirmAPI = async (data: PasswordResetConfirmRequest): Promise<PasswordResetConfirmResponse> => {
-    // 노션 상 url 불일치
     const response = await api.patch<PasswordResetConfirmResponse>(`/auth/password/reset/confirm`, data);
     return response.data;
 }
@@ -193,10 +185,4 @@ export interface RefreshResponse {
         refreshToken: string;
     }
 }
-
-export const RefreshAPI = async (data: RefreshRequest): Promise<RefreshResponse> => {
-    const response = await api.post<RefreshResponse>(`/auth/token/refresh`, data);
-    return response.data;
-}
-
 
