@@ -43,6 +43,7 @@ interface UserState {
   markKeywordVisited: (keyword: string) => void;
   answerQuiz: (keyword: string, optionIndex: number) => void;
   addPoints: (amount: number) => void;
+  setAccessToken: (token: string) => void;
 }
 
 // 포인트 50 적립마다 레벨업
@@ -114,7 +115,10 @@ export const useUserStore = create<UserState>()(
           }
           return { user: { ...state.user, points, level } };
         }),
+
+        setAccessToken: (token) => set({ accessToken: token }),
     }),
+
     {
       name: "user-storage",
       storage: createJSONStorage(() => AsyncStorage),

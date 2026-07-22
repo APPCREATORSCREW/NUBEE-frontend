@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useUserStore } from "../store/useUserStore";
+import { tokenStorage } from "../utils/tokenStorage";
+import { RefreshAPI } from "./auth";
 
 export const api = axios.create({
     // 임시 주소
@@ -19,3 +21,31 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    
+    if (error.response?.status === 401 && !error.config._retry) {
+      error.config._retry = true;
+
+      const refreshToken = await tokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        return Promise.reject(error);
+      }
+      try {
+        const { result } = await RefreshAPI({ refreshToken });
+
+        useUserStore.getState().setAccessToken(result.accessToken);
+
+        error.config.headers.Authorization = `Bearer ${result.accessToken}`;
+        return api(error.config);
+      } catch (refreshError) {
+        useUserStore.getState().logout();
+        await tokenStorage.removeRefreshToken();
+        return Promise.reject(error);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
