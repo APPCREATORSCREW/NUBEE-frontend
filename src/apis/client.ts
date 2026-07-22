@@ -4,8 +4,7 @@ import { tokenStorage } from "../utils/tokenStorage";
 import type { RefreshResponse } from "./auth";
 
 export const api = axios.create({
-    // 임시 주소
-    baseURL : '임시 주소',
+    baseURL : process.env.EXPO_PUBLIC_API_BASE_URL,
     timeout: 5000,
 })
 
