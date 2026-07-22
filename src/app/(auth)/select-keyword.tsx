@@ -1,10 +1,13 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { useUserStore } from '../../store/useUserStore';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { SignUpAPI, KeywordCountAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const OPTIONS = [
   { count: 3, background: colors.yellow100, border: colors.yellow400 },
@@ -17,11 +20,22 @@ const SelectKeywordScreen = () => {
   const router = useRouter();
   const setSettings = useUserStore((state) => state.setSettings);
   const [selectedCount, setSelectedCount] = useState<number | null>(null);
+  
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleStart = () => {
-    if (selectedCount === null) return;
-    setSettings({ keywordCount: selectedCount });
-    router.replace('/home');
+  // api 연동 - 회원가입 api / 키워드 api
+  const handleStart = async () => {
+    if (selectedCount === null || isLoading) return;
+    
+    setIsLoading(true);
+    try{
+      const response = await KeywordCountAPI({ preferredKeywordCount: selectedCount });
+      router.replace('/home');
+    } catch(error){
+      Alert.alert('오류', getErrorMessage(error));
+    } finally{
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -57,6 +71,7 @@ const SelectKeywordScreen = () => {
           onPress={handleStart}
         />
       </View>
+      {isLoading && <LoadingIndicator fullScreen />}
     </View>
   );
 };

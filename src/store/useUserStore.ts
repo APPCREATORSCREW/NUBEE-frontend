@@ -29,20 +29,23 @@ interface UserSettings {
 interface UserState {
   user: User | null;
   accessToken: string | null;
+  refreshToken: string | null;
   isLoggedIn: boolean;
   selectedSkin: Skin | null;
   settings: UserSettings;
-  visitedKeywords: string[];
-  quizAnswers: Record<string, number>;
+  visitedKeywords: number[];
+  quizAnswers: Record<number, number>;
 
   login: (user: User, token: string) => void;
   logout: () => void;
   setSelectedSkin: (skin: Skin) => void;
   setProfileImage: (uri: string) => void;
   setSettings: (settings: Partial<UserSettings>) => void;
-  markKeywordVisited: (keyword: string) => void;
-  answerQuiz: (keyword: string, optionIndex: number) => void;
+  markKeywordVisited: (keyword: number) => void;
+  answerQuiz: (keyword: number, optionIndex: number) => void;
   addPoints: (amount: number) => void;
+  setAccessToken: (token: string) => void;
+  setRefreshToken: (token: string) => void;
 }
 
 // 포인트 50 적립마다 레벨업
@@ -63,6 +66,7 @@ export const useUserStore = create<UserState>()(
         loginType: "email",
       },
       accessToken: null,
+      refreshToken: null,
       isLoggedIn: false,
       selectedSkin: null,
       // 임시
@@ -91,7 +95,7 @@ export const useUserStore = create<UserState>()(
         set((state) => ({
           settings: { ...state.settings, ...newSettings },
         })),
-      markKeywordVisited: (keyword: string) =>
+      markKeywordVisited: (keyword: number) =>
         set((state) =>
           state.visitedKeywords.includes(keyword)
             ? state
@@ -114,7 +118,11 @@ export const useUserStore = create<UserState>()(
           }
           return { user: { ...state.user, points, level } };
         }),
+
+        setAccessToken: (token) => set({ accessToken: token }),
+        setRefreshToken: (token) => set({ refreshToken: token }),
     }),
+
     {
       name: "user-storage",
       storage: createJSONStorage(() => AsyncStorage),

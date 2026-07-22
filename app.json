@@ -12,7 +12,8 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.nubee"
+      "package": "com.anonymous.nubee",
+      "usesCleartextTraffic": true
     },
     "plugins": [
       "expo-font",
