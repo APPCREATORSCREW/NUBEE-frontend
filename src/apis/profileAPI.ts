@@ -35,24 +35,15 @@ export const getProfile = async () => {
 };
 
 // PATCH /api/users/profile-image - 프로필 이미지 변경
-// uri: expo-image-picker가 반환하는 로컬 파일 경로, 서버 응답 필드명인 imageUrl과는 무관,
-// RN FormData가 파일을 업로드할 때 요구하는 고정 키 이름
-export const updateProfileImage = async (uri: string) => {
-  const formData = new FormData();
-  formData.append("image", {
-    uri,
-    name: "profile.jpg",
-    type: "image/jpeg",
-  } as unknown as Blob);
-
-  // Content-Type을 수동으로 지정하면 boundary가 빠져서 서버가 파싱 못 할 수 있음
-  // (500 에러 원인) - axios/RN이 FormData를 보고 자동으로 boundary 포함 헤더를 붙이게 둠
+// S3 presigned URL로 직접 업로드 끝난 뒤 최종 URL을 서버에 저장 요청하는 단계
+// (실제 파일 업로드는 s3API.ts의 uploadToS3가 담당, 여기선 URL만 전달)
+export const updateProfileImage = async (profileImageUrl: string) => {
   const { data } = await api.patch<{
     isSuccess: boolean;
     code: string;
     message: string;
     result: { profileImage: string };
-  }>("/api/users/profile-image", formData);
+  }>("/api/users/profile-image", { profileImageUrl });
   return data.result;
 };
 

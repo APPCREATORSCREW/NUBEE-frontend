@@ -86,7 +86,18 @@ export const useUserStore = create<UserState>()(
       setSelectedSkin: (skin) => set({ selectedSkin: skin }),
       setProfileImage: (uri) =>
         set((state) => ({
-          user: state.user ? { ...state.user, profileImage: uri } : null,
+          user: state.user
+            ? { ...state.user, profileImage: uri }
+            : {
+                id: "",
+                name: "",
+                email: "",
+                level: 0,
+                streak: 0,
+                points: 0,
+                profileImage: uri,
+                loginType: "email",
+              },
         })),
       // 서버 응답 등으로 유저 정보를 갱신할 때 사용.
       // 로그인 화면이 accessToken만 저장하고 user 객체는 안 만들어주기 때문에
