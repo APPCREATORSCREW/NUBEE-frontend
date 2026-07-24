@@ -162,8 +162,8 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   mascot: {
-    width: 145,
-    height: 145,
+    width: 135,
+    height: 135,
   },
   speechBubble: {
     backgroundColor: colors.yellow100,

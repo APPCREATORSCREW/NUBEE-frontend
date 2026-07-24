@@ -13,6 +13,8 @@ import { router } from "expo-router";
 import { colors } from "../constants/colors";
 import { fonts } from "../constants/fonts";
 
+import { useSkinStore, getSkinById } from "../store/useSkinStore";
+
 // 아이콘
 import ArrowCircleLeft from "../components/icons/ArrowCircleLeft";
 import SentimentSatisfied from "../components/icons/SentimentSatisfied";
@@ -31,6 +33,9 @@ export default function FlashCard() {
   const [isFront, setIsFront] = useState(true);
   const [finished, setFinished] = useState(false);
   
+  const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
+  const skin = getSkinById(selectedSkinId);
+
   // 애니메이션 값
   const flipAnim = useRef(new Animated.Value(0)).current;
 
@@ -76,7 +81,9 @@ export default function FlashCard() {
           <Text style={styles.progressText}>{words.length}/{words.length}</Text>
         </View>
         <View style={styles.finishCard}>
-          <View style={{ height: 80 }} /><Image source={require("../../assets/skins/skin_origin.png")} style={styles.finishImage} />
+          <View style={{ height: 80 }} />
+          {/* 전역 스토어에서 가져온 스킨 이미지 동적 렌더링 */}
+          <Image source={skin.image} style={styles.finishImage} />
           <Text style={styles.finishTitle}>축하합니다{"\n"}학습이 끝났어요!</Text>
         </View>
         <View style={{ paddingHorizontal: 20 }}>
@@ -152,5 +159,5 @@ const styles = StyleSheet.create({
   actionText: { marginTop: 2, fontFamily: fonts.family.bold, fontSize: 18, color: colors.black },
   finishCard: { marginTop: 30, marginBottom: 40, borderRadius: 30, backgroundColor: "#FFFCF7", justifyContent: "center", alignItems: "center", paddingHorizontal: 30, height: 400, width: "90%", alignSelf: "center" },
   finishImage: { width: 150, height: 150, transform: [{ translateY: -50 }] },
-  finishTitle: { textAlign: "center", fontFamily: fonts.family.bold, fontSize: 30, color: colors.black, transform: [{ translateY: -50 }] },
+  finishTitle: { textAlign: "center", fontFamily: fonts.family.bold, fontSize: 30, color: colors.black, transform: [{ translateY: -30 }] },
 });

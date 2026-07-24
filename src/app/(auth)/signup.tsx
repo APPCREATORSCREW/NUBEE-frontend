@@ -8,12 +8,17 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CheckEnabled, CheckDisabled } from '../../components/icons';
+import { SignUpAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+import { useUserStore } from '../../store/useUserStore';
+import { tokenStorage } from '../../utils/tokenStorage';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -40,29 +45,37 @@ const FieldInput = ({ label, error, valid, rightElement, ...inputProps }: FieldI
 const SignupScreen = () => {
   const router = useRouter();
 
-  const [name, setName] = useState('');
+  const [username, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
 
   const [touched, setTouched] = useState({
     email: false,
     password: false,
-    confirmPassword: false,
+    passwordConfirm: false,
   });
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const nameValid = name.trim().length > 0;
+  const usernameValid = username.trim().length > 0;
   const emailValid = EMAIL_REGEX.test(email);
   const passwordValid = PASSWORD_REGEX.test(password);
-  const confirmPasswordValid = confirmPassword.length > 0 && confirmPassword === password;
+  const passwordConfirmValid = passwordConfirm.length > 0 && passwordConfirm === password;
 
-  const canSubmit = nameValid && emailValid && passwordValid && confirmPasswordValid;
+  const canSubmit = usernameValid && emailValid && passwordValid && passwordConfirmValid;
+  
+  const handleSubmit =  async() => {
+    try{
+      const response = await SignUpAPI({ username, email, password, passwordConfirm });
+      const { accessToken, refreshToken } = response.result;
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    router.replace('/birth-date');
+      useUserStore.getState().setAccessToken(accessToken);
+      tokenStorage.saveRefreshToken(refreshToken);
+    } catch (error) {
+      Alert.alert('오류', getErrorMessage(error));
+    }
+    router.push({ pathname: '/birth-date' });
   };
 
   return (
@@ -73,7 +86,7 @@ const SignupScreen = () => {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>회원가입</Text>
 
-        <FieldInput label="이름" value={name} onChangeText={setName} valid={nameValid} />
+        <FieldInput label="이름" value={username} onChangeText={setName} valid={usernameValid} />
 
         <FieldInput
           label="이메일"
@@ -101,14 +114,14 @@ const SignupScreen = () => {
 
         <FieldInput
           label="비밀번호 확인"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          onBlur={markTouched('confirmPassword')}
+          value={passwordConfirm}
+          onChangeText={setPasswordConfirm}
+          onBlur={markTouched('passwordConfirm')}
           secureTextEntry
           autoCapitalize="none"
-          valid={confirmPasswordValid}
+          valid={passwordConfirmValid}
           error={
-            touched.confirmPassword && !confirmPasswordValid
+            touched.passwordConfirm && !passwordConfirmValid
               ? '비밀번호가 일치하지 않습니다.'
               : undefined
           }
