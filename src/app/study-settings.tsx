@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -23,12 +23,17 @@ import {
   scheduleDailyStudyNotification,
   cancelStudyNotification,
 } from "../utils/notifications";
+import {
+  getSettings,
+  updateSettings as updateSettingsAPI,
+} from "../apis/settingsAPI";
 
 const KEYWORD_OPTIONS = [3, 4, 5, 6];
+const DEFAULT_NOTIFICATION_TIME = "17:30";
 
-// "17:30" -> Date
-const parseTime = (time: string) => {
-  const [hours, minutes] = time.split(":").map(Number);
+// "17:30" -> Date (서버에서 아직 값이 없는 신규 유저는 null이 올 수 있어 기본값으로 대체)
+const parseTime = (time: string | null | undefined) => {
+  const [hours, minutes] = (time ?? DEFAULT_NOTIFICATION_TIME).split(":").map(Number);
   const date = new Date();
   date.setHours(hours, minutes, 0, 0);
   return date;
@@ -42,8 +47,8 @@ const toStoredTime = (date: Date) => {
 };
 
 // "17:30" -> "오후 5:30"
-const formatDisplayTime = (time: string) => {
-  const [hours, minutes] = time.split(":").map(Number);
+const formatDisplayTime = (time: string | null | undefined) => {
+  const [hours, minutes] = (time ?? DEFAULT_NOTIFICATION_TIME).split(":").map(Number);
   const period = hours < 12 ? "오전" : "오후";
   const displayHour = hours % 12 === 0 ? 12 : hours % 12;
   return `${period} ${displayHour}:${minutes.toString().padStart(2, "0")}`;
@@ -68,6 +73,33 @@ const StudySettings = () => {
     width: 0,
   });
   const selectViewRef = useRef<View>(null);
+
+  // 화면 진입 시 GET /api/users/settings로 최신 설정 조회
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const data = await getSettings();
+        // 신규 유저 등 서버에 아직 값이 없으면 null이 올 수 있어 기본값으로 대체
+        const nextKeywordCount = data.preferredKeywordCount ?? 3;
+        const nextNotificationEnabled = data.notificationEnabled ?? true;
+        const nextNotificationTime = data.notificationTime ?? DEFAULT_NOTIFICATION_TIME;
+
+        setKeywordCount(nextKeywordCount);
+        setNotificationEnabled(nextNotificationEnabled);
+        setNotificationTime(nextNotificationTime);
+        setSettings({
+          keywordCount: nextKeywordCount,
+          notificationEnabled: nextNotificationEnabled,
+          notificationTime: nextNotificationTime,
+        });
+      } catch (error) {
+        // TODO: 실패 시 에러 UI 처리, 지금은 로컬(스토어) 값 그대로 사용
+        console.error("학습 설정 조회 실패", error);
+      }
+    };
+
+    fetchSettings();
+  }, []);
 
   // 키워드 수 설정
   const openKeywordMenu = () => {
@@ -108,8 +140,23 @@ const StudySettings = () => {
       await cancelStudyNotification();
     }
 
-    setSettings({ keywordCount, notificationEnabled: enabled, notificationTime });
-    // 학습 설정 API 연동은 추후 작업
+    try {
+      // PATCH /api/users/settings - 로컬 필드명(keywordCount) -> 서버 필드명(preferredKeywordCount) 매핑
+      await updateSettingsAPI({
+        preferredKeywordCount: keywordCount,
+        notificationEnabled: enabled,
+        notificationTime,
+      });
+    } catch (error) {
+      // TODO: 실패 시 에러 UI 처리, 지금은 로컬 상태만이라도 반영하고 진행
+      console.error("학습 설정 저장 실패", error);
+    }
+
+    setSettings({
+      keywordCount,
+      notificationEnabled: enabled,
+      notificationTime,
+    });
     router.back();
   };
 

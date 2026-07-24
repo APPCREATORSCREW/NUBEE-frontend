@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { colors } from "../../constants/colors";
 import ProfileHeader from "../../components/profile/ProfileHeader";
@@ -9,10 +10,47 @@ import MenuList from "../../components/profile/MenuList";
 import StatCard from "../../components/profile/StatCard";
 import ProgressBar from "../../components/profile/ProgressBar";
 import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
+import { useSkinStore, getSkinByApiId } from "../../store/useSkinStore";
+import { getProfile } from "../../apis/profileAPI";
 
 const Profile = () => {
   const points = useUserStore((state) => state.user?.points ?? 0);
   const level = useUserStore((state) => state.user?.level ?? 0);
+  const updateUser = useUserStore((state) => state.updateUser);
+  const setSkinLevel = useSkinStore((state) => state.setLevel);
+  const selectSkin = useSkinStore((state) => state.selectSkin);
+
+  // 프로필 화면 진입 시 GET /api/users/profile 호출해서 최신 정보로 갱신
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await getProfile();
+        console.log("profile 응답:", JSON.stringify(profile)); // 임시
+
+        // 서버 응답 필드명 -> 로컬 User 타입 필드명 매핑
+        updateUser({
+          name: profile.username,
+          email: profile.email,
+          level: profile.currentLevel,
+          streak: profile.currentStreak,
+          points: profile.currentPoint,
+          profileImage: profile.profileImageUrl,
+        });
+
+        // 스킨 잠금 계산에 쓰이는 레벨도 같이 동기화
+        setSkinLevel(profile.currentLevel);
+
+        // 현재 적용 중인 스킨도 반영 (서버는 apiId 기준 숫자 id를 줌)
+        const equippedSkin = getSkinByApiId(profile.currentSkinId);
+        if (equippedSkin) selectSkin(equippedSkin.id);
+      } catch (error) {
+        // TODO: 실패 시 에러 UI 처리, 지금은 임시 유저 값 유지한 채로 조용히 무시
+        console.error("프로필 조회 실패", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>

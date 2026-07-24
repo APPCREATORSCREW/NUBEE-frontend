@@ -17,6 +17,7 @@ import { fonts } from "../constants/fonts";
 import Button from "../components/common/Button";
 import { CircleLeft, VisibilityOn, VisibilityOff } from "../components/icons";
 import { Shadow } from "react-native-shadow-2";
+import { changePassword as changePasswordAPI } from "../apis/profileAPI";
 
 // 영어, 숫자, 특수문자 포함 10자 이상
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
@@ -63,10 +64,20 @@ const ChangePassword = () => {
   const canSubmit =
     currentPassword.length > 0 && newPasswordValid && confirmNewPasswordValid;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
-    // 비밀번호 변경 API 연동은 추후 작업
-    router.back();
+
+    try {
+      await changePasswordAPI({
+        currentPassword,
+        newPassword,
+        newPasswordConfirm: confirmNewPassword,
+      });
+      router.back();
+    } catch (error) {
+      // TODO: 실패 시 에러 UI 처리 (예: 기존 비밀번호 불일치)
+      console.error("비밀번호 변경 실패", error);
+    }
   };
 
   return (
