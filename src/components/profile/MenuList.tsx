@@ -4,7 +4,7 @@ import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import MenuArrow from "../icons/MenuArrow";
 import { useUserStore } from "../../store/useUserStore";
-import { tokenStorage } from "../../store/tokenStorage";
+import { tokenStorage } from "../../utils/tokenStorage";
 import { logoutAPI } from "../../apis/profileAPI";
 
 const MENUS = [

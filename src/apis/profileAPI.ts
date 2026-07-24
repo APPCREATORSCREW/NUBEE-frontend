@@ -45,14 +45,14 @@ export const updateProfileImage = async (uri: string) => {
     type: "image/jpeg",
   } as unknown as Blob);
 
+  // Content-Type을 수동으로 지정하면 boundary가 빠져서 서버가 파싱 못 할 수 있음
+  // (500 에러 원인) - axios/RN이 FormData를 보고 자동으로 boundary 포함 헤더를 붙이게 둠
   const { data } = await api.patch<{
     isSuccess: boolean;
     code: string;
     message: string;
     result: { profileImage: string };
-  }>("/api/users/profile-image", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  }>("/api/users/profile-image", formData);
   return data.result;
 };
 

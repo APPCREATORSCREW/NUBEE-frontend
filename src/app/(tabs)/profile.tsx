@@ -25,6 +25,7 @@ const Profile = () => {
     const fetchProfile = async () => {
       try {
         const profile = await getProfile();
+        console.log("profile 응답:", JSON.stringify(profile)); // 임시
 
         // 서버 응답 필드명 -> 로컬 User 타입 필드명 매핑
         updateUser({

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { tokenStorage } from "./tokenStorage";
+import { tokenStorage } from "../utils/tokenStorage";
 
 interface Skin {
   id: number;
@@ -56,17 +56,7 @@ export const POINTS_PER_LEVEL = 50;
 export const useUserStore = create<UserState>()(
   persist(
     (set) => ({
-      // 연동 테스트용 임시값 여기에 작성
-      user: {
-        id: "test-user",
-        name: "눈송이",
-        email: "nubee@example.com",
-        level: 10,
-        streak: 3,
-        points: 32,
-        profileImage: null,
-        loginType: "email",
-      },
+      user: null,
       accessToken: null,
       refreshToken: null,
       isLoggedIn: false,
@@ -98,10 +88,25 @@ export const useUserStore = create<UserState>()(
         set((state) => ({
           user: state.user ? { ...state.user, profileImage: uri } : null,
         })),
-      // 서버 응답 등으로 유저 정보 일부만 갱신할 때 사용 (로그인 전이면 동작 안 함)
+      // 서버 응답 등으로 유저 정보를 갱신할 때 사용.
+      // 로그인 화면이 accessToken만 저장하고 user 객체는 안 만들어주기 때문에
+      // user가 아직 null이어도(로그인 직후 최초 프로필 조회 등) partial로 새로 만들어줌
       updateUser: (partial) =>
         set((state) => ({
-          user: state.user ? { ...state.user, ...partial } : null,
+          user: state.user
+            ? { ...state.user, ...partial }
+            : {
+                id: "",
+                name: "",
+                email: "",
+                level: 0,
+                streak: 0,
+                points: 0,
+                profileImage: null,
+                loginType: "email",
+                ...partial,
+              },
+          isLoggedIn: true,
         })),
       setSettings: (newSettings) =>
         set((state) => ({
@@ -131,8 +136,8 @@ export const useUserStore = create<UserState>()(
           return { user: { ...state.user, points, level } };
         }),
 
-        setAccessToken: (token) => set({ accessToken: token }),
-        setRefreshToken: (token) => set({ refreshToken: token }),
+      setAccessToken: (token) => set({ accessToken: token }),
+      setRefreshToken: (token) => set({ refreshToken: token }),
     }),
 
     {
