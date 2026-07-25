@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getNewsHistory } from "../../apis/news";
 import {
   SafeAreaView,
   View,
@@ -14,6 +15,7 @@ import { fonts } from "../../constants/fonts";
 
 const categories = ["경제", "사회", "과학", "세계"];
 
+/* 더미 데이터
 const reviewData = {
   경제: [
     { month: "2026.05", title: "한국 성장률 전망 '쑥'...\n경기과열 조짐에 고개드는 금리 인상론", date: "2026.05.05" },
@@ -24,13 +26,50 @@ const reviewData = {
   ],
   과학: [],
   세계: [],
-};
+};*/
 
 export default function ReviewScreen() {
   const [selected, setSelected] = useState("경제");
+  interface NewsItem {
+  newsId: number;
+  title: string;
+  imageUrl: string;
+  viewedAt: string;
+}
+
+const [newsList, setNewsList] = useState<NewsItem[]>([]);
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+  loadNews();
+}, [selected]);
+
+const loadNews = async () => {
+  try {
+    setLoading(true);
+
+    const data = await getNewsHistory(selected);
+
+    setNewsList(data.result.news);
+  } catch (error) {
+    console.error(error);
+    setNewsList([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const renderNewsCard = (item: any, index: number, array: any[]) => {
-    const isFirstOfMonth = index === 0 || array[index - 1].month !== item.month;
+    const month = item.viewedAt.slice(0, 7).replace("-", ".");
+    const date = item.viewedAt.slice(0, 10).replace(/-/g, ".");
+
+    const prevMonth =
+      index > 0
+        ? array[index - 1].viewedAt.slice(0, 7).replace("-", ".")
+        : "";
+
+    const isFirstOfMonth =
+      index === 0 || prevMonth !== month;
 
     return (
       <View key={index}>
@@ -95,8 +134,10 @@ export default function ReviewScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {reviewData[selected as keyof typeof reviewData].length > 0 ? (
-          reviewData[selected as keyof typeof reviewData].map((item, index, array) =>
+        {loading ? (
+          <Text>불러오는 중...</Text>
+        ) : newsList.length > 0 ? (
+          newsList.map((item, index, array) =>
             renderNewsCard(item, index, array)
           )
         ) : (
