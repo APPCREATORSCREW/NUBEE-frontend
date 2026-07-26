@@ -26,7 +26,7 @@ const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
 
 type Step = 'verify' | 'reset';
 
-// 인증번호 유효시간 (전송/재전송 시점부터 5분)
+// 인증번호 유효시간
 const RESEND_INTERVAL_MS = 5 * 60 * 1000;
 
 const useResendTimer = () => {
@@ -122,7 +122,7 @@ const FindPasswordScreen = () => {
 
   // api 연동 - 인증번호 확인
   const handleVerifyCode = async () => {
-    if (!authCode && isLoading) return;
+    if (!authCode || isLoading) return;
     setIsLoading(true);
     try {
       const response = await PasswordResetVerifyAPI({ email, code: authCode });
