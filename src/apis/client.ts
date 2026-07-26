@@ -23,7 +23,6 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-
     if (error.response?.status === 401 && !error.config._retry) {
       error.config._retry = true;
 
@@ -42,8 +41,8 @@ api.interceptors.response.use(
 
         return api(error.config);
       } catch (refreshError) {
-        useUserStore.getState().logout();
-        await tokenStorage.removeRefreshToken();
+        // 로그아웃 되는지 확인
+        await useUserStore.getState().logout();
         return Promise.reject(error);
       }
     }

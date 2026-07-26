@@ -60,7 +60,7 @@ const LoginScreen = () => {
 
   // api 연동 - 로그인
   const handleSubmit = async () => {
-    if (!canSubmit && isLoading) return;
+    if (!canSubmit || isLoading) return;
     setIsLoading(true);
     try {
       const response = await LoginAPI({ email, password });

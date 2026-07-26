@@ -42,7 +42,7 @@ export interface KeywordIdResponse {
 }
 
 export const KeywordExplanationAPI = async (keyword_id: number): Promise<KeywordIdResponse> => {
-    const response = await api.get<KeywordIdResponse>(`/api/keywords/${keyword_id}`, { params: { keyword_id }});
+    const response = await api.get<KeywordIdResponse>(`/api/keywords/${keyword_id}`);
     return response.data;
 }
 
@@ -69,7 +69,7 @@ export interface KeywordQuizResponse {
 }
 
 export const KeywordQuizAPI = async (keyword_id: number): Promise<KeywordQuizResponse> => {
-    const response = await api.get<KeywordQuizResponse>(`/api/keywords/${keyword_id}/quiz`, { params: { keyword_id }});
+    const response = await api.get<KeywordQuizResponse>(`/api/keywords/${keyword_id}/quiz`);
     return response.data;
 }
 
