@@ -1,166 +1,150 @@
-import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState, useEffect } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '../constants/colors';
 import { fonts } from '../constants/fonts';
 import Button from '../components/common/Button';
 import { useSkinStore, getSkinById } from '../store/useSkinStore';
 import { useUserStore } from '../store/useUserStore';
+import LoadingIndicator from '../components/common/LoadingIndicator';
+import {
+  KeywordExplanationAPI,
+  KeywordQuizAPI,
+  KeywordSubmitAPI,
+  MainKeyword,
+  KeywordQuiz,
+  KeywordQuizOption,
+  KeywordSubmit,
+} from '../apis/home';
+import { getErrorMessage } from '../utils/getErrorMessage';
 
-interface KeywordContent {
-  title: string;
-  intro: string;
-  paragraphs: string[];
-  summaryTitle: string;
-  summaryPoints: string[];
-  quiz: {
-    question: string;
-    options: string[];
-    correctIndex: number;
-    explanation: string;
-  };
-}
+// 제목 설정
+const hasFinalConsonant = (char: string): boolean => {
+  const code = char.charCodeAt(0) - 0xac00;
+  if (code < 0 || code > 11171) return false;
+  return code % 28 !== 0;
+};
 
-// 금리 제외 나머지 키워드는 임시 데이터 // api 연동
-const KEYWORD_CONTENT: Record<string, KeywordContent> = {
-  금리: {
-    title: '금리란?',
-    intro: '금리는 돈을 빌릴 때 내는 사용료예요!',
-    paragraphs: [
-      '예를 들어볼게요.\n친구한테 1000원을 빌렸어요. 한 달 뒤에 갚을 때 1100원을 돌려줬어요. 그 추가된 100원이 바로 이자고, 이자가 얼마나 되는지 나타내는 비율이 금리예요.',
-      '금리가 높을 때 은행에서 돈을 빌리면, 추가되는 금액이 많아지기 때문에 사람들이 돈을 덜 빌리게 돼요.',
-      '금리가 낮으면? 추가되는 금액이 적어지니까 사람들이 돈을 더 많이 빌려서 물건도 많이 사게 돼요.',
-      '은행에 돈을 맡길 때도 금리가 중요해요! 내가 은행에 1000원을 맡기면, 은행이 나한테 이자를 줘요. 금리가 높을수록 이자를 더 많이 받을 수 있어요.',
-    ],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: [
-      '금리 높으면 → 돈 빌리기 부담 ↑',
-      '금리 낮으면 → 돈 빌리기 쉬워짐',
-      '저금할 땐 금리 높을수록 유리!',
-    ],
-    quiz: {
-      question: '금리가 높아지면 어떻게 될까요?',
-      options: [
-        '돈을 빌리기가 더 쉬워요',
-        '돈을 빌리는 비용이 더 비싸져요',
-        '은행이 이자를 안 줘요',
-        '물건 값이 낮아져요',
-      ],
-      correctIndex: 1,
-      explanation:
-        '금리가 높아지면 돈을 빌릴 때 갚아야 하는 이자가 늘어나서, 돈 빌리는 게 더 비싸져요.',
-    },
-  },
-  // 임시 데이터 // api 연동
-  AIDC: {
-    title: 'AIDC란?',
-    intro: 'AIDC에 대한 임시 설명이에요.',
-    paragraphs: ['AIDC에 대한 상세 설명은 아직 준비 중이에요. 임시 설명 내용입니다.'],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: ['임시 요약 포인트예요.'],
-    quiz: {
-      question: 'AIDC에 대한 임시 퀴즈 질문이에요.',
-      options: ['임시 옵션 1', '임시 옵션 2', '임시 옵션 3', '임시 옵션 4'],
-      correctIndex: 0,
-      explanation: '임시 해설이에요.',
-    },
-  },
-  // 임시 데이터 // api 연동
-  딥페이크: {
-    title: '딥페이크란?',
-    intro: '딥페이크에 대한 임시 설명이에요.',
-    paragraphs: ['딥페이크에 대한 상세 설명은 아직 준비 중이에요. 임시 설명 내용입니다.'],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: ['임시 요약 포인트예요.'],
-    quiz: {
-      question: '딥페이크에 대한 임시 퀴즈 질문이에요.',
-      options: ['임시 옵션 1', '임시 옵션 2', '임시 옵션 3', '임시 옵션 4'],
-      correctIndex: 0,
-      explanation: '임시 해설이에요.',
-    },
-  },
-  // 임시 데이터 // api 연동
-  종전: {
-    title: '종전이란?',
-    intro: '종전에 대한 임시 설명이에요.',
-    paragraphs: ['종전에 대한 상세 설명은 아직 준비 중이에요. 임시 설명 내용입니다.'],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: ['임시 요약 포인트예요.'],
-    quiz: {
-      question: '종전에 대한 임시 퀴즈 질문이에요.',
-      options: ['임시 옵션 1', '임시 옵션 2', '임시 옵션 3', '임시 옵션 4'],
-      correctIndex: 0,
-      explanation: '임시 해설이에요.',
-    },
-  },
-  // 임시 데이터 // api 연동
-  외화: {
-    title: '외화란?',
-    intro: '외화에 대한 임시 설명이에요.',
-    paragraphs: ['외화에 대한 상세 설명은 아직 준비 중이에요. 임시 설명 내용입니다.'],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: ['임시 요약 포인트예요.'],
-    quiz: {
-      question: '외화에 대한 임시 퀴즈 질문이에요.',
-      options: ['임시 옵션 1', '임시 옵션 2', '임시 옵션 3', '임시 옵션 4'],
-      correctIndex: 0,
-      explanation: '임시 해설이에요.',
-    },
-  },
-  // 임시 데이터 // api 연동
-  투표권: {
-    title: '투표권이란?',
-    intro: '투표권에 대한 임시 설명이에요.',
-    paragraphs: ['투표권에 대한 상세 설명은 아직 준비 중이에요. 임시 설명 내용입니다.'],
-    summaryTitle: '이것만 기억해요!',
-    summaryPoints: ['임시 요약 포인트예요.'],
-    quiz: {
-      question: '투표권에 대한 임시 퀴즈 질문이에요.',
-      options: ['임시 옵션 1', '임시 옵션 2', '임시 옵션 3', '임시 옵션 4'],
-      correctIndex: 0,
-      explanation: '임시 해설이에요.',
-    },
-  },
+const getTitleSuffix = (word: string): string => {
+  const lastChar = word[word.length - 1];
+  return hasFinalConsonant(lastChar) ? '이란?' : '란?';
+};
+
+// 문자열 파싱
+const parseExplanation = (explanation: string) => {
+  const sections = explanation
+    .split('\n\n')
+    .map((section) => section.trim())
+    .filter(Boolean);
+
+  if (sections.length === 0) {
+    return { intro: '', paragraphs: [] as string[], summaryTitle: '', summaryPoints: [] as string[] };
+  }
+
+  const intro = sections[0];
+  const hasSummary = sections.length > 1;
+  const paragraphs = hasSummary ? sections.slice(1, -1) : [];
+  const summaryLines = hasSummary
+    ? sections[sections.length - 1]
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : [];
+  const summaryTitle = summaryLines[0] ?? '';
+  const summaryPoints = summaryLines.slice(1);
+
+  return { intro, paragraphs, summaryTitle, summaryPoints };
 };
 
 const KeywordQuizScreen = () => {
   const router = useRouter();
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const mascot = getSkinById(selectedSkinId).image;
-  const { keyword } = useLocalSearchParams<{ keyword?: string }>();
-  const activeKeyword = keyword ?? '금리';
-  const content = KEYWORD_CONTENT[activeKeyword] ?? KEYWORD_CONTENT['금리'];
-  // 제목만 하이라이트
-  const titleRest = content.title.startsWith(activeKeyword)
-    ? content.title.slice(activeKeyword.length)
-    : content.title;
+  // news_id까지 넘기기
+  const { keyword_id, news_id } = useLocalSearchParams<{ keyword_id: string; news_id: string }>();
+  const keywordId = Number(keyword_id);
 
   const quizAnswers = useUserStore((state) => state.quizAnswers);
-  const answerQuiz = useUserStore((state) => state.answerQuiz);
-  const selectedIndex = quizAnswers[activeKeyword] ?? null;
+  const answerQuizStore = useUserStore((state) => state.answerQuiz);
+  const addPoints = useUserStore((state) => state.addPoints);
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [content, setContent] = useState<MainKeyword>();
+  const [quiz, setQuiz] = useState<KeywordQuiz>();
+  const [submitResult, setSubmitResult] = useState<KeywordSubmit>();
 
   const [step, setStep] = useState<'explanation' | 'quiz'>('explanation');
 
-  const answered = selectedIndex !== null;
-  const isCorrect = selectedIndex === content.quiz.correctIndex;
+  // 설명 + 퀴즈 조회
+  useEffect(() => {
+    const fetchAllData = async () => {
+      setIsLoading(true);
+      try {
+        const [explanationRes, quizRes] = await Promise.all([
+          KeywordExplanationAPI(keywordId),
+          KeywordQuizAPI(keywordId),
+        ]);
+        if (explanationRes.isSuccess) {
+          setContent(explanationRes.result);
+        }
+        if (quizRes.isSuccess) {
+          setQuiz(quizRes.result);
+        }
+      } catch (error) {
+        Alert.alert('오류', getErrorMessage(error));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    if (keyword_id) {
+      fetchAllData();
+    }
+  }, [keyword_id]);
 
-  const goToQuiz = () => setStep('quiz');
   const goToExplanation = () => setStep('explanation');
+  const goToQuiz = () => setStep('quiz');
 
-  const handleSelect = (index: number) => {
-    if (answered) return; // 전역 상태로 1회 제한 관리
-    answerQuiz(activeKeyword, index);
+  // 재방문 1회 제한
+  const alreadyAnswered = quizAnswers[keywordId] !== undefined;
+  const answered = alreadyAnswered || submitResult !== undefined;
+
+  // 키워드 퀴즈 채점 및 포인트 지급
+  const handleSelect = async (optionNumber: number) => {
+    if (answered || isLoading || !quiz) return;
+    setIsLoading(true);
+    try {
+      const response = await KeywordSubmitAPI(keywordId, {
+        quiz_id: quiz.id,
+        selected_answer: optionNumber,
+      });
+      if (response.isSuccess) {
+        setSubmitResult(response.result);
+        answerQuizStore(keywordId, optionNumber);
+        addPoints(response.result.point_result.earned_point);
+      }
+    } catch (error) {
+      Alert.alert('오류', getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const getOptionStyle = (index: number) => {
-    if (!answered) return styles.optionDefault;
-    if (index === content.quiz.correctIndex) return styles.optionCorrect;
-    if (index === selectedIndex) return styles.optionWrong;
+  const getOptionStyle = (optionNumber: number) => {
+    if (!submitResult) return styles.optionDefault;
+    if (optionNumber === submitResult.correct_answer) return styles.optionCorrect;
+    if (optionNumber === submitResult.selected_answer) return styles.optionWrong;
     return styles.optionDefault;
   };
 
-  const isOptionActive = (index: number) =>
-    answered && (index === content.quiz.correctIndex || index === selectedIndex);
+  const isOptionActive = (optionNumber: number) =>
+    !!submitResult &&
+    (optionNumber === submitResult.correct_answer || optionNumber === submitResult.selected_answer);
+
+  const word = content?.word ?? '';
+  const titleSuffix = word ? getTitleSuffix(word) : '';
+  const { intro, paragraphs, summaryTitle, summaryPoints } = content
+    ? parseExplanation(content.explanation)
+    : { intro: '', paragraphs: [] as string[], summaryTitle: '', summaryPoints: [] as string[] };
 
   if (step === 'explanation') {
     return (
@@ -169,34 +153,37 @@ const KeywordQuizScreen = () => {
           <Image source={mascot} style={styles.mascotImage} resizeMode="contain" />
           <View style={styles.titleBubble}>
             <View style={styles.highlightKeyword}>
-              <Text style={styles.titleBubbleKeyword}>{activeKeyword}</Text>
+              <Text style={styles.titleBubbleKeyword}>{word}</Text>
             </View>
-            <Text style={styles.titleBubbleText}>{titleRest}</Text>
+            <Text style={styles.titleBubbleText}>{titleSuffix}</Text>
           </View>
         </View>
 
         <View style={styles.explanationCard}>
-          <Text style={styles.introText}>{content.intro}</Text>
-          {content.paragraphs.map((paragraph) => (
+          <Text style={styles.introText}>{intro}</Text>
+          {paragraphs.map((paragraph) => (
             <Text key={paragraph} style={styles.paragraphText}>
               {paragraph}
             </Text>
           ))}
 
-          <View style={styles.summaryBox}>
-            <Text style={styles.summaryTitle}>{content.summaryTitle}</Text>
-          </View>
-          {content.summaryPoints.map((point) => (
-              <Text key={point} style={styles.summaryPoint}>
-                • {point}
-              </Text>
-            ))}
+          {summaryTitle ? (
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryTitle}>{summaryTitle}</Text>
+            </View>
+          ) : null}
+          {summaryPoints.map((point) => (
+            <Text key={point} style={styles.summaryPoint}>
+              {point}
+            </Text>
+          ))}
         </View>
 
         <View style={styles.spacer} />
         <View style={styles.quizButtonWrap}>
-          <Button label="퀴즈 풀기" variant="filled" onPress={goToQuiz} />
+          <Button label="퀴즈 풀기" variant={quiz ? 'filled' : 'disabled'} onPress={goToQuiz} />
         </View>
+        {isLoading && <LoadingIndicator />}
       </ScrollView>
     );
   }
@@ -205,34 +192,39 @@ const KeywordQuizScreen = () => {
     <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
       <Text style={styles.title}>키워드 퀴즈</Text>
       <Text style={styles.caption}>기회는 1번 뿐이니 신중하게 선택하세요!</Text>
-      <Text style={styles.question}>{content.quiz.question}</Text>
+      <Text style={styles.question}>{quiz?.question}</Text>
 
       <View style={styles.optionList}>
-        {content.quiz.options.map((option, index) => (
+        {quiz?.options.map((option: KeywordQuizOption) => (
           <Pressable
-            key={option}
-            style={[styles.option, getOptionStyle(index)]}
-            onPress={() => handleSelect(index)}
-            disabled={answered}
+            key={option.option_number}
+            style={[styles.option, getOptionStyle(option.option_number)]}
+            onPress={() => handleSelect(option.option_number)}
+            disabled={answered || isLoading}
           >
-            <Text style={[styles.optionText, isOptionActive(index) && styles.optionTextActive]}>
-              {option}
+            <Text
+              style={[
+                styles.optionText,
+                isOptionActive(option.option_number) && styles.optionTextActive,
+              ]}
+            >
+              {option.option_text}
             </Text>
           </Pressable>
         ))}
       </View>
 
-      {answered && (
+      {submitResult && (
         <View
           style={[
             styles.feedbackBox,
-            isCorrect ? styles.feedbackBoxCorrect : styles.feedbackBoxWrong,
+            submitResult.is_correct ? styles.feedbackBoxCorrect : styles.feedbackBoxWrong,
           ]}
         >
           <Text style={styles.feedbackTitle}>
-            {isCorrect ? '🎉 정답이에요!' : '❌ 정답이 아니에요'}
+            {submitResult.is_correct ? '🎉 정답이에요!' : '❌ 정답이 아니에요'}
           </Text>
-          <Text style={styles.feedbackDescription}>{content.quiz.explanation}</Text>
+          <Text style={styles.feedbackDescription}>{submitResult.explanation}</Text>
         </View>
       )}
 
@@ -240,9 +232,20 @@ const KeywordQuizScreen = () => {
       {answered && (
         <View style={styles.buttonGroup}>
           <Button label="키워드 다시보기" variant="outlined" onPress={goToExplanation} />
-          <Button label="뉴스 보기" variant="filled" onPress={() => router.push('/news')} />
+          <Button 
+            label="뉴스 보기" 
+            variant="filled" 
+            onPress={() => 
+              router.push({
+                pathname: "/news",
+                params: {
+                  newsId: news_id,
+                },
+              })
+            } />
         </View>
       )}
+      {isLoading && <LoadingIndicator />}
     </ScrollView>
   );
 };

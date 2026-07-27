@@ -4,6 +4,8 @@ import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import MenuArrow from "../icons/MenuArrow";
 import { useUserStore } from "../../store/useUserStore";
+import { tokenStorage } from "../../utils/tokenStorage";
+import { logoutAPI } from "../../apis/profileAPI";
 
 const MENUS = [
   { label: "비밀번호 변경", route: "/change-password" },
@@ -15,12 +17,20 @@ const MenuList = () => {
   const router = useRouter();
   const logout = useUserStore((state) => state.logout);
 
-  const handlePress = (route: string | null) => {
+  const handlePress = async (route: string | null) => {
     if (route) {
       router.push(route as any);
       return;
     }
-    logout();
+    // route가 null인 항목은 "로그아웃" 하나뿐 (MENUS 참고)
+    try {
+      const refreshToken = await tokenStorage.getRefreshToken();
+      if (refreshToken) await logoutAPI({ refreshToken });
+    } catch (error) {
+      // 서버 로그아웃 실패해도 로컬 정리는 계속 진행
+      console.error("로그아웃 API 실패", error);
+    }
+    await logout(); // 로컬 정리 (SecureStore + zustand 상태 초기화)
     router.replace("/splash");
   };
 

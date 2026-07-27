@@ -1,5 +1,6 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   TextInput,
@@ -17,6 +18,12 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import { CheckEnabled, CheckDisabled } from '../../components/icons';
+import { BirthDateAPI, ParentEmailSendAPI, ParentEmailVerifyAPI } from '../../apis/auth';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+
+// 카카오 리디렉션 시 flow: null
+// 일반 회원가입 flow: SignupFlow
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const BIRTH_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -34,6 +41,7 @@ const getAge = (birthDate: string) => {
   }
   return age;
 };
+
 
 const formatDate = (date: Date) => {
   const year = date.getFullYear();
@@ -164,7 +172,9 @@ const FieldInput = ({ label, error, valid, rightElement, ...inputProps }: FieldI
 
 const BirthDateScreen = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
+  const [step, setStep] = useState<'birthdate' | 'parent'>('birthdate');
   const [birthDate, setBirthDate] = useState('');
   const [isPickerVisible, setPickerVisible] = useState(false);
   const [pickerDate, setPickerDate] = useState(DEFAULT_BIRTH_DATE);
@@ -176,6 +186,8 @@ const BirthDateScreen = () => {
   const parentEmailTimer = useResendTimer();
 
   const [touched, setTouched] = useState({ parentEmail: false });
+
+
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
@@ -187,7 +199,11 @@ const BirthDateScreen = () => {
 
   const canSubmit = birthDateValid && (!isMinor || parentVerified);
 
-  const title = isMinor ? '보호자 동의가 필요해요' : '생년월일을 입력해주세요';
+  const title = step === 'parent' ? '보호자 동의가 필요해요' : '생년월일을 입력해주세요';
+
+  const isNextStep = step === 'birthdate' && isMinor;
+  const primaryLabel = isNextStep ? '다음' : '완료';
+  const primaryEnabled = isNextStep ? birthDateValid : canSubmit;
 
   const openPicker = () => {
     setPickerDate(birthDateValid ? new Date(birthDate) : DEFAULT_BIRTH_DATE);
@@ -199,22 +215,78 @@ const BirthDateScreen = () => {
     setPickerVisible(false);
   };
 
-  const handleSendParentEmail = () => {
-    if (!parentEmailValid) return;
-    // api 연동
-    setParentEmailSent(true);
-    parentEmailTimer.start();
+  // api 연동 - 부모님 이메일 전송
+  const handleSendParentEmail = async () => {
+    if (!parentEmailValid || isLoading) return;
+    setIsLoading(true);
+    try{
+      const response = await ParentEmailSendAPI({ parentEmail });
+      setParentEmailSent(true);
+      parentEmailTimer.start();
+    }
+    catch(error){
+      Alert.alert('오류', getErrorMessage(error));
+    }
+    finally{
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyParentEmail = () => {
-    if (!parentAuthCode) return;
-    // api 연동
-    setParentVerified(true);
+  // api 연동 - 부모님 이메일 확인
+  const handleVerifyParentEmail = async () => {
+    if (!parentAuthCode || isLoading) return;
+    setIsLoading(true);
+    try{
+      const response = await ParentEmailVerifyAPI({ parentEmail, code: parentAuthCode });
+      setParentVerified(true);
+    }
+    catch(error){
+      Alert.alert('오류', getErrorMessage(error));
+    }
+    finally{
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = () => {
     if (!canSubmit) return;
     router.replace('/tutorial');
+  };
+
+
+  // api 연동 - 생년월일
+  const handlePrimaryPress = async () => {
+    if (isLoading) return;
+
+    if (isNextStep) {
+      if (!birthDateValid) return;
+
+      setIsLoading(true);
+      try {
+        const response = await BirthDateAPI({ birthDate });
+      } 
+      catch (error) {
+        Alert.alert('오류', getErrorMessage(error));
+      } 
+      finally {
+        setIsLoading(false);
+      }
+
+      setStep('parent');
+      return;
+    }
+
+    setIsLoading(true);
+    try{
+      const response = await BirthDateAPI({ birthDate });
+    }
+    catch(error){
+      Alert.alert('오류', getErrorMessage(error));
+    }
+    finally{
+      setIsLoading(false);
+    }
+    handleSubmit();
   };
 
   return (
@@ -225,7 +297,8 @@ const BirthDateScreen = () => {
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <Text style={styles.title}>{title}</Text>
 
-        {!isMinor && (
+        {step === 'birthdate' && (
+          // 생년월일 피커
           <Pressable style={styles.fieldContainer} onPress={openPicker}>
             <Text style={styles.label}>생년월일</Text>
             <View style={styles.inputWrapper}>
@@ -237,7 +310,7 @@ const BirthDateScreen = () => {
           </Pressable>
         )}
 
-        {isMinor && (
+        {step === 'parent' && (
           <View style={styles.parentSection}>
             <FieldInput
               label="보호자 이메일"
@@ -303,9 +376,9 @@ const BirthDateScreen = () => {
         <View style={styles.spacer} />
         <View style={styles.buttonContainer}>
           <Button
-            label="완료"
-            variant={canSubmit ? 'filled' : 'disabled'}
-            onPress={handleSubmit}
+            label={primaryLabel}
+            variant={primaryEnabled ? 'filled' : 'disabled'}
+            onPress={handlePrimaryPress}
           />
         </View>
       </ScrollView>
@@ -331,6 +404,7 @@ const BirthDateScreen = () => {
           </View>
         </View>
       </Modal>
+      {isLoading && <LoadingIndicator fullScreen />}
     </KeyboardAvoidingView>
   );
 };

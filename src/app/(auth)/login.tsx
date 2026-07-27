@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Alert,
   View,
   Text,
   TextInput,
@@ -15,6 +16,12 @@ import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { LoginAPI } from '../../apis/auth';
+import { getErrorMessage } from '../../utils/getErrorMessage';
+import { useUserStore } from '../../store/useUserStore';
+import { tokenStorage } from '../../utils/tokenStorage';
+import { syncProfile } from '../../utils/syncProfile';
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 
@@ -50,10 +57,26 @@ const LoginScreen = () => {
   const passwordValid = PASSWORD_REGEX.test(password);
   const canSubmit = emailValid && passwordValid;
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    // API 연동 후 처리
-    router.replace('/home');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // api 연동 - 로그인
+  const handleSubmit = async () => {
+    if (!canSubmit || isLoading) return;
+    setIsLoading(true);
+    try {
+      const response = await LoginAPI({ email, password });
+      const { accessToken, refreshToken } = response.result;
+
+      useUserStore.getState().setAccessToken(accessToken);
+      await tokenStorage.saveRefreshToken(refreshToken);
+      // 토큰 저장 후 프로필 조회
+      await syncProfile();
+      router.replace('/home');
+    } catch (error) {
+      Alert.alert('오류', getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -100,6 +123,7 @@ const LoginScreen = () => {
           </Pressable>
         </View>
       </ScrollView>
+      {isLoading && <LoadingIndicator fullScreen />}
     </KeyboardAvoidingView>
   );
 };

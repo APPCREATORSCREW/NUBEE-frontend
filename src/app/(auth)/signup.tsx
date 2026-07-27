@@ -1,4 +1,4 @@
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState } from "react";
 import {
   View,
   Text,
@@ -8,12 +8,17 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { useRouter } from 'expo-router';
-import { colors } from '../../constants/colors';
-import { fonts } from '../../constants/fonts';
-import Button from '../../components/common/Button';
-import { CheckEnabled, CheckDisabled } from '../../components/icons';
+  Alert,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { colors } from "../../constants/colors";
+import { fonts } from "../../constants/fonts";
+import Button from "../../components/common/Button";
+import { CheckEnabled, CheckDisabled } from "../../components/icons";
+import { SignUpAPI } from "../../apis/auth";
+import { getErrorMessage } from "../../utils/getErrorMessage";
+import { useUserStore } from "../../store/useUserStore";
+import { tokenStorage } from "../../utils/tokenStorage";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // 영어, 숫자, 특수문자 포함 10자 이상
@@ -26,11 +31,21 @@ interface FieldInputProps extends TextInputProps {
   rightElement?: ReactNode;
 }
 
-const FieldInput = ({ label, error, valid, rightElement, ...inputProps }: FieldInputProps) => (
+const FieldInput = ({
+  label,
+  error,
+  valid,
+  rightElement,
+  ...inputProps
+}: FieldInputProps) => (
   <View style={styles.fieldContainer}>
     <Text style={styles.label}>{label}</Text>
     <View style={styles.inputWrapper}>
-      <TextInput style={styles.input} placeholderTextColor={colors.gray400} {...inputProps} />
+      <TextInput
+        style={styles.input}
+        placeholderTextColor={colors.gray400}
+        {...inputProps}
+      />
       {rightElement ?? (valid ? <CheckEnabled /> : <CheckDisabled />)}
     </View>
     {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -40,51 +55,79 @@ const FieldInput = ({ label, error, valid, rightElement, ...inputProps }: FieldI
 const SignupScreen = () => {
   const router = useRouter();
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
 
   const [touched, setTouched] = useState({
     email: false,
     password: false,
-    confirmPassword: false,
+    passwordConfirm: false,
   });
   const markTouched = (field: keyof typeof touched) => () =>
     setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const nameValid = name.trim().length > 0;
+  const usernameValid = username.trim().length > 0;
   const emailValid = EMAIL_REGEX.test(email);
   const passwordValid = PASSWORD_REGEX.test(password);
-  const confirmPasswordValid = confirmPassword.length > 0 && confirmPassword === password;
+  const passwordConfirmValid =
+    passwordConfirm.length > 0 && passwordConfirm === password;
 
-  const canSubmit = nameValid && emailValid && passwordValid && confirmPasswordValid;
+  const canSubmit =
+    usernameValid && emailValid && passwordValid && passwordConfirmValid;
 
-  const handleSubmit = () => {
-    if (!canSubmit) return;
-    router.replace('/birth-date');
+  const handleSubmit = async () => {
+    try {
+      const response = await SignUpAPI({
+        username,
+        email,
+        password,
+        passwordConfirm,
+      });
+      const { accessToken, refreshToken } = response.result;
+
+      useUserStore.getState().setAccessToken(accessToken);
+      tokenStorage.saveRefreshToken(refreshToken);
+      router.push({ pathname: "/birth-date" });
+    } catch (error) {
+      Alert.alert("오류", getErrorMessage(error));
+    }
+    router.push({ pathname: "/birth-date" });
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
         <Text style={styles.title}>회원가입</Text>
 
-        <FieldInput label="이름" value={name} onChangeText={setName} valid={nameValid} />
+        <FieldInput
+          label="이름"
+          value={username}
+          onChangeText={setName}
+          valid={usernameValid}
+        />
 
         <FieldInput
           label="이메일"
           placeholder="nubee@example.com"
           value={email}
           onChangeText={setEmail}
-          onBlur={markTouched('email')}
+          onBlur={markTouched("email")}
           keyboardType="email-address"
           autoCapitalize="none"
           valid={emailValid}
-          error={touched.email && !emailValid ? '유효한 이메일 주소가 아닙니다.' : undefined}
+          error={
+            touched.email && !emailValid
+              ? "유효한 이메일 주소가 아닙니다."
+              : undefined
+          }
         />
 
         <FieldInput
@@ -92,24 +135,28 @@ const SignupScreen = () => {
           placeholder="영어, 숫자, 특수문자 포함 10자 이상"
           value={password}
           onChangeText={setPassword}
-          onBlur={markTouched('password')}
+          onBlur={markTouched("password")}
           secureTextEntry
           autoCapitalize="none"
           valid={passwordValid}
-          error={touched.password && !passwordValid ? '올바른 비밀번호 형식이 아닙니다.' : undefined}
+          error={
+            touched.password && !passwordValid
+              ? "올바른 비밀번호 형식이 아닙니다."
+              : undefined
+          }
         />
 
         <FieldInput
           label="비밀번호 확인"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          onBlur={markTouched('confirmPassword')}
+          value={passwordConfirm}
+          onChangeText={setPasswordConfirm}
+          onBlur={markTouched("passwordConfirm")}
           secureTextEntry
           autoCapitalize="none"
-          valid={confirmPasswordValid}
+          valid={passwordConfirmValid}
           error={
-            touched.confirmPassword && !confirmPasswordValid
-              ? '비밀번호가 일치하지 않습니다.'
+            touched.passwordConfirm && !passwordConfirmValid
+              ? "비밀번호가 일치하지 않습니다."
               : undefined
           }
         />
@@ -118,7 +165,7 @@ const SignupScreen = () => {
         <View style={styles.buttonContainer}>
           <Button
             label="다음"
-            variant={canSubmit ? 'filled' : 'disabled'}
+            variant={canSubmit ? "filled" : "disabled"}
             onPress={handleSubmit}
           />
         </View>
@@ -161,8 +208,8 @@ const styles = StyleSheet.create({
     marginBottom: 65,
   },
   inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     height: 52,
     borderWidth: 1,
     borderColor: colors.yellow400,

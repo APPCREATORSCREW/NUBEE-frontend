@@ -170,7 +170,7 @@ const TutorialScreen = () => {
       </ScrollView>
 
       <View style={styles.dotsRow}>
-        {/* 도트는 웰컴 페이지를 제외한 콘텐츠 페이지 수만큼만 표시 */}
+        {/* 도트 인디케이터 개수 설정 */}
         {PAGES.slice(1).map((_, index) => (
           <View
             key={index}

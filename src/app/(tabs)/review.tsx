@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { getNewsHistory } from "../../apis/review";
 import {
   SafeAreaView,
   View,
@@ -14,6 +15,7 @@ import { fonts } from "../../constants/fonts";
 
 const categories = ["경제", "사회", "과학", "세계"];
 
+/* 더미 데이터
 const reviewData = {
   경제: [
     { month: "2026.05", title: "한국 성장률 전망 '쑥'...\n경기과열 조짐에 고개드는 금리 인상론", date: "2026.05.05" },
@@ -24,13 +26,47 @@ const reviewData = {
   ],
   과학: [],
   세계: [],
-};
+};*/
 
 export default function ReviewScreen() {
   const [selected, setSelected] = useState("경제");
+  interface NewsItem {
+    newsId: number;
+    title: string;
+    imageUrl: string;
+    viewedAt: string;
+  }
+
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadNews();
+  }, [selected]);
+
+  const loadNews = async () => {
+    try {
+      setLoading(true);
+
+      // const data = await getNewsHistory(selected);
+
+      // setNewsList(data.result.news);
+    } catch (error) {
+      console.error(error);
+      setNewsList([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderNewsCard = (item: any, index: number, array: any[]) => {
-    const isFirstOfMonth = index === 0 || array[index - 1].month !== item.month;
+    const month = item.viewedAt.slice(0, 7).replace("-", ".");
+    const date = item.viewedAt.slice(0, 10).replace(/-/g, ".");
+
+    const prevMonth =
+      index > 0 ? array[index - 1].viewedAt.slice(0, 7).replace("-", ".") : "";
+
+    const isFirstOfMonth = index === 0 || prevMonth !== month;
 
     return (
       <View key={index}>
@@ -54,7 +90,7 @@ export default function ReviewScreen() {
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
       <Image
-        source={require("../../../assets/skins/skin_origin.png")} 
+        source={require("../../../assets/skins/skin_origin.png")}
         style={styles.emptyImage}
         resizeMode="contain"
       />
@@ -95,9 +131,11 @@ export default function ReviewScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {reviewData[selected as keyof typeof reviewData].length > 0 ? (
-          reviewData[selected as keyof typeof reviewData].map((item, index, array) =>
-            renderNewsCard(item, index, array)
+        {loading ? (
+          <Text>불러오는 중...</Text>
+        ) : newsList.length > 0 ? (
+          newsList.map((item, index, array) =>
+            renderNewsCard(item, index, array),
           )
         ) : (
           renderEmpty()
@@ -110,23 +148,23 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFCF7",
+    backgroundColor: colors.background,
     paddingTop: 30,
+    paddingHorizontal: 20,
   },
   title: {
     fontFamily: fonts.family.bold,
-    fontSize: 30,
+    fontSize: fonts.size.header,
+    letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
     marginBottom: 30,
     paddingTop: 20,
-    paddingLeft: 20,
   },
   tabRow: {
     flexDirection: "row",
-    paddingHorizontal: 20,
     marginBottom: 13,
     borderBottomWidth: 1,
-    borderBottomColor: "#D9D9D9",
+    borderBottomColor: colors.gray400,
   },
   tab: {
     flex: 1,
@@ -134,8 +172,9 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontFamily: fonts.family.bold,
-    fontSize: 18,
-    color: "#B8B8B8",
+    fontSize: fonts.size.title,
+    letterSpacing: fonts.letterSpacing.title,
+    color: colors.gray400,
     marginBottom: 12,
   },
   selectedTabText: {
@@ -143,7 +182,7 @@ const styles = StyleSheet.create({
   },
   tabLine: {
     width: "100%",
-    height: 2,
+    height: 1,
     backgroundColor: "transparent",
   },
   selectedTabLine: {
@@ -157,27 +196,28 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 999,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#A8A8A8",
+    borderColor: colors.gray400,
     marginBottom: 18,
     marginTop: 5,
   },
   monthText: {
     fontFamily: fonts.family.regular,
-    fontSize: 14,
-    color: "#8C8C8C",
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
+    color: colors.gray400,
   },
   newsCard: {
     flexDirection: "row",
-    backgroundColor: "#FFF7DE",
-    borderRadius: 22,
+    backgroundColor: colors.yellow100,
+    borderRadius: 16,
     padding: 16,
     marginBottom: 22,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.12,
-    shadowRadius: 10,
+    shadowRadius: 16,
     elevation: 5,
   },
   thumbnail: {
@@ -192,7 +232,8 @@ const styles = StyleSheet.create({
   },
   newsTitle: {
     fontFamily: fonts.family.bold,
-    fontSize: 18,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
     lineHeight: 28,
   },
@@ -200,7 +241,8 @@ const styles = StyleSheet.create({
     marginTop: 12, // 제목과 날짜 사이 간격
     alignSelf: "flex-end",
     fontFamily: fonts.family.regular,
-    fontSize: 13,
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
   },
   emptyContainer: {
@@ -216,7 +258,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontFamily: fonts.family.bold,
-    fontSize: 20,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.black, // 검정색으로 변경
   },
 });

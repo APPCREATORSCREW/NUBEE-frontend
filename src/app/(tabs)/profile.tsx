@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { colors } from "../../constants/colors";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import { StarShine } from "../../components/icons";
@@ -9,10 +10,25 @@ import MenuList from "../../components/profile/MenuList";
 import StatCard from "../../components/profile/StatCard";
 import ProgressBar from "../../components/profile/ProgressBar";
 import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
+import { syncProfile } from "../../utils/syncProfile";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const Profile = () => {
   const points = useUserStore((state) => state.user?.points ?? 0);
   const level = useUserStore((state) => state.user?.level ?? 0);
+
+  // 프로필 화면 진입 시 GET /api/users/profile 호출해서 최신 정보로 갱신
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        await syncProfile();
+      } catch (error) {
+        Alert.alert("오류", getErrorMessage(error));
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>

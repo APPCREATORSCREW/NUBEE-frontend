@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
@@ -6,14 +6,12 @@ import { PolygonBlue, PolygonGreen, PolygonPink, PolygonYellow } from '../../com
 import Button from '../../components/common/Button';
 import { useUserStore } from '../../store/useUserStore';
 import { useSkinStore, getSkinById } from '../../store/useSkinStore';
+import { useEffect, useState } from 'react';
+import LoadingIndicator from '../../components/common/LoadingIndicator';
+import { KeywordsAPI, NewsItem } from '../../apis/home';
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
-
-// 임시 // api 연동
-const ALL_KEYWORDS = ['금리', 'AIDC', '딥페이크', '종전', '외화', '투표권'];
-
-// 임시 // api 연동
-const pointsToNextLevel = 35;
 
 const HEX_WIDTH = 180;
 const HEX_HEIGHT = 180;
@@ -29,39 +27,61 @@ const HomeScreen = () => {
   const settings = useUserStore((state) => state.settings);
   const visitedKeywords = useUserStore((state) => state.visitedKeywords);
   const markKeywordVisited = useUserStore((state) => state.markKeywordVisited);
+  const quizAnswers = useUserStore((state) => state.quizAnswers);
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const mascot = getSkinById(selectedSkinId).image;
 
-  // 임시 (user 없을 때 폴백값) // api 연동
-  const level = user?.level ?? 2;
-  const points = user?.points ?? 15;
-  const streakDays = user?.streak ?? 3;
-  const KEYWORDS = ALL_KEYWORDS.slice(0, settings.keywordCount);
+  const [isLoading, setIsLoading] = useState(false);
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
 
-  const handlePressKeyword = (keyword: string) => {
-    if (visitedKeywords.includes(keyword)) return;
-    markKeywordVisited(keyword);
-    router.push({ pathname: '/keyword-quiz', params: { keyword } });
+  // 프로필 조회 api 연동 후
+  const level = user?.level ?? 1;
+  const points = user?.points ?? 0;
+  const streakDays = user?.streak ?? 0;
+  const pointsToNextLevel = 35;
+
+  useEffect(() => {
+
+    const fetchKeywords = async () => {
+      setIsLoading(true);
+      try {
+        const response = await KeywordsAPI();
+        if (response.isSuccess) {
+          setNewsList(response.result.news_list);
+        }
+      } catch (error) {
+        Alert.alert('Error', getErrorMessage(error));
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchKeywords();
+  }, []);
+
+  const handlePressKeyword = (keyword_id: number, news_id: number) => {
+    if (quizAnswers[keyword_id] !== undefined) return;
+    markKeywordVisited(keyword_id);
+    router.push({ pathname: '/keyword-quiz', params: { keyword_id, news_id } });
   };
 
-  const leftColumn = KEYWORDS.filter((_, index) => index % 2 === 0);
-  const rightColumn = KEYWORDS.filter((_, index) => index % 2 === 1);
+  const leftColumn = newsList.filter((_, index) => index % 2 === 0);
+  const rightColumn = newsList.filter((_, index) => index % 2 === 1);
 
-  const renderColumn = (items: string[], startIndex: number) => (
+  const renderColumn = (items: NewsItem[], startIndex: number) => (
     <View style={startIndex === 1 ? styles.columnOffset : styles.column}>
-      {items.map((keyword, i) => {
+      {items.map((item, i) => {
         const originalIndex = startIndex + i * 2;
         const Polygon = HEXAGON_COLORS[originalIndex % HEXAGON_COLORS.length];
-        const isVisited = visitedKeywords.includes(keyword);
+        const isAnswered = quizAnswers[item.main_keyword.id] !== undefined;
         return (
           <Pressable
-            key={keyword}
-            style={[styles.hexagon, isVisited && styles.hexagonVisited]}
-            onPress={() => handlePressKeyword(keyword)}
-            disabled={isVisited}
+            key={item.main_keyword.id}
+            style={[styles.hexagon, isAnswered && styles.hexagonVisited]}
+            onPress={() => handlePressKeyword(item.main_keyword.id, item.id)}
+            disabled={isAnswered}
           >
             <Polygon width={HEX_WIDTH} height={HEX_HEIGHT} />
-            <Text style={styles.hexagonLabel}>{keyword}</Text>
+            <Text style={styles.hexagonLabel}>{item.main_keyword.word}</Text>
           </Pressable>
         );
       })}
@@ -115,6 +135,8 @@ const HomeScreen = () => {
           />
         </View>
       )}
+
+      {isLoading && <LoadingIndicator />}
     </View>
   );
 };
@@ -162,8 +184,8 @@ const styles = StyleSheet.create({
     marginLeft: 20
   },
   mascot: {
-    width: 145,
-    height: 145,
+    width: 135,
+    height: 135,
   },
   speechBubble: {
     backgroundColor: colors.yellow100,

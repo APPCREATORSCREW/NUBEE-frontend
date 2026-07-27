@@ -10,6 +10,7 @@ import {
 import Button from "../common/Button";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
+import { applySkin } from "../../apis/profileAPI";
 
 const SkinList = () => {
   const level = useSkinStore((state) => state.level);
@@ -18,8 +19,18 @@ const SkinList = () => {
 
   const [previewSkin, setPreviewSkin] = useState<Skin | null>(null);
 
-  const handleConfirm = () => {
-    if (previewSkin) selectSkin(previewSkin.id);
+  const handleConfirm = async () => {
+    if (!previewSkin) return;
+
+    try {
+      // PATCH /api/users/skin - 서버는 apiId(숫자) 기준으로 받음
+      await applySkin(previewSkin.apiId);
+    } catch (error) {
+      // TODO: 실패 시 에러 UI 처리, 지금은 로컬 상태만이라도 반영
+      console.error("스킨 적용 실패", error);
+    }
+
+    selectSkin(previewSkin.id);
     setPreviewSkin(null);
   };
 
