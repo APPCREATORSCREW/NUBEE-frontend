@@ -87,14 +87,16 @@ const styles = StyleSheet.create({
 
   title: {
     fontFamily: fonts.family.bold,
-    fontSize: 30,
+    fontSize: fonts.size.header,
+    letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
     marginBottom: 20,
   },
 
   sectionTitle: {
     fontFamily: fonts.family.regular,
-    fontSize: 20,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.gray400,
     marginBottom: 16,
     marginTop: 10,
@@ -103,25 +105,26 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     borderColor: colors.gray100,
-    borderRadius: 18,
-    paddingHorizontal: 20,
-    paddingVertical: 25,
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    paddingVertical: 20,
     marginBottom: 18,
     backgroundColor: colors.background,
   },
 
   word: {
     fontFamily: fonts.family.bold,
-    fontSize: 22,
+    fontSize: fonts.size.title,
+    letterSpacing: fonts.letterSpacing.title,
     color: colors.black,
     marginBottom: 12,
   },
 
   description: {
     fontFamily: fonts.family.regular,
-    fontSize: 18,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
-    lineHeight: 28,
   },
 
   buttonContainer: {
