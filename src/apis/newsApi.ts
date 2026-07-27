@@ -26,7 +26,7 @@ export const getNewsQuiz = async (newsId: number | string) => {
 // 3. 뉴스 퀴즈 채점 및 포인트 지급
 export const submitNewsQuiz = async (newsId: number | string, quizId: number, selectedAnswer: number) => {
   try {
-    const response = await api.post(`/api/news/${newsId}/quiz`, {
+    const response = await api.post(`/api/news/${newsId}/quiz/submit`, {
       quiz_id: quizId,
       selected_answer: selectedAnswer,
     });
