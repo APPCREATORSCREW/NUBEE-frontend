@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getNewsHistory } from "../../apis/news";
+import { getNewsHistory } from "../../apis/review";
 import {
   SafeAreaView,
   View,

@@ -463,7 +463,7 @@ interface NewsData {
 
 export default function News() {
   const { newsId } = useLocalSearchParams<{ newsId?: string }>();
-  const activeNewsId = newsId ? Number(newsId) : 24; // 기본 테스트 ID 24
+  const activeNewsId = Number(newsId);
 
   const [news, setNews] = useState<NewsData | null>(null);
   const [loading, setLoading] = useState(true);
