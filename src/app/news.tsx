@@ -427,7 +427,7 @@ import {
   SafeAreaView,
   ScrollView,
   View,
-  Text,
+  Text, 
   StyleSheet,
   Image,
   Pressable,
@@ -463,6 +463,7 @@ interface NewsData {
 
 export default function News() {
   const { newsId } = useLocalSearchParams<{ newsId?: string }>();
+  console.log("newsId:", newsId);
   const activeNewsId = Number(newsId);
 
   const [news, setNews] = useState<NewsData | null>(null);
@@ -539,9 +540,16 @@ export default function News() {
 
         {/* 원문 링크 */}
         {news.original_url && (
-          <Pressable 
-            style={styles.linkButton} 
-            onPress={() => Linking.openURL(news.original_url)}
+         <Pressable
+            style={styles.linkButton}
+            onPress={async () => {
+              try {
+                const url = news.original_url.replace("http://", "https://");
+                await Linking.openURL(url);
+              } catch (e) {
+                Alert.alert("오류", "링크를 열 수 없습니다.");
+              }
+            }}
           >
             <Ionicons name="link-outline" size={20} color={colors.black} />
             <Text style={styles.linkText}>원문 보러 가기</Text>
