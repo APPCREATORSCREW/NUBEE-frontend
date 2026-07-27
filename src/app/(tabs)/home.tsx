@@ -58,10 +58,10 @@ const HomeScreen = () => {
     fetchKeywords();
   }, []);
 
-  const handlePressKeyword = (keyword_id: number) => {
+  const handlePressKeyword = (keyword_id: number, news_id: number) => {
     if (quizAnswers[keyword_id] !== undefined) return;
     markKeywordVisited(keyword_id);
-    router.push({ pathname: '/keyword-quiz', params: { keyword_id } });
+    router.push({ pathname: '/keyword-quiz', params: { keyword_id, news_id } });
   };
 
   const leftColumn = newsList.filter((_, index) => index % 2 === 0);
@@ -77,7 +77,7 @@ const HomeScreen = () => {
           <Pressable
             key={item.main_keyword.id}
             style={[styles.hexagon, isAnswered && styles.hexagonVisited]}
-            onPress={() => handlePressKeyword(item.main_keyword.id)}
+            onPress={() => handlePressKeyword(item.main_keyword.id, item.id)}
             disabled={isAnswered}
           >
             <Polygon width={HEX_WIDTH} height={HEX_HEIGHT} />
