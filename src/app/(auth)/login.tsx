@@ -21,6 +21,7 @@ import { LoginAPI } from '../../apis/auth';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 import { useUserStore } from '../../store/useUserStore';
 import { tokenStorage } from '../../utils/tokenStorage';
+import { syncProfile } from '../../utils/syncProfile';
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 
@@ -67,14 +68,15 @@ const LoginScreen = () => {
       const { accessToken, refreshToken } = response.result;
 
       useUserStore.getState().setAccessToken(accessToken);
-      tokenStorage.saveRefreshToken(refreshToken);
+      await tokenStorage.saveRefreshToken(refreshToken);
+      // 토큰 저장 후 프로필 조회
+      await syncProfile();
       router.replace('/home');
     } catch (error) {
       Alert.alert('오류', getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
-    // api 연동 - 프로필 조회 api -> 전역 관리
   };
 
   return (

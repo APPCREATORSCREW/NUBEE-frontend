@@ -1,13 +1,14 @@
-import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
-import { colors } from '../../constants/colors';
-import { fonts } from '../../constants/fonts';
-import Button from '../../components/common/Button';
-import { useUserStore } from '../../store/useUserStore';
-import LoadingIndicator from '../../components/common/LoadingIndicator';
-import { SignUpAPI, KeywordCountAPI } from '../../apis/auth';
-import { getErrorMessage } from '../../utils/getErrorMessage';
+import { useState } from "react";
+import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
+import { useRouter } from "expo-router";
+import { colors } from "../../constants/colors";
+import { fonts } from "../../constants/fonts";
+import Button from "../../components/common/Button";
+import { useUserStore } from "../../store/useUserStore";
+import LoadingIndicator from "../../components/common/LoadingIndicator";
+import { KeywordCountAPI } from "../../apis/auth";
+import { getErrorMessage } from "../../utils/getErrorMessage";
+import { syncProfile } from "../../utils/syncProfile";
 
 const OPTIONS = [
   { count: 3, background: colors.yellow100, border: colors.yellow400 },
@@ -20,20 +21,23 @@ const SelectKeywordScreen = () => {
   const router = useRouter();
   const setSettings = useUserStore((state) => state.setSettings);
   const [selectedCount, setSelectedCount] = useState<number | null>(null);
-  
+
   const [isLoading, setIsLoading] = useState(false);
 
   // api 연동 - 회원가입 api / 키워드 api
   const handleStart = async () => {
     if (selectedCount === null || isLoading) return;
-    
+
     setIsLoading(true);
-    try{
-      const response = await KeywordCountAPI({ preferredKeywordCount: selectedCount });
-      router.replace('/home');
-    } catch(error){
-      Alert.alert('오류', getErrorMessage(error));
-    } finally{
+    try {
+      await KeywordCountAPI({ preferredKeywordCount: selectedCount });
+      setSettings({ keywordCount: selectedCount });
+      // 회원가입 설정 끝난 후 프로필 조회
+      await syncProfile();
+      router.replace("/home");
+    } catch (error) {
+      Alert.alert("오류", getErrorMessage(error));
+    } finally {
       setIsLoading(false);
     }
   };
@@ -42,7 +46,7 @@ const SelectKeywordScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>
         하루에 볼 <Text style={styles.titleHighlight}>키워드</Text>
-        {'\n'}개수를 선택해 주세요
+        {"\n"}개수를 선택해 주세요
       </Text>
 
       <View style={styles.grid}>
@@ -53,7 +57,11 @@ const SelectKeywordScreen = () => {
               key={option.count}
               style={[
                 styles.card,
-                { backgroundColor: isSelected ? option.border : option.background },
+                {
+                  backgroundColor: isSelected
+                    ? option.border
+                    : option.background,
+                },
                 isSelected && { borderColor: option.border },
               ]}
               onPress={() => setSelectedCount(option.count)}
@@ -67,7 +75,7 @@ const SelectKeywordScreen = () => {
       <View style={styles.buttonContainer}>
         <Button
           label="시작하기"
-          variant={selectedCount !== null ? 'filled' : 'disabled'}
+          variant={selectedCount !== null ? "filled" : "disabled"}
           onPress={handleStart}
         />
       </View>
@@ -97,20 +105,20 @@ const styles = StyleSheet.create({
   },
   grid: {
     marginTop: 20,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     rowGap: 16,
   },
   card: {
-    width: '48%',
-    height: '48%',
+    width: "48%",
+    height: "48%",
     aspectRatio: 1,
     borderRadius: 24,
     borderWidth: 3,
-    borderColor: 'transparent',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
   },
   cardLabel: {
     fontFamily: fonts.family.bold,
@@ -119,7 +127,7 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   buttonContainer: {
-    marginTop: 'auto',
+    marginTop: "auto",
     marginBottom: 65,
   },
 });
