@@ -39,8 +39,9 @@ export default function Wordbook() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.flex}>
       <ScrollView
+        style={styles.flex}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
@@ -59,35 +60,36 @@ export default function Wordbook() {
           ))
         )}
 
-        <View style={{ height: 140 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
 
-      <View style={styles.buttonContainer}>
+      <View style={styles.floatingButton}>
         <Button
           label="플래시카드로 학습하기"
           variant="filled"
           onPress={() => router.push("/flashcard")}
         />
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
     backgroundColor: colors.background,
   },
   content: {
     paddingHorizontal: 20,
     paddingTop: 25,
-    paddingBottom: 20,
+    paddingBottom: 80,
   },
   title: {
     fontFamily: fonts.family.bold,
     fontSize: 30,
     color: colors.black,
-    marginBottom: 20,
+    paddingTop: 45,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontFamily: fonts.family.regular,
@@ -124,14 +126,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 40,
   },
-  buttonContainer: {
+  floatingButton: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 32,
-    backgroundColor: colors.background,
+    left: 20,
+    right: 20,
+    bottom: 16,
+    backgroundColor: "transparent",
   },
 });
