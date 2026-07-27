@@ -18,7 +18,8 @@ import { Ionicons } from "@expo/vector-icons";
 import Button from "../components/common/Button";
 import { colors } from "../constants/colors";
 import { fonts } from "../constants/fonts";
-import { getNewsDetail, addKeywordToWordbook } from "../apis/newsApi";
+import { getNewsDetail } from "../apis/newsApi";
+import { addWordToBook } from "../apis/wordApi";
 
 interface KeywordItem {
   id: number;
@@ -139,7 +140,7 @@ export default function News() {
   const handleSaveWord = async () => {
     if (!selectedWord) return;
     try {
-      const data = await addKeywordToWordbook(selectedWord.id);
+      const data = await addWordToBook(selectedWord.id);
       if (data.isSuccess) {
         Alert.alert("성공", "단어장에 추가되었습니다!");
         setModalVisible(false);
