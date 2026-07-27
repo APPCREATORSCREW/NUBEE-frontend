@@ -60,7 +60,8 @@ const KeywordQuizScreen = () => {
   const router = useRouter();
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const mascot = getSkinById(selectedSkinId).image;
-  const { keyword_id } = useLocalSearchParams<{ keyword_id: string }>();
+  // news_id까지 넘기기
+  const { keyword_id, news_id } = useLocalSearchParams<{ keyword_id: string; news_id: string }>();
   const keywordId = Number(keyword_id);
 
   const quizAnswers = useUserStore((state) => state.quizAnswers);
@@ -231,7 +232,17 @@ const KeywordQuizScreen = () => {
       {answered && (
         <View style={styles.buttonGroup}>
           <Button label="키워드 다시보기" variant="outlined" onPress={goToExplanation} />
-          <Button label="뉴스 보기" variant="filled" onPress={() => router.push('/news')} />
+          <Button 
+            label="뉴스 보기" 
+            variant="filled" 
+            onPress={() => 
+              router.push({
+                pathname: "/news",
+                params: {
+                  newsId: news_id,
+                },
+              })
+            } />
         </View>
       )}
       {isLoading && <LoadingIndicator />}
