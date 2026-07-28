@@ -1,8 +1,8 @@
 import { api } from "./client";
 
 // 보유 스킨 하나의 정보 (owned: 잠금 해제 여부)
-interface Skin {
-  imageUrl: string;
+export interface ProfileSkin {
+  imageUrl: string | null;
   owned: boolean;
   skinId: number;
   skinName: string;
@@ -18,7 +18,7 @@ interface ProfileResult {
   profileImageUrl: string | null;
   currentSkinId: number;
   currentSkinName: string;
-  skins: Skin[];
+  skins: ProfileSkin[];
 }
 
 interface ProfileResponse {
