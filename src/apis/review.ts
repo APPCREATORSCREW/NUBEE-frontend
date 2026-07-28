@@ -1,5 +1,5 @@
 import { api } from "./client";
-import { useUserStore } from "../store/useUserStore";
+import { AxiosError } from "axios";
 
 export interface NewsItem {
   newsId: number;
@@ -23,21 +23,30 @@ export const getNewsHistory = async (
   page = 0,
   size = 20
 ): Promise<NewsHistoryResponse> => {
-  const accessToken = useUserStore.getState().accessToken;
+  try {
+    const response = await api.get<NewsHistoryResponse>(
+      "/api/news/history",
+      {
+        params: {
+          category,
+          page,
+          size,
+        },
+      }
+    );
 
-  const response = await api.get<NewsHistoryResponse>(
-    "/api/news/history",
-    {
-      params: {
-        category,
-        page,
-        size,
-      },
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as AxiosError<{ message?: string }>;
+    const status = err.response?.status;
+
+    if (status === 401) {
+      throw new Error("인증이 만료되었습니다. 다시 로그인해 주세요.");
     }
-  );
 
-  return response.data;
+    throw new Error(
+      err.response?.data?.message ??
+        "복습 목록을 불러오는데 실패했습니다."
+    );
+  }
 };
