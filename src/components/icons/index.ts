@@ -15,4 +15,7 @@ export { default as StarShine } from "./StarShine";
 export { default as ToggleOff } from "./ToggleOff";
 export { default as ToggleOn } from "./ToggleOn";
 export { default as VisibilityOff } from "./VisibilityOff";
-export { default as VisibilityOn } from "./VisibilityOn";
+export { default as Levelup } from "./Levelup";
+export { default as SkinLock } from "./SkinLock";
+export { default as SkinUnlock } from "./SkinUnlock";
+export { default as New } from "./New";
