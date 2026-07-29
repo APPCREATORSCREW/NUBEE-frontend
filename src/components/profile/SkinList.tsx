@@ -1,19 +1,14 @@
 import { View, StyleSheet, Modal, Text, Image } from "react-native";
 import React, { useState } from "react";
 import SkinItem from "./SkinItem";
-import {
-  useSkinStore,
-  SKINS,
-  isSkinUnlocked,
-  type Skin,
-} from "../../store/useSkinStore";
+import { useSkinStore, type Skin } from "../../store/useSkinStore";
 import Button from "../common/Button";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import { applySkin } from "../../apis/profileAPI";
 
 const SkinList = () => {
-  const level = useSkinStore((state) => state.level);
+  const skins = useSkinStore((state) => state.skins);
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const selectSkin = useSkinStore((state) => state.selectSkin);
 
@@ -37,8 +32,8 @@ const SkinList = () => {
   return (
     <>
       <View style={styles.grid}>
-        {SKINS.map((skin) => {
-          const locked = !isSkinUnlocked(skin.id, level);
+        {skins.map((skin) => {
+          const locked = !skin.owned;
           return (
             <SkinItem
               key={skin.id}

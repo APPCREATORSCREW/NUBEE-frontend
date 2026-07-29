@@ -1,5 +1,5 @@
 import { getProfile } from "../apis/profileAPI";
-import { getSkinByApiId, useSkinStore } from "../store/useSkinStore";
+import { useSkinStore } from "../store/useSkinStore";
 import { useUserStore } from "../store/useUserStore";
 
 // 서버의 최신 프로필을 전역 스토어에 반영
@@ -16,11 +16,8 @@ export const syncProfile = async () => {
     profileImage: profile.profileImageUrl,
   });
 
-  const skinStore = useSkinStore.getState();
-  skinStore.setLevel(profile.currentLevel);
-
-  const equippedSkin = getSkinByApiId(profile.currentSkinId);
-  if (equippedSkin) skinStore.selectSkin(equippedSkin.id);
+  // 서버가 내려준 이미지 URL/보유 여부/현재 적용 스킨을 스킨 스토어에 반영
+  useSkinStore.getState().setSkins(profile.skins, profile.currentSkinId);
 
   return profile;
 };
