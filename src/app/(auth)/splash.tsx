@@ -8,7 +8,7 @@ import * as WebBrowser from "expo-web-browser";
 import { api } from "../../apis/client";
 
 const mascot = require('../../../assets/skins/skin_origin.png');
-const KAKAO_YELLOW = '#FEE500';
+const kakaoLoginButton = require('../../../assets/icons/kakao_login_medium_wide.png');
 
 const SplashScreen = () => {
   const router = useRouter();
@@ -41,8 +41,12 @@ const SplashScreen = () => {
           style={({ pressed }) => [
             styles.kakaoButton, 
             pressed && { opacity: 0.8 }]}
-          >
-          <Text style={styles.kakaoLabel}>--- (임시) 카카오 로그인 자리 ---</Text>
+        >
+          <Image
+            source={kakaoLoginButton}
+            style={styles.kakaoImage}
+          />
+          
         </Pressable>
       </View>
     </LinearGradient>
@@ -79,21 +83,12 @@ const styles = StyleSheet.create({
     marginBottom: 70,
   },
   kakaoButton: {
-    height: 52,
-    borderRadius: 16,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: KAKAO_YELLOW,
+    justifyContent: 'center'
   },
-  kakaoIcon: {
-    fontSize: fonts.size.body,
-    marginRight: 6,
-  },
-  kakaoLabel: {
-    fontFamily: fonts.family.bold,
-    fontSize: fonts.size.body,
-    letterSpacing: fonts.letterSpacing.body,
-    color: colors.black,
+  kakaoImage: {
+    width: '100%',
+    height: 52,
+    resizeMode: 'contain',
   },
 });
