@@ -8,7 +8,7 @@ import { useUserStore } from '../../store/useUserStore';
 import { useSkinStore, getSkinById } from '../../store/useSkinStore';
 import { useEffect, useState } from 'react';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
-import { KeywordsAPI, NewsItem } from '../../apis/home';
+import { KeywordsAPI, NewsItem, SendNewsAPI } from '../../apis/home';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
@@ -129,8 +129,21 @@ const HomeScreen = () => {
           <Button
             label="오늘의 학습을 부모님께 자랑해요"
             variant="filled"
-            onPress={() => {
-              // api 연동
+            onPress={async () => {
+              try{
+                const response = await SendNewsAPI();
+                if (response.isSuccess) {
+                  Alert.alert(
+                    "전송 완료",
+                    "부모님께 오늘의 학습 결과를 전달했어요!"
+                  );
+                }
+              } catch (error) {
+                Alert.alert(
+                  "오류",
+                  getErrorMessage(error)
+                );
+              }
             }}
           />
         </View>

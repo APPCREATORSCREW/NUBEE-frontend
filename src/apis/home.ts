@@ -103,3 +103,27 @@ export const KeywordSubmitAPI = async (keyword_id: number, data: KeywordSubmitRe
     const response = await api.post<KeywordSubmitResponse>(`/api/keywords/${keyword_id}/quiz/submit`, data);
     return response.data;
 }
+
+export interface LearnedKeyword {
+    word: string;
+    originalUrl: string;
+}
+
+export interface SendNewsResult {
+    username: string;
+    learnedKeywords: LearnedKeyword[];
+    keywordQuizAccuracy: number;
+    newsQuizAccuracy: number;
+}
+
+export interface SendNewsResponse {
+    isSuccess: boolean;
+    code: string;
+    message: string;
+    result: SendNewsResult;
+}
+
+export const SendNewsAPI = async (): Promise<SendNewsResponse> => {
+    const response = await api.get<SendNewsResponse>("/api/news/send");
+    return response.data;
+};
