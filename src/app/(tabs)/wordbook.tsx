@@ -13,11 +13,11 @@ interface WordItem {
   word: string;
   explanation: string;
   exampleSentence: string;
-  learned: boolean;
 }
 
 export default function Wordbook() {
-  const [words, setWords] = useState<WordItem[]>([]);
+  const [todayWords, setTodayWords] = useState<WordItem[]>([]);
+  const [previousWords, setPreviousWords] = useState<WordItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchWords = async () => {
@@ -25,7 +25,8 @@ export default function Wordbook() {
       setIsLoading(true);
       const data = await getWordList();
       if (data.isSuccess) {
-        setWords(data.result);
+        setTodayWords(data.result.todayWords);
+        setPreviousWords(data.result.previousWords);
       }
     } catch (error: any) {
       Alert.alert("오류", error.message);
@@ -39,7 +40,7 @@ export default function Wordbook() {
   }, []);
 
   return (
-    <View style={styles.flex}>
+    <SafeAreaView style={styles.flex}>
       <ScrollView
         style={styles.flex}
         contentContainerStyle={styles.content}
@@ -47,15 +48,37 @@ export default function Wordbook() {
       >
         <Text style={styles.title}>단어장</Text>
 
-        <Text style={styles.sectionTitle}>저장된 단어 목록</Text>
+        <Text style={styles.sectionTitle}>오늘 저장</Text>
 
-        {words.length === 0 && !isLoading ? (
-          <Text style={styles.emptyText}>단어장에 저장된 단어가 없어요.</Text>
+        {todayWords.length === 0 && !isLoading ? (
+          <Text style={styles.emptyText}>
+            오늘 저장된 단어가 없어요.
+          </Text>
         ) : (
-          words.map((item) => (
+          todayWords.map((item) => (
             <View key={item.userKeywordId} style={styles.card}>
               <Text style={styles.word}>{item.word}</Text>
-              <Text style={styles.description}>{item.explanation}</Text>
+              <Text style={styles.description}>
+                {item.explanation}
+              </Text>
+            </View>
+          ))
+        )}
+
+
+        <Text style={styles.sectionTitle}>이전에 저장</Text>
+
+        {previousWords.length === 0 && !isLoading ? (
+          <Text style={styles.emptyText}>
+            이전에 저장된 단어가 없어요.
+          </Text>
+        ) : (
+          previousWords.map((item) => (
+            <View key={item.userKeywordId} style={styles.card}>
+              <Text style={styles.word}>{item.word}</Text>
+              <Text style={styles.description}>
+                {item.explanation}
+              </Text>
             </View>
           ))
         )}
@@ -70,7 +93,7 @@ export default function Wordbook() {
           onPress={() => router.push("/flashcard")}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -124,7 +147,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.gray400,
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 25,
+    marginBottom: 25,
   },
   floatingButton: {
     position: "absolute",
