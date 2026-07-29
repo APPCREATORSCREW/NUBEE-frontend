@@ -4,12 +4,23 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
+import * as WebBrowser from "expo-web-browser";
+import { api } from "../../apis/client";
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 const KAKAO_YELLOW = '#FEE500';
 
 const SplashScreen = () => {
   const router = useRouter();
+  const handleKakaoLogin = async () => {
+    try {
+      await WebBrowser.openBrowserAsync(
+        `${api.defaults.baseURL}/auth/kakao`
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <LinearGradient
@@ -25,7 +36,12 @@ const SplashScreen = () => {
       <View style={styles.buttonGroup}>
         <Button label="로그인" variant="filled" onPress={() => router.push('/login')} />
         <Button label="회원가입" variant="outlined" onPress={() => router.push('/signup')} />
-        <Pressable style={({ pressed }) => [styles.kakaoButton, pressed && { opacity: 0.8 }]}>
+        <Pressable 
+          onPress={handleKakaoLogin}
+          style={({ pressed }) => [
+            styles.kakaoButton, 
+            pressed && { opacity: 0.8 }]}
+          >
           <Text style={styles.kakaoLabel}>--- (임시) 카카오 로그인 자리 ---</Text>
         </Pressable>
       </View>
