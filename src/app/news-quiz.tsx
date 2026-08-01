@@ -43,6 +43,7 @@ const KeywordQuizScreen = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [optionLineCount, setOptionLineCount] = useState<Record<number, number>>({});
 
   useEffect(() => {
     fetchQuiz();
@@ -113,7 +114,23 @@ const KeywordQuizScreen = () => {
             onPress={() => handleSelect(option.option_number)}
             disabled={answered || isSubmitting}
           >
-            <Text style={[styles.optionText, isOptionActive(option.option_number) && styles.optionTextActive]}>
+            <Text
+              onTextLayout={(e) => {
+                const lines = e.nativeEvent.lines.length;
+
+                setOptionLineCount((prev) => ({
+                  ...prev,
+                  [option.option_number]: lines,
+                }));
+              }}
+              style={[
+                styles.optionText,
+                optionLineCount[option.option_number] === 1
+                  ? styles.optionTextCenter
+                  : styles.optionTextLeft,
+                isOptionActive(option.option_number) && styles.optionTextActive,
+              ]}
+            >
               {option.option_text}
             </Text>
           </Pressable>
@@ -166,7 +183,19 @@ const styles = StyleSheet.create({
   optionDefault: { backgroundColor: colors.background, borderColor: colors.blue400 },
   optionCorrect: { backgroundColor: colors.blue400, borderColor: colors.blue400 },
   optionWrong: { backgroundColor: colors.red100, borderColor: colors.red100 },
-  optionText: { fontFamily: fonts.family.regular, fontSize: 16, color: colors.black, lineHeight: 22, textAlign: 'left', width: '100%' },
+  optionText: { 
+    fontFamily: fonts.family.regular, 
+    fontSize: 16, 
+    color: colors.black, 
+    lineHeight: 22, 
+    width: '100%' 
+  },
+  optionTextCenter: {
+    textAlign: 'center',
+  },
+  optionTextLeft: {
+    textAlign: 'left',
+  },
   optionTextActive: { color: colors.background },
   feedbackBox: { borderRadius: 16, borderWidth: 2, padding: 16, marginTop: 30 },
   feedbackBoxCorrect: { backgroundColor: colors.background, borderColor: colors.blue400 },

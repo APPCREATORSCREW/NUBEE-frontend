@@ -30,7 +30,6 @@ interface WordItem {
   word: string;
   explanation: string;
   exampleSentence: string;
-  learned: boolean;
 }
 
 export default function FlashCard() {
@@ -56,8 +55,12 @@ export default function FlashCard() {
         setIsLoading(true);
         const data = await getWordList();
         if (data.isSuccess) {
-          setWords(data.result);
-          setTotalWords(data.result.length);
+          const mergedWords = [
+            ...(data.result.todayWords ?? []),
+            ...(data.result.previousWords ?? []),
+          ];
+          setWords(mergedWords);
+          setTotalWords(mergedWords.length);
         }
       } catch (error: any) {
         Alert.alert("오류", error.message || "단어 목록을 불러오지 못했습니다.");

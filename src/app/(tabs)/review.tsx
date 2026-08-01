@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getNewsHistory } from "../../apis/review";
+import { getNewsHistory, NewsItem } from "../../apis/review";
 import {
   SafeAreaView,
   View,
@@ -8,49 +8,67 @@ import {
   Pressable,
   ScrollView,
   Image,
+  ActivityIndicator,
 } from "react-native";
 
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 
-const categories = ["경제", "사회", "과학", "세계"];
-
-/* 더미 데이터
-const reviewData = {
-  경제: [
-    { month: "2026.05", title: "한국 성장률 전망 '쑥'...\n경기과열 조짐에 고개드는 금리 인상론", date: "2026.05.05" },
-  ],
-  사회: [
-    { month: "2026.05", title: "야구장 연기 치솟자 뛰쳐나왔다...\n경기 관람하던 소방관들의 기지", date: "2026.05.07" },
-    { month: "2026.05", title: '"다이어트약 있나요?" SNS 단체\n방 타고 퍼진 불법 의약품', date: "2026.05.07" },
-  ],
-  과학: [],
-  세계: [],
-};*/
-
 export default function ReviewScreen() {
-  const [selected, setSelected] = useState("경제");
-  interface NewsItem {
-    newsId: number;
-    title: string;
-    imageUrl: string;
-    viewedAt: string;
-  }
-
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selected, setSelected] = useState<string>("");
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadNews();
+    initCategoriesAndNews();
+  }, []);
+
+  useEffect(() => {
+    if (selected) {
+      loadNews(selected);
+    }
   }, [selected]);
 
-  const loadNews = async () => {
+  const initCategoriesAndNews = async () => {
     try {
       setLoading(true);
 
-      // const data = await getNewsHistory(selected);
+      const initialCategory = "경제"; 
+      const data = await getNewsHistory(initialCategory);
 
-      // setNewsList(data.result.news);
+      if (data.isSuccess) {
+        
+        const fetchedNews = data.result.news || [];
+        setNewsList(fetchedNews);
+        
+      
+        const activeCategory = data.result.category || initialCategory;
+        
+        const dynamicCategories = Array.from(
+          new Set([activeCategory, "경제", "사회", "과학", "세계"])
+        );
+        
+        setCategories(dynamicCategories);
+        setSelected(activeCategory);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadNews = async (category: string) => {
+    try {
+      setLoading(true);
+      const data = await getNewsHistory(category);
+
+      if (data.isSuccess) {
+        setNewsList(data.result.news);
+      } else {
+        setNewsList([]);
+      }
     } catch (error) {
       console.error(error);
       setNewsList([]);
@@ -59,28 +77,36 @@ export default function ReviewScreen() {
     }
   };
 
-  const renderNewsCard = (item: any, index: number, array: any[]) => {
-    const month = item.viewedAt.slice(0, 7).replace("-", ".");
-    const date = item.viewedAt.slice(0, 10).replace(/-/g, ".");
+  const renderNewsCard = (item: NewsItem, index: number, array: NewsItem[]) => {
+    const month = item.viewedAt ? item.viewedAt.slice(0, 7).replace("-", ".") : "";
+    const date = item.viewedAt ? item.viewedAt.slice(0, 10).replace(/-/g, ".") : "";
 
     const prevMonth =
-      index > 0 ? array[index - 1].viewedAt.slice(0, 7).replace("-", ".") : "";
+      index > 0 && array[index - 1].viewedAt
+        ? array[index - 1].viewedAt.slice(0, 7).replace("-", ".")
+        : "";
 
     const isFirstOfMonth = index === 0 || prevMonth !== month;
 
     return (
-      <View key={index}>
-        {isFirstOfMonth && (
+      <View key={item.newsId}>
+        {isFirstOfMonth && month !== "" && (
           <View style={styles.monthChip}>
-            <Text style={styles.monthText}>{item.month}</Text>
+            <Text style={styles.monthText}>{month}</Text>
           </View>
         )}
 
         <View style={styles.newsCard}>
-          <View style={styles.thumbnail} />
+          <Image
+            source={{ uri: item.imageUrl }}
+            style={styles.thumbnail}
+            resizeMode="cover"
+          />
           <View style={styles.newsContent}>
-            <Text style={styles.newsTitle}>{item.title}</Text>
-            <Text style={styles.newsDate}>{item.date}</Text>
+            <Text style={styles.newsTitle} numberOfLines={2}>
+              {item.title}
+            </Text>
+            <Text style={styles.newsDate}>{date}</Text>
           </View>
         </View>
       </View>
@@ -132,10 +158,12 @@ export default function ReviewScreen() {
         contentContainerStyle={styles.scrollContent}
       >
         {loading ? (
-          <Text>불러오는 중...</Text>
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={colors.black} />
+          </View>
         ) : newsList.length > 0 ? (
           newsList.map((item, index, array) =>
-            renderNewsCard(item, index, array),
+            renderNewsCard(item, index, array)
           )
         ) : (
           renderEmpty()
@@ -182,15 +210,16 @@ const styles = StyleSheet.create({
   },
   tabLine: {
     width: "100%",
-    height: 1,
+    height: 2,
     backgroundColor: "transparent",
   },
   selectedTabLine: {
     backgroundColor: colors.black,
   },
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 20,
+    flexGrow: 1,
   },
   monthChip: {
     alignSelf: "flex-start",
@@ -219,6 +248,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 16,
     elevation: 5,
+    alignItems: "center",
   },
   thumbnail: {
     width: 90,
@@ -235,15 +265,21 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
-    lineHeight: 28,
+    lineHeight: 24,
   },
   newsDate: {
-    marginTop: 12, // 제목과 날짜 사이 간격
+    marginTop: 12,
     alignSelf: "flex-end",
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+  },
+  centerContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 100,
   },
   emptyContainer: {
     flex: 1,
@@ -260,6 +296,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.family.bold,
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
-    color: colors.black, // 검정색으로 변경
+    color: colors.black,
   },
 });

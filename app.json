@@ -2,12 +2,17 @@
   "expo": {
     "name": "nubee",
     "slug": "nubee",
+    "scheme": "nubee",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.nubee",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true,
@@ -20,7 +25,14 @@
       "expo-router",
       "@react-native-community/datetimepicker",
       "expo-notifications",
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-web-browser"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "bc530c65-50bc-4e7d-8003-141d11fdbbd8"
+      }
+    }
   }
 }
