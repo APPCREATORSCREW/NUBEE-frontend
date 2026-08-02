@@ -32,7 +32,10 @@ api.interceptors.response.use(
       }
       try {
 
-        const { data } = await axios.post<RefreshResponse>(`${api.defaults.baseURL}/auth/refresh`, { refreshToken });        
+        const { data } = await axios.post<RefreshResponse>(`${api.defaults.baseURL}/auth/token/refresh`, 
+          { refreshToken },
+          { headers: { Authorization: `Bearer ${useUserStore.getState().accessToken}` } }
+        );
         const result = data.result;
 
         useUserStore.getState().setAccessToken(result.accessToken);
@@ -41,7 +44,6 @@ api.interceptors.response.use(
 
         return api(error.config);
       } catch (refreshError) {
-        // 로그아웃 되는지 확인
         await useUserStore.getState().logout();
         return Promise.reject(error);
       }
