@@ -2,13 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { tokenStorage } from "../utils/tokenStorage";
-
-interface Skin {
-  id: number;
-  name: string;
-  level: number;
-  image?: any;
-}
+import type { KeywordSubmit } from "../apis/home";
 
 interface User {
   id: string;
@@ -32,19 +26,20 @@ interface UserState {
   accessToken: string | null;
   refreshToken: string | null;
   isLoggedIn: boolean;
-  selectedSkin: Skin | null;
   settings: UserSettings;
   visitedKeywords: number[];
   quizAnswers: Record<number, number>;
+  quizResults: Record<number, KeywordSubmit>;
+  newsQuizAnswers: Record<number, number>;
 
   login: (user: User, token: string) => void;
   logout: () => Promise<void>;
-  setSelectedSkin: (skin: Skin) => void;
   setProfileImage: (uri: string) => void;
   updateUser: (partial: Partial<User>) => void;
   setSettings: (settings: Partial<UserSettings>) => void;
   markKeywordVisited: (keyword: number) => void;
-  answerQuiz: (keyword: number, optionIndex: number) => void;
+  answerQuiz: (keyword: number, result: KeywordSubmit) => void;
+  answerNewsQuiz: (newsId: number, optionIndex: number) => void;
   addPoints: (amount: number) => void;
   setAccessToken: (token: string) => void;
   setRefreshToken: (token: string) => void;
@@ -60,8 +55,6 @@ export const useUserStore = create<UserState>()(
       accessToken: null,
       refreshToken: null,
       isLoggedIn: false,
-      selectedSkin: null,
-      // 임시
       settings: {
         keywordCount: 3,
         notificationEnabled: true,
@@ -69,21 +62,23 @@ export const useUserStore = create<UserState>()(
       },
       visitedKeywords: [],
       quizAnswers: {},
+      quizResults: {},
+      newsQuizAnswers: {},
 
-      // 로그인 성공 응답을 그대로 받아서 세팅 (accessToken은 메모리에만, refresh token은 tokenStorage 별도 관리)
       login: (user, token) =>
         set({ user, accessToken: token, isLoggedIn: true }),
-      // 서버 refresh_token 폐기 API 호출은 별개(로그아웃 화면 담당) - 여기선 로컬 정리만 담당
       logout: async () => {
         await tokenStorage.removeRefreshToken();
         set({
           user: null,
           accessToken: null,
           isLoggedIn: false,
-          selectedSkin: null,
+          visitedKeywords: [],
+          quizAnswers: {},
+          quizResults: {},
+          newsQuizAnswers: {},
         });
       },
-      setSelectedSkin: (skin) => set({ selectedSkin: skin }),
       setProfileImage: (uri) =>
         set((state) => ({
           user: state.user
@@ -99,9 +94,7 @@ export const useUserStore = create<UserState>()(
                 loginType: "email",
               },
         })),
-      // 서버 응답 등으로 유저 정보를 갱신할 때 사용.
-      // 로그인 화면이 accessToken만 저장하고 user 객체는 안 만들어주기 때문에
-      // user가 아직 null이어도(로그인 직후 최초 프로필 조회 등) partial로 새로 만들어줌
+
       updateUser: (partial) =>
         set((state) => ({
           user: state.user
@@ -129,11 +122,20 @@ export const useUserStore = create<UserState>()(
             ? state
             : { visitedKeywords: [...state.visitedKeywords, keyword] },
         ),
-      answerQuiz: (keyword, optionIndex) =>
+      answerQuiz: (keyword, result) =>
         set((state) =>
           state.quizAnswers[keyword] !== undefined
             ? state
-            : { quizAnswers: { ...state.quizAnswers, [keyword]: optionIndex } },
+            : {
+                quizAnswers: { ...state.quizAnswers, [keyword]: result.selected_answer },
+                quizResults: { ...state.quizResults, [keyword]: result },
+              },
+        ),
+      answerNewsQuiz: (newsId, optionIndex) =>
+        set((state) =>
+          state.newsQuizAnswers[newsId] !== undefined
+            ? state
+            : { newsQuizAnswers: { ...state.newsQuizAnswers, [newsId]: optionIndex } },
         ),
       addPoints: (amount) =>
         set((state) => {
@@ -154,11 +156,12 @@ export const useUserStore = create<UserState>()(
     {
       name: "user-storage",
       storage: createJSONStorage(() => AsyncStorage),
-      // 방문한 키워드/키워드 설정/퀴즈 응답만 영속화 (로그인 상태 등은 유지 대상 아님)
       partialize: (state) => ({
         visitedKeywords: state.visitedKeywords,
         settings: state.settings,
         quizAnswers: state.quizAnswers,
+        quizResults: state.quizResults,
+        newsQuizAnswers: state.newsQuizAnswers,
       }),
     },
   ),

@@ -65,13 +65,17 @@ const KeywordQuizScreen = () => {
   const keywordId = Number(keyword_id);
 
   const quizAnswers = useUserStore((state) => state.quizAnswers);
+  const quizResults = useUserStore((state) => state.quizResults);
   const answerQuizStore = useUserStore((state) => state.answerQuiz);
   const addPoints = useUserStore((state) => state.addPoints);
 
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState<MainKeyword>();
   const [quiz, setQuiz] = useState<KeywordQuiz>();
-  const [submitResult, setSubmitResult] = useState<KeywordSubmit>();
+  // 이미 답변한 키워드를 재방문한 경우, 저장해둔 결과로 피드백을 그대로 복원
+  const [submitResult, setSubmitResult] = useState<KeywordSubmit | undefined>(
+    quizResults[keywordId],
+  );
 
   const [step, setStep] = useState<'explanation' | 'quiz'>('explanation');
 
@@ -119,7 +123,7 @@ const KeywordQuizScreen = () => {
       });
       if (response.isSuccess) {
         setSubmitResult(response.result);
-        answerQuizStore(keywordId, optionNumber);
+        answerQuizStore(keywordId, response.result);
         addPoints(response.result.point_result.earned_point);
       }
     } catch (error) {
