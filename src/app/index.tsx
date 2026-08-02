@@ -1,36 +1,58 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../constants/colors';
-import { fonts } from '../constants/fonts';
-import Button from '../components/common/Button';
+import { useEffect, useState } from 'react';
+import { useUserStore } from '../store/useUserStore';
+import { tokenStorage } from '../utils/tokenStorage';
+import axios from 'axios';
+import { api } from '../apis/client';
+import { RefreshResponse } from '../apis/auth';
+import LoadingIndicator from '../components/common/LoadingIndicator';
+import { syncProfile } from '../utils/syncProfile';
 
 const nubeeIcon = require('../../assets/icons/nubee-icon.png');
 
-// 여기에 인증 분기 ...?
-// 테스트용 임시 라우팅, merge 시 변경 필요
 const Index = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const bootstrap = async () => {
+      setIsLoading(true);
+      const refreshToken = await tokenStorage.getRefreshToken();
+      if (!refreshToken) {
+        setIsLoading(false);
+        router.replace('/splash');
+        return;
+    }
+
+    try {
+      const { data } = await axios.post<RefreshResponse>(`${api.defaults.baseURL}/auth/token/refresh`, 
+        { refreshToken }
+      );
+      useUserStore.getState().setAccessToken(data.result.accessToken);
+      await tokenStorage.saveRefreshToken(data.result.refreshToken);
+      await syncProfile();
+
+      router.replace('/home');
+    } 
+    catch (error) {
+      await tokenStorage.removeRefreshToken();
+      router.replace('/splash');
+    } 
+    finally {
+      setIsLoading(false);
+    }
+    };
+    bootstrap();
+  }, []);
 
   return (
     <View style={styles.container}>
-
       <View style={styles.iconContainer}>
         <Image source={nubeeIcon} style={styles.icon} resizeMode="contain" />
       </View>
-
-      <View style={styles.buttonGroup}>
-        <Text style={styles.tempLabel}>임시버튼</Text>
-        <Button
-          label="스플래시로 이동"
-          variant="outlined"
-          onPress={() => router.replace('/splash')}
-        />
-        <Button
-          label="홈으로 이동"
-          variant="outlined"
-          onPress={() => router.replace('/home')}
-        />
-      </View>
+      {isLoading && <LoadingIndicator fullScreen />}
     </View>
   );
 };
@@ -49,26 +71,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
     overflow: 'visible',
-    marginBottom: 140,
   },
   icon: {
     width: 158,
     height: 198,
     alignSelf: 'center',
-  },
-  buttonGroup: {
-    position: 'absolute',
-    bottom: 60,
-    width: '100%',
-    paddingHorizontal: 20,
-    gap: 12,
-  },
-  tempLabel: {
-    fontFamily: fonts.family.bold,
-    fontSize: fonts.size.body,
-    letterSpacing: fonts.letterSpacing.body,
-    color: colors.black,
-    textAlign: 'center',
-    marginBottom: 8,
   },
 });
