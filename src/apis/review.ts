@@ -18,6 +18,32 @@ export interface NewsHistoryResponse {
   };
 }
 
+export interface CategoryResponse {
+  isSuccess: boolean;
+  code: string;
+  message: string;
+  result: {
+    categories: string[];
+  };
+}
+
+export const getCategories = async (): Promise<CategoryResponse> => {
+  try {
+    const response = await api.get<CategoryResponse>(
+      "/api/news/categories"
+    );
+
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as AxiosError<{ message?: string }>;
+
+    throw new Error(
+      err.response?.data?.message ??
+      "카테고리를 불러오는데 실패했습니다."
+    );
+  }
+};
+
 export const getNewsHistory = async (
   category: string,
   page = 0,

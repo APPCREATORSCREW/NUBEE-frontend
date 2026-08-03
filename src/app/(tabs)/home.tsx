@@ -45,10 +45,12 @@ const HomeScreen = () => {
       setIsLoading(true);
       try {
         const response = await KeywordsAPI();
+        console.log("오늘의 키워드 API 응답:", response);
         if (response.isSuccess) {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
+        console.log("키워드 API 에러:", error);
         Alert.alert('Error', getErrorMessage(error));
       } finally {
         setIsLoading(false);

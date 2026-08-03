@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getNewsHistory, NewsItem } from "../../apis/review";
+import { useRouter } from "expo-router";
+import { getCategories, getNewsHistory, NewsItem } from "../../apis/review";
 import {
   SafeAreaView,
   View,
@@ -19,6 +20,7 @@ export default function ReviewScreen() {
   const [selected, setSelected] = useState<string>("");
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     initCategoriesAndNews();
@@ -32,29 +34,23 @@ export default function ReviewScreen() {
 
   const initCategoriesAndNews = async () => {
     try {
-      setLoading(true);
+      const categoryData = await getCategories();
 
-      const initialCategory = "경제"; 
-      const data = await getNewsHistory(initialCategory);
+      if (categoryData.isSuccess) {
+        const categoryList = categoryData.result.categories;
 
-      if (data.isSuccess) {
-        
-        const fetchedNews = data.result.news || [];
-        setNewsList(fetchedNews);
-        
-      
-        const activeCategory = data.result.category || initialCategory;
-        
-        const dynamicCategories = Array.from(
-          new Set([activeCategory, "경제", "사회", "과학", "세계"])
-        );
-        
-        setCategories(dynamicCategories);
-        setSelected(activeCategory);
+        setCategories(categoryList);
+
+        if (categoryList.length > 0) {
+          setSelected(categoryList[0]);
+        } else {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
       }
     } catch (error) {
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
@@ -62,6 +58,7 @@ export default function ReviewScreen() {
   const loadNews = async (category: string) => {
     try {
       setLoading(true);
+
       const data = await getNewsHistory(category);
 
       if (data.isSuccess) {
@@ -96,7 +93,17 @@ export default function ReviewScreen() {
           </View>
         )}
 
-        <View style={styles.newsCard}>
+        <Pressable
+          style={styles.newsCard}
+          onPress={() => {
+            router.push({
+              pathname: "/news-detail",
+              params: {
+                news_id: item.newsId,
+              },
+            });
+          }}
+        >
           <Image
             source={{ uri: item.imageUrl }}
             style={styles.thumbnail}
@@ -108,7 +115,7 @@ export default function ReviewScreen() {
             </Text>
             <Text style={styles.newsDate}>{date}</Text>
           </View>
-        </View>
+        </Pressable>
       </View>
     );
   };
