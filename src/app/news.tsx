@@ -35,6 +35,7 @@ interface NewsData {
   summary: string;
   image_url: string;
   original_url: string;
+  published_at: string;
   related_keywords: KeywordItem[];
 }
 
@@ -81,61 +82,92 @@ export default function News() {
     }
   };
 
-  const renderSummary = () => {
-    if (!news) return null;
-
-    let parts: React.ReactNode[] = [];
-    let currentIndex = 0;
-
-    // 키워드를 긴 순서대로 정렬 (겹치는 단어 방지)
-    const keywords = [...news.related_keywords].sort(
-      (a, b) => b.word.length - a.word.length
-    );
-
-    while (currentIndex < news.summary.length) {
-      let matchedKeyword: KeywordItem | undefined = undefined;
-      let matchedIndex = Infinity;
-
-      // 현재 위치 이후 가장 먼저 나오는 키워드 찾기
-      for (const keyword of keywords) {
-        const idx = news.summary.indexOf(keyword.word, currentIndex);
-
-        if (idx !== -1 && idx < matchedIndex) {
-          matchedIndex = idx;
-          matchedKeyword = keyword;
-        }
-      }
-
-    // 더 이상 키워드가 없으면 나머지 출력
-      if (!matchedKeyword) {
-        parts.push(news.summary.slice(currentIndex));
-        break;
-      }
-
-      // 키워드 전 텍스트
-      if (matchedIndex > currentIndex) {
-        parts.push(news.summary.slice(currentIndex, matchedIndex));
-      }
-
-      // 키워드
-      parts.push(
-        <Text
-          key={`${matchedKeyword.id}-${matchedIndex}`}
-          style={styles.highlight}
-          onPress={() => {
-            setSelectedWord(matchedKeyword!);
-            setModalVisible(true);
-          }}
-        >
-          {matchedKeyword.word}
-        </Text>
-      );
-
-      currentIndex = matchedIndex + matchedKeyword.word.length;
-    }
-
-    return <Text style={styles.body}>{parts}</Text>;
-  };
+  const renderSummary = () => { 
+    if (!news) return null; 
+    const lines = news.summary.split("\n"); 
+    const parts: React.ReactNode[] = []; 
+    // 키워드를 긴 순서대로 정렬 (겹치는 단어 방지) 
+    const keywords = [...news.related_keywords].sort( 
+      (a, b) => b.word.length - a.word.length ); 
+      lines.forEach((line, lineIndex) => { 
+        // 이모티콘으로 시작하는 줄인지 확인 
+        // // 예: ⚖️ 법을 지키는 든든한 가이드 
+        // // 🏢 로펌으로 가는 노동 전문가들 
+        const isSubtitle = /^[^\w\s가-힣]/u.test(line.trim()); 
+        let currentIndex = 0; 
+        const lineParts: React.ReactNode[] = []; 
+        while (currentIndex < line.length) { 
+          let matchedKeyword: KeywordItem | undefined = undefined; 
+          let matchedIndex = Infinity; 
+          // 현재 위치 이후 가장 먼저 나오는 키워드 찾기 
+          for (const keyword of keywords) { 
+            const idx = line.indexOf(keyword.word, currentIndex); 
+            if (idx !== -1 && idx < matchedIndex) { 
+              matchedIndex = idx; 
+              matchedKeyword = keyword; 
+            } 
+          } 
+          // 더 이상 키워드가 없으면 나머지 출력 
+          if (!matchedKeyword) { 
+            if (currentIndex < line.length) { 
+              lineParts.push( 
+                <Text key={`text-${lineIndex}-${currentIndex}`}> 
+                  {line.slice(currentIndex)} 
+                </Text> 
+              ); 
+            } 
+            break; 
+          } 
+          // 키워드 전 텍스트 
+          if (matchedIndex > currentIndex) { 
+            lineParts.push( 
+              <Text key={`text-${lineIndex}-${currentIndex}`}> 
+                {line.slice(currentIndex, matchedIndex)} 
+              </Text> 
+            ); 
+          } 
+          // 키워드 
+          lineParts.push( 
+            <Text 
+              key={`${matchedKeyword.id}-${lineIndex}-${matchedIndex}`} 
+              style={[ 
+                styles.highlight, 
+                isSubtitle && styles.subtitle, 
+              ]} 
+              onPress={() => { 
+                setSelectedWord(matchedKeyword!); 
+                setModalVisible(true); 
+              }} 
+            >
+             {matchedKeyword.word} 
+            </Text> 
+          ); 
+          currentIndex = matchedIndex + matchedKeyword.word.length; 
+        } 
+        // 키워드가 하나도 없는 줄 
+        if (lineParts.length === 0 && line.length > 0) { 
+          lineParts.push( 
+            <Text key={`line-${lineIndex}`}> 
+              {line} 
+            </Text> 
+          ); 
+        } 
+        // 줄 전체를 Text로 감싸서 소제목이면 볼드 처리 
+        parts.push( 
+          <Text 
+            key={`line-${lineIndex}`} 
+            style={isSubtitle ? styles.subtitle : undefined} 
+          > 
+            {lineParts} 
+          </Text> 
+        ); 
+        // 줄바꿈 유지 
+        if (lineIndex < lines.length - 1) { 
+          parts.push("\n"); 
+        } 
+      }); 
+      return <Text style={styles.body}>{parts}</Text>; 
+    };
 
   const handleSaveWord = async () => {
     if (!selectedWord) return;
@@ -166,7 +198,9 @@ export default function News() {
         <Text style={styles.title}>{news.title}</Text>
 
         <View style={styles.infoContainer}>
-          <Text style={styles.info}>카테고리: {news.category}</Text>
+          <Text style={styles.info}>
+            {news.published_at.slice(0, 10).replace(/-/g, ".")}
+          </Text>
         </View>
 
         
@@ -233,7 +267,7 @@ const styles = StyleSheet.create({
   content: { paddingBottom: 20 },
   image: { width: "100%", height: 220, resizeMode: "cover" },
   title: { paddingHorizontal: 20, marginTop: 24, fontFamily: fonts.family.bold, fontSize: 26, color: colors.black, lineHeight: 36 },
-  infoContainer: { alignItems: "flex-end", paddingHorizontal: 20, marginTop: 15, marginBottom: 25 },
+  infoContainer: { alignItems: "flex-end", paddingHorizontal: 25, marginTop: 10, marginBottom: 10 },
   info: { fontFamily: fonts.family.regular, fontSize: 13, color: colors.black },
   section: { paddingHorizontal: 20, marginBottom: 25 },
   body: { fontFamily: fonts.family.regular, fontSize: 17, color: colors.black, lineHeight: 31 },
@@ -254,5 +288,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.family.bold,
     backgroundColor: "#F7D66E",
     color: colors.black,
+  },
+  subtitle: {
+    fontFamily: fonts.family.bold,
   },
 });
