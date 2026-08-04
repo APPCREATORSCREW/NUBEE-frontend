@@ -4,7 +4,7 @@ import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
 import { PolygonBlue, PolygonGreen, PolygonPink, PolygonYellow } from '../../components/icons';
 import Button from '../../components/common/Button';
-import { useUserStore } from '../../store/useUserStore';
+import { useUserStore, POINTS_PER_LEVEL } from '../../store/useUserStore';
 import { useSkinStore, getSkinById } from '../../store/useSkinStore';
 import { useEffect, useState } from 'react';
 import LoadingIndicator from '../../components/common/LoadingIndicator';
@@ -25,20 +25,19 @@ const HomeScreen = () => {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const settings = useUserStore((state) => state.settings);
-  const visitedKeywords = useUserStore((state) => state.visitedKeywords);
   const markKeywordVisited = useUserStore((state) => state.markKeywordVisited);
   const quizAnswers = useUserStore((state) => state.quizAnswers);
+  const newsQuizAnswers = useUserStore((state) => state.newsQuizAnswers);
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const mascot = getSkinById(selectedSkinId).image;
 
   const [isLoading, setIsLoading] = useState(false);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
 
-  // 프로필 조회 api 연동 후
   const level = user?.level ?? 1;
   const points = user?.points ?? 0;
   const streakDays = user?.streak ?? 0;
-  const pointsToNextLevel = 35;
+  const pointsToNextLevel = POINTS_PER_LEVEL - points;
 
   useEffect(() => {
 
@@ -46,20 +45,26 @@ const HomeScreen = () => {
       setIsLoading(true);
       try {
         const response = await KeywordsAPI();
+        console.log("오늘의 키워드 API 응답:", response);
         if (response.isSuccess) {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
+        console.log("키워드 API 에러:", error);
         Alert.alert('Error', getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
     };
     fetchKeywords();
-  }, []);
+  }, [settings.keywordCount]);
+
+  // 키워드 퀴즈 + 뉴스 퀴즈까지 둘 다 끝나야 완전히 완료된 것으로 처리
+  const isFullyCompleted = (keyword_id: number, news_id: number) =>
+    quizAnswers[keyword_id] !== undefined && newsQuizAnswers[news_id] !== undefined;
 
   const handlePressKeyword = (keyword_id: number, news_id: number) => {
-    if (quizAnswers[keyword_id] !== undefined) return;
+    if (isFullyCompleted(keyword_id, news_id)) return;
     markKeywordVisited(keyword_id);
     router.push({ pathname: '/keyword-quiz', params: { keyword_id, news_id } });
   };
@@ -72,7 +77,7 @@ const HomeScreen = () => {
       {items.map((item, i) => {
         const originalIndex = startIndex + i * 2;
         const Polygon = HEXAGON_COLORS[originalIndex % HEXAGON_COLORS.length];
-        const isAnswered = quizAnswers[item.main_keyword.id] !== undefined;
+        const isAnswered = isFullyCompleted(item.main_keyword.id, item.id);
         return (
           <Pressable
             key={item.main_keyword.id}
@@ -124,7 +129,7 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {visitedKeywords.length > 0 && (
+      {newsList.some((item) => newsQuizAnswers[item.id] !== undefined) && (
         <View style={styles.floatingButton}>
           <Button
             label="오늘의 학습을 부모님께 자랑해요"

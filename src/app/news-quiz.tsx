@@ -5,6 +5,7 @@ import { colors } from '../constants/colors';
 import { fonts } from '../constants/fonts';
 import Button from '../components/common/Button';
 import { getNewsQuiz, submitNewsQuiz } from '../apis/newsApi';
+import { useUserStore } from '../store/useUserStore';
 
 interface Option {
   option_number: number;
@@ -72,6 +73,7 @@ const KeywordQuizScreen = () => {
       const data = await submitNewsQuiz(activeNewsId, quiz.id, optionNumber);
       if (data.isSuccess) {
         setQuizResult(data.result);
+        useUserStore.getState().answerNewsQuiz(activeNewsId, optionNumber);
       }
     } catch (error: any) {
       Alert.alert("알림", error.message);
@@ -156,7 +158,7 @@ const KeywordQuizScreen = () => {
           <Button
             label="홈으로 돌아가기"
             variant="filled"
-            onPress={() => router.push("/")}
+            onPress={() => router.push("/home")}
           />
 
           <Text style={styles.finishText}>
