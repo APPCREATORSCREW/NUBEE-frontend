@@ -54,9 +54,13 @@ export default function ReviewScreen() {
         console.log("카테고리 API 실패:", categoryData);
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       console.log("카테고리 API 에러:", error);
+      console.log("상태 코드:", error?.response?.status);
+      console.log("요청 URL:", error?.config?.url);
+      console.log("요청 method:", error?.config?.method);
+      console.log("에러 전체:", error);
       setLoading(false);
     }
   };
