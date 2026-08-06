@@ -126,10 +126,10 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
-            <Text style={styles.newsMeta}>
-              <Text style={styles.newsPublisher}>{item.publisher}</Text>
-              <Text style={styles.newsDate}>{date}</Text>
-            </Text>
+            
+              
+            <Text style={styles.newsDate}>{date}</Text>
+            
           </View>
         </Pressable>
       </View>
@@ -148,38 +148,39 @@ export default function ReviewScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>복습하기</Text>
-
-      <View style={styles.tabRow}>
-        {categories.map((category) => (
-          <Pressable
-            key={category}
-            style={styles.tab}
-            onPress={() => setSelected(category)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selected === category && styles.selectedTabText,
-              ]}
-            >
-              {category}
-            </Text>
-            <View
-              style={[
-                styles.tabLine,
-                selected === category && styles.selectedTabLine,
-              ]}
-            />
-          </Pressable>
-        ))}
-      </View>
-
+    <SafeAreaView style={styles.flex}>
       <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
       >
+        <Text style={styles.title}>복습하기</Text>
+
+        <View style={styles.tabRow}>
+          {categories.map((category) => (
+            <Pressable
+              key={category}
+              style={styles.tab}
+              onPress={() => setSelected(category)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selected === category && styles.selectedTabText,
+                ]}
+              >
+                {category}
+              </Text>
+              <View
+                style={[
+                  styles.tabLine,
+                  selected === category && styles.selectedTabLine,
+                ]}
+              />
+            </Pressable>
+          ))}
+        </View>
+
         {loading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={colors.black} />
@@ -197,11 +198,15 @@ export default function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: 30,
+  },
+
+  content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 80,
   },
   title: {
     fontFamily: fonts.family.bold,
@@ -239,11 +244,7 @@ const styles = StyleSheet.create({
   selectedTabLine: {
     backgroundColor: colors.black,
   },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingBottom: 20,
-    flexGrow: 1,
-  },
+
   monthChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 22,
+    marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.12,
@@ -274,7 +275,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: 90,
+    width: 120,
     height: 90,
     borderRadius: 14,
     backgroundColor: "#D9D9D9",
@@ -290,7 +291,7 @@ const styles = StyleSheet.create({
     color: colors.black,
     lineHeight: 24,
   },
-  newsMeta: {
+  /*newsMeta: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 12,
@@ -302,13 +303,15 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
     marginRight: 24,
-  },
+  },*/
 
   newsDate: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+    alignSelf: "flex-end",
+    marginTop: 12,
   },
   centerContainer: {
     flex: 1,
