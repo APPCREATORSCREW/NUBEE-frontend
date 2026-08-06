@@ -35,22 +35,32 @@ export default function ReviewScreen() {
   const initCategoriesAndNews = async () => {
     try {
       const categoryData = await getCategories();
+      console.log("복습 카테고리 API 응답:", categoryData);
 
       if (categoryData.isSuccess) {
         const categoryList = categoryData.result.categories;
+        console.log("카테고리 목록:", categoryList);
 
         setCategories(categoryList);
 
         if (categoryList.length > 0) {
+          console.log("첫 번째 카테고리 선택: ", categoryList[0]);
           setSelected(categoryList[0]);
         } else {
+          console.log("카테고리가 비어있음");
           setLoading(false);
         }
       } else {
+        console.log("카테고리 API 실패:", categoryData);
         setLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      console.log("카테고리 API 에러:", error);
+      console.log("상태 코드:", error?.response?.status);
+      console.log("요청 URL:", error?.config?.url);
+      console.log("요청 method:", error?.config?.method);
+      console.log("에러 전체:", error);
       setLoading(false);
     }
   };
@@ -58,16 +68,21 @@ export default function ReviewScreen() {
   const loadNews = async (category: string) => {
     try {
       setLoading(true);
+      console.log("뉴스 조회 요청 카테고리:", category);
 
       const data = await getNewsHistory(category);
+      console.log("뉴스 조회 API 응답:", data);
 
       if (data.isSuccess) {
+        console.log("뉴스 목록:", data.result.news);
         setNewsList(data.result.news);
       } else {
+        console.log("뉴스 조회 실패:", data);
         setNewsList([]);
       }
     } catch (error) {
       console.error(error);
+      console.log("뉴스 조회 에러:", error);
       setNewsList([]);
     } finally {
       setLoading(false);
@@ -96,10 +111,12 @@ export default function ReviewScreen() {
         <Pressable
           style={styles.newsCard}
           onPress={() => {
+            console.log("복습에서 뉴스 클릭:", item.newsId);
             router.push({
-              pathname: "/news-detail",
+              pathname: "/news",
               params: {
-                news_id: item.newsId,
+                newsId: item.newsId,
+                fromReview: "true",
               },
             });
           }}
@@ -113,7 +130,10 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
+            
+              
             <Text style={styles.newsDate}>{date}</Text>
+            
           </View>
         </Pressable>
       </View>
@@ -132,38 +152,39 @@ export default function ReviewScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>복습하기</Text>
-
-      <View style={styles.tabRow}>
-        {categories.map((category) => (
-          <Pressable
-            key={category}
-            style={styles.tab}
-            onPress={() => setSelected(category)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selected === category && styles.selectedTabText,
-              ]}
-            >
-              {category}
-            </Text>
-            <View
-              style={[
-                styles.tabLine,
-                selected === category && styles.selectedTabLine,
-              ]}
-            />
-          </Pressable>
-        ))}
-      </View>
-
+    <SafeAreaView style={styles.flex}>
       <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
       >
+        <Text style={styles.title}>복습하기</Text>
+
+        <View style={styles.tabRow}>
+          {categories.map((category) => (
+            <Pressable
+              key={category}
+              style={styles.tab}
+              onPress={() => setSelected(category)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selected === category && styles.selectedTabText,
+                ]}
+              >
+                {category}
+              </Text>
+              <View
+                style={[
+                  styles.tabLine,
+                  selected === category && styles.selectedTabLine,
+                ]}
+              />
+            </Pressable>
+
+          ))}
+        </View>
         {loading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={colors.black} />
@@ -181,11 +202,15 @@ export default function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: 30,
+  },
+
+  content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 80,
   },
   title: {
     fontFamily: fonts.family.bold,
@@ -223,11 +248,7 @@ const styles = StyleSheet.create({
   selectedTabLine: {
     backgroundColor: colors.black,
   },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingBottom: 20,
-    flexGrow: 1,
-  },
+  
   monthChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,
@@ -249,7 +270,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 22,
+    marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.12,
@@ -258,7 +279,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: 90,
+    width: 120,
     height: 90,
     borderRadius: 14,
     backgroundColor: "#D9D9D9",
@@ -274,13 +295,26 @@ const styles = StyleSheet.create({
     color: colors.black,
     lineHeight: 24,
   },
-  newsDate: {
+  /*newsMeta: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 12,
-    alignSelf: "flex-end",
+  },
+
+  newsPublisher: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+    marginRight: 24,
+  },*/
+
+  newsDate: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
+    color: colors.black,
+    alignSelf: "flex-end",
   },
   centerContainer: {
     flex: 1,
