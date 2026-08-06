@@ -107,10 +107,12 @@ export default function ReviewScreen() {
         <Pressable
           style={styles.newsCard}
           onPress={() => {
+            console.log("복습에서 뉴스 클릭:", item.newsId);
             router.push({
-              pathname: "/news-detail",
+              pathname: "/news",
               params: {
-                news_id: item.newsId,
+                newsId: item.newsId,
+                fromReview: "true",
               },
             });
           }}
@@ -124,7 +126,10 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
-            <Text style={styles.newsDate}>{date}</Text>
+            <Text style={styles.newsMeta}>
+              <Text style={styles.newsPublisher}>{item.publisher}</Text>
+              <Text style={styles.newsDate}>{date}</Text>
+            </Text>
           </View>
         </Pressable>
       </View>
@@ -285,9 +290,21 @@ const styles = StyleSheet.create({
     color: colors.black,
     lineHeight: 24,
   },
-  newsDate: {
+  newsMeta: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 12,
-    alignSelf: "flex-end",
+  },
+
+  newsPublisher: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
+    color: colors.black,
+    marginRight: 24,
+  },
+
+  newsDate: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
