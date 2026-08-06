@@ -6,6 +6,7 @@ export interface NewsItem {
   title: string;
   imageUrl: string;
   viewedAt: string;
+  publisher: string;
 }
 
 export interface NewsHistoryResponse {
@@ -60,6 +61,9 @@ export const getNewsHistory = async (
         },
       }
     );
+
+    console.log("복습 뉴스 실제 응답:", response.data);
+    console.log("복습 뉴스 목록:", response.data.result.news);
 
     return response.data;
   } catch (error: unknown) {

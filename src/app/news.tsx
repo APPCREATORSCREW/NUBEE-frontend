@@ -40,8 +40,9 @@ interface NewsData {
 }
 
 export default function News() {
-  const { newsId } = useLocalSearchParams<{ newsId?: string }>();
+  const { newsId, fromReview } = useLocalSearchParams<{ newsId?: string; fromReview?: string }>();
   console.log("newsId:", newsId);
+  console.log("fromReview:", fromReview);
   const activeNewsId = Number(newsId);
 
   const [news, setNews] = useState<NewsData | null>(null);
@@ -250,13 +251,20 @@ export default function News() {
         </View>
       </Modal>
 
-      <View style={styles.buttonContainer}>
-        <Button
-          label="퀴즈 풀기"
-          variant="filled"
-          onPress={() => router.push({ pathname: "/news-quiz", params: { newsId: activeNewsId } })}
-        />
-      </View>
+      {fromReview !== "true" && (
+        <View style={styles.buttonContainer}>
+          <Button
+            label="퀴즈 풀기"
+            variant="filled"
+            onPress={() =>
+              router.push({
+                pathname: "/news-quiz",
+                params: { newsId: activeNewsId },
+              })
+            }
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
