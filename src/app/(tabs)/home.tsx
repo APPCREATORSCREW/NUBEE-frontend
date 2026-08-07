@@ -117,15 +117,15 @@ const HomeScreen = () => {
     fetchKeywords();
   }, [settings.keywordCount]);
 
-  // 키워드 퀴즈 + 뉴스 퀴즈까지 둘 다 끝나야 완전히 완료된 것으로 처리
-  const isFullyCompleted = (keyword_id: number, news_id: number) =>
-    quizAnswers[keyword_id] !== undefined &&
-    newsQuizAnswers[news_id] !== undefined;
+  // 백엔드에서 제공하는 solved 필드 + quizAnswers와 newsQuizAnswers를 모두 확인
+  const isFullyCompleted = (item: NewsItem) =>
+    item.solved || (quizAnswers[item.main_keyword.id] !== undefined && newsQuizAnswers[item.id] !== undefined);
+    
 
-  const handlePressKeyword = (keyword_id: number, news_id: number) => {
-    if (isFullyCompleted(keyword_id, news_id)) return;
-    markKeywordVisited(keyword_id);
-    router.push({ pathname: "/keyword-quiz", params: { keyword_id, news_id } });
+  const handlePressKeyword = (item: NewsItem) => {
+    if (isFullyCompleted(item)) return;
+    markKeywordVisited(item.main_keyword.id);
+    router.push({ pathname: "/keyword-quiz", params: { keyword_id: item.main_keyword.id, news_id: item.id } });
   };
 
   const leftColumn = newsList.filter((_, index) => index % 2 === 0);
@@ -136,12 +136,12 @@ const HomeScreen = () => {
       {items.map((item, i) => {
         const originalIndex = startIndex + i * 2;
         const Polygon = HEXAGON_COLORS[originalIndex % HEXAGON_COLORS.length];
-        const isAnswered = isFullyCompleted(item.main_keyword.id, item.id);
+        const isAnswered = isFullyCompleted(item);
         return (
           <Pressable
             key={item.main_keyword.id}
             style={[styles.hexagon, isAnswered && styles.hexagonVisited]}
-            onPress={() => handlePressKeyword(item.main_keyword.id, item.id)}
+            onPress={() => handlePressKeyword(item)}
             disabled={isAnswered}
           >
             <Polygon width={HEX_WIDTH} height={HEX_HEIGHT} />
@@ -157,7 +157,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
         <View style={styles.topRow}>
           <View style={[styles.badge, styles.levelBadge]}>
-            <Text style={styles.badgeText}>🐝 Lv.{level}</Text>
+            <Text style={styles.badgeText}>🐝 LV.{level}</Text>
           </View>
           <View style={[styles.badge, styles.pointBadge]}>
             <Text style={styles.badgeText}>🍀 {points}P</Text>

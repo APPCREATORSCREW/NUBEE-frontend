@@ -16,6 +16,7 @@ export interface NewsItem {
     summary: string;
     image_url: string;
     main_keyword: MainKeyword;
+    solved: boolean;
 }
 
 export interface KeywordsResponse {
