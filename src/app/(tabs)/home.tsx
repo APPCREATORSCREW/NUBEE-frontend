@@ -1,15 +1,29 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert, Share, } from 'react-native';
-import { useRouter } from 'expo-router';
-import { colors } from '../../constants/colors';
-import { fonts } from '../../constants/fonts';
-import { PolygonBlue, PolygonGreen, PolygonPink, PolygonYellow } from '../../components/icons';
-import Button from '../../components/common/Button';
-import { useUserStore, POINTS_PER_LEVEL } from '../../store/useUserStore';
-import { useSkinStore, getSkinById } from '../../store/useSkinStore';
-import { useEffect, useState } from 'react';
-import LoadingIndicator from '../../components/common/LoadingIndicator';
-import { KeywordsAPI, NewsItem, SendNewsAPI } from '../../apis/home';
-import { getErrorMessage } from '../../utils/getErrorMessage';
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+  Share,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { colors } from "../../constants/colors";
+import { fonts } from "../../constants/fonts";
+import {
+  PolygonBlue,
+  PolygonGreen,
+  PolygonPink,
+  PolygonYellow,
+} from "../../components/icons";
+import Button from "../../components/common/Button";
+import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
+import { useSkinStore, getSkinById } from "../../store/useSkinStore";
+import { useEffect, useState } from "react";
+import LoadingIndicator from "../../components/common/LoadingIndicator";
+import { KeywordsAPI, NewsItem, SendNewsAPI } from "../../apis/home";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
 
@@ -19,7 +33,7 @@ const HEX_HEIGHT = 180;
 const COLUMN_OVERLAP = HEX_WIDTH * 0.21;
 const ROW_OFFSET = HEX_HEIGHT / 2.21;
 
-const ROW_GAP = (-HEX_HEIGHT) / 10.5;
+const ROW_GAP = -HEX_HEIGHT / 10.5;
 
 const HomeScreen = () => {
   const router = useRouter();
@@ -40,7 +54,6 @@ const HomeScreen = () => {
   const pointsToNextLevel = POINTS_PER_LEVEL - points;
 
   useEffect(() => {
-
     const fetchKeywords = async () => {
       setIsLoading(true);
       try {
@@ -51,7 +64,7 @@ const HomeScreen = () => {
         }
       } catch (error) {
         console.log("키워드 API 에러:", error);
-        Alert.alert('Error', getErrorMessage(error));
+        Alert.alert("Error", getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -61,12 +74,13 @@ const HomeScreen = () => {
 
   // 키워드 퀴즈 + 뉴스 퀴즈까지 둘 다 끝나야 완전히 완료된 것으로 처리
   const isFullyCompleted = (keyword_id: number, news_id: number) =>
-    quizAnswers[keyword_id] !== undefined && newsQuizAnswers[news_id] !== undefined;
+    quizAnswers[keyword_id] !== undefined &&
+    newsQuizAnswers[news_id] !== undefined;
 
   const handlePressKeyword = (keyword_id: number, news_id: number) => {
     if (isFullyCompleted(keyword_id, news_id)) return;
     markKeywordVisited(keyword_id);
-    router.push({ pathname: '/keyword-quiz', params: { keyword_id, news_id } });
+    router.push({ pathname: "/keyword-quiz", params: { keyword_id, news_id } });
   };
 
   const leftColumn = newsList.filter((_, index) => index % 2 === 0);
@@ -155,7 +169,7 @@ const HomeScreen = () => {
                       ? learnedKeywords
                           .map(
                             (item: { word: string; originalUrl: string }) =>
-                              `• ${item.word}\n  🔗 ${item.originalUrl}`
+                              `• ${item.word}\n  🔗 ${item.originalUrl}`,
                           )
                           .join("\n")
                       : "학습한 키워드가 없어요.";
@@ -197,13 +211,13 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 30,
   },
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -221,11 +235,11 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   mascotRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
     marginBottom: 2,
-    marginLeft: 20
+    marginLeft: 20,
   },
   mascot: {
     width: 135,
@@ -245,8 +259,8 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   streakBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 3,
     backgroundColor: colors.yellow100,
     borderRadius: 16,
@@ -278,8 +292,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   hexGrid: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
   },
   column: {},
   columnOffset: {
@@ -290,14 +304,14 @@ const styles = StyleSheet.create({
     width: HEX_WIDTH,
     height: HEX_HEIGHT,
     marginBottom: ROW_GAP,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   hexagonVisited: {
     opacity: 0.35,
   },
   hexagonLabel: {
-    position: 'absolute',
+    position: "absolute",
     fontFamily: fonts.family.bold,
     // header 사이즈보다 커서 임시 조절
     fontSize: 27,
@@ -305,7 +319,7 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
   floatingButton: {
-    position: 'absolute',
+    position: "absolute",
     left: 20,
     right: 20,
     bottom: 16,

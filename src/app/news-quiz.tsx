@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { colors } from '../constants/colors';
-import { fonts } from '../constants/fonts';
-import Button from '../components/common/Button';
-import { getNewsQuiz, submitNewsQuiz } from '../apis/newsApi';
-import { useUserStore } from '../store/useUserStore';
+import React, { useState, useEffect } from "react";
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { colors } from "../constants/colors";
+import { fonts } from "../constants/fonts";
+import Button from "../components/common/Button";
+import { getNewsQuiz, submitNewsQuiz } from "../apis/newsApi";
+import { useUserStore } from "../store/useUserStore";
 
 interface Option {
   option_number: number;
@@ -46,7 +54,9 @@ const KeywordQuizScreen = () => {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [optionLineCount, setOptionLineCount] = useState<Record<number, number>>({});
+  const [optionLineCount, setOptionLineCount] = useState<
+    Record<number, number>
+  >({});
 
   useEffect(() => {
     fetchQuiz();
@@ -88,7 +98,10 @@ const KeywordQuizScreen = () => {
 
   if (loading || !quiz) {
     return (
-      <ScrollView contentContainerStyle={[styles.container, styles.center]} style={styles.flex}>
+      <ScrollView
+        contentContainerStyle={[styles.container, styles.center]}
+        style={styles.flex}
+      >
         <ActivityIndicator size="large" color={colors.black} />
       </ScrollView>
     );
@@ -104,7 +117,9 @@ const KeywordQuizScreen = () => {
   };
 
   const isOptionActive = (optionNumber: number) =>
-    answered && (optionNumber === quizResult.correct_answer || optionNumber === selectedIndex);
+    answered &&
+    (optionNumber === quizResult.correct_answer ||
+      optionNumber === selectedIndex);
 
   return (
     <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
@@ -146,13 +161,17 @@ const KeywordQuizScreen = () => {
         <View
           style={[
             styles.feedbackBox,
-            quizResult.is_correct ? styles.feedbackBoxCorrect : styles.feedbackBoxWrong,
+            quizResult.is_correct
+              ? styles.feedbackBoxCorrect
+              : styles.feedbackBoxWrong,
           ]}
         >
           <Text style={styles.feedbackTitle}>
-            {quizResult.is_correct ? '🎉 정답이에요!' : '❌ 정답이 아니에요'}
+            {quizResult.is_correct ? "🎉 정답이에요!" : "❌ 정답이 아니에요"}
           </Text>
-          <Text style={styles.feedbackDescription}>{quizResult.explanation}</Text>
+          <Text style={styles.feedbackDescription}>
+            {quizResult.explanation}
+          </Text>
         </View>
       )}
 
@@ -179,34 +198,82 @@ export default KeywordQuizScreen;
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.background },
-  center: { justifyContent: 'center', alignItems: 'center' },
+  center: { justifyContent: "center", alignItems: "center" },
   container: { flexGrow: 1, padding: 20, paddingBottom: 40 },
-  title: { fontFamily: fonts.family.bold, fontSize: 24, color: colors.black, marginTop: 50, paddingBottom: 20 },
-  question: { fontFamily: fonts.family.bold, fontSize: 20, color: colors.black, marginBottom: 30, lineHeight: 28 },
+  title: {
+    fontFamily: fonts.family.bold,
+    fontSize: 24,
+    color: colors.black,
+    marginTop: 50,
+    paddingBottom: 20,
+  },
+  question: {
+    fontFamily: fonts.family.bold,
+    fontSize: 20,
+    color: colors.black,
+    marginBottom: 30,
+    lineHeight: 28,
+  },
   optionList: { gap: 18 },
-  option: { minHeight: 52, borderRadius: 16, borderWidth: 1, justifyContent: 'center', paddingHorizontal: 16, paddingVertical: 12 },
-  optionDefault: { backgroundColor: colors.background, borderColor: colors.blue400 },
-  optionCorrect: { backgroundColor: colors.blue400, borderColor: colors.blue400 },
+  option: {
+    minHeight: 52,
+    borderRadius: 16,
+    borderWidth: 1,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  optionDefault: {
+    backgroundColor: colors.background,
+    borderColor: colors.blue400,
+  },
+  optionCorrect: {
+    backgroundColor: colors.blue400,
+    borderColor: colors.blue400,
+  },
   optionWrong: { backgroundColor: colors.red100, borderColor: colors.red100 },
-  optionText: { 
-    fontFamily: fonts.family.regular, 
-    fontSize: 16, 
-    color: colors.black, 
-    lineHeight: 22, 
-    width: '100%' 
+  optionText: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+    color: colors.black,
+    lineHeight: 22,
+    width: "100%",
   },
   optionTextCenter: {
-    textAlign: 'center',
+    textAlign: "center",
   },
   optionTextLeft: {
-    textAlign: 'left',
+    textAlign: "left",
   },
   optionTextActive: { color: colors.background },
   feedbackBox: { borderRadius: 16, borderWidth: 2, padding: 16, marginTop: 30 },
-  feedbackBoxCorrect: { backgroundColor: colors.background, borderColor: colors.blue400 },
-  feedbackBoxWrong: { backgroundColor: colors.background, borderColor: colors.red400 },
-  feedbackTitle: { fontFamily: fonts.family.bold, fontSize: 16, color: colors.black, marginBottom: 8 },
-  feedbackDescription: { fontFamily: fonts.family.regular, fontSize: 15, color: colors.black, lineHeight: 22 },
+  feedbackBoxCorrect: {
+    backgroundColor: colors.background,
+    borderColor: colors.blue400,
+  },
+  feedbackBoxWrong: {
+    backgroundColor: colors.background,
+    borderColor: colors.red400,
+  },
+  feedbackTitle: {
+    fontFamily: fonts.family.bold,
+    fontSize: 16,
+    color: colors.black,
+    marginBottom: 8,
+  },
+  feedbackDescription: {
+    fontFamily: fonts.family.regular,
+    fontSize: 15,
+    color: colors.black,
+    lineHeight: 22,
+  },
   finishArea: { marginTop: 24 },
-  finishText: { marginTop: 18, textAlign: "center", fontFamily: fonts.family.regular, fontSize: 15, color: colors.black },
+  finishText: {
+    marginTop: 18,
+    textAlign: "center",
+    fontFamily: fonts.family.regular,
+    fontSize: 15,
+    color: colors.black,
+  },
 });
