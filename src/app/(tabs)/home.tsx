@@ -8,7 +8,7 @@ import {
   Alert,
   Share,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import {
@@ -20,10 +20,13 @@ import {
 import Button from "../../components/common/Button";
 import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
 import { useSkinStore, getSkinById } from "../../store/useSkinStore";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import LoadingIndicator from "../../components/common/LoadingIndicator";
+import LevelUp from "../../components/common/LevelUp";
 import { KeywordsAPI, NewsItem, SendNewsAPI } from "../../apis/home";
 import { getErrorMessage } from "../../utils/getErrorMessage";
+import { syncProfile } from "../../utils/syncProfile";
+import type { ProfileSkin } from "../../apis/profileAPI";
 
 const HEXAGON_COLORS = [PolygonYellow, PolygonGreen, PolygonBlue, PolygonPink];
 
@@ -47,18 +50,61 @@ const HomeScreen = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [levelUpVisible, setLevelUpVisible] = useState(false);
+  const [unlockedSkin, setUnlockedSkin] = useState<ProfileSkin | null>(null);
 
   const level = user?.level ?? 1;
   const points = user?.points ?? 0;
   const streakDays = user?.streak ?? 0;
   const pointsToNextLevel = POINTS_PER_LEVEL - points;
 
+  // 홈에 진입할 때 서버의 최신 프로필 동기화 및 레벨업 여부 확인
+  useFocusEffect(
+    useCallback(() => {
+      const fetchProfile = async () => {
+        try {
+          const previousLevel = useUserStore.getState().user?.level ?? 0;
+          const previousOwnedSkinIds = useSkinStore
+            .getState()
+            .skins.filter((skin) => skin.owned)
+            .map((skin) => skin.apiId);
+
+          const profile = await syncProfile();
+
+          console.log("홈 프로필 동기화 결과:", {
+            previousLevel,
+            currentLevel: profile.currentLevel,
+            currentPoint: profile.currentPoint,
+            currentStreak: profile.currentStreak,
+          });
+
+          const leveledUp =
+            previousLevel > 0 && profile.currentLevel > previousLevel;
+
+          if (!leveledUp) return;
+
+          const newlyUnlockedSkin =
+            profile.skins.find(
+              (skin) =>
+                skin.owned && !previousOwnedSkinIds.includes(skin.skinId),
+            ) ?? null;
+
+          setUnlockedSkin(newlyUnlockedSkin);
+          setLevelUpVisible(true);
+        } catch (error) {
+          console.error("홈 프로필 동기화 실패:", error);
+        }
+      };
+
+      fetchProfile();
+    }, []),
+  );
+
   useEffect(() => {
     const fetchKeywords = async () => {
       setIsLoading(true);
       try {
         const response = await KeywordsAPI();
-        console.log("오늘의 키워드 API 응답:", response);
         if (response.isSuccess) {
           setNewsList(response.result.news_list);
         }
@@ -195,6 +241,18 @@ const HomeScreen = () => {
       )}
 
       {isLoading && <LoadingIndicator />}
+
+      <LevelUp
+        visible={levelUpVisible}
+        skinName={unlockedSkin?.skinName}
+        skinImage={
+          unlockedSkin?.imageUrl ? { uri: unlockedSkin.imageUrl } : undefined
+        }
+        onClose={() => {
+          setLevelUpVisible(false);
+          setUnlockedSkin(null);
+        }}
+      />
     </View>
   );
 };
