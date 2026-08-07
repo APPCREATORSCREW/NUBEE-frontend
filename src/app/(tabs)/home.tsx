@@ -71,13 +71,6 @@ const HomeScreen = () => {
 
           const profile = await syncProfile();
 
-          console.log("홈 프로필 동기화 결과:", {
-            previousLevel,
-            currentLevel: profile.currentLevel,
-            currentPoint: profile.currentPoint,
-            currentStreak: profile.currentStreak,
-          });
-
           const leveledUp =
             previousLevel > 0 && profile.currentLevel > previousLevel;
 
@@ -109,7 +102,7 @@ const HomeScreen = () => {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
-        Alert.alert('Error', getErrorMessage(error));
+        Alert.alert("Error", getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -119,13 +112,17 @@ const HomeScreen = () => {
 
   // 백엔드에서 제공하는 solved 필드 + quizAnswers와 newsQuizAnswers를 모두 확인
   const isFullyCompleted = (item: NewsItem) =>
-    item.solved || (quizAnswers[item.main_keyword.id] !== undefined && newsQuizAnswers[item.id] !== undefined);
-    
+    item.solved ||
+    (quizAnswers[item.main_keyword.id] !== undefined &&
+      newsQuizAnswers[item.id] !== undefined);
 
   const handlePressKeyword = (item: NewsItem) => {
     if (isFullyCompleted(item)) return;
     markKeywordVisited(item.main_keyword.id);
-    router.push({ pathname: "/keyword-quiz", params: { keyword_id: item.main_keyword.id, news_id: item.id } });
+    router.push({
+      pathname: "/keyword-quiz",
+      params: { keyword_id: item.main_keyword.id, news_id: item.id },
+    });
   };
 
   const leftColumn = newsList.filter((_, index) => index % 2 === 0);
@@ -188,13 +185,15 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {newsList.some((item) => newsQuizAnswers[item.id] !== undefined || item.solved) && (
+      {newsList.some(
+        (item) => newsQuizAnswers[item.id] !== undefined || item.solved,
+      ) && (
         <View style={styles.floatingButton}>
           <Button
             label="오늘의 학습을 부모님께 자랑해요"
             variant="filled"
             onPress={async () => {
-              try{
+              try {
                 const response = await SendNewsAPI();
                 if (response.isSuccess) {
                   const {
@@ -227,7 +226,6 @@ const HomeScreen = () => {
                   });
                 }
               } catch (error) {
-        
                 Alert.alert("오류", getErrorMessage(error));
               }
             }}
