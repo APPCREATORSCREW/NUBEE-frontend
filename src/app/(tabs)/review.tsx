@@ -9,10 +9,12 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export default function ReviewScreen() {
   const [categories, setCategories] = useState<string[]>([]);
@@ -52,9 +54,8 @@ export default function ReviewScreen() {
         setCategories(dynamicCategories);
         setSelected(activeCategory);
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
+    } catch (error: any) {
+      Alert.alert("카테고리 API 에러", getErrorMessage(error));
       setLoading(false);
     }
   };

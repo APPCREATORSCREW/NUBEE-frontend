@@ -96,7 +96,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
         <View style={styles.topRow}>
           <View style={[styles.badge, styles.levelBadge]}>
-            <Text style={styles.badgeText}>🐝 Lv.{level}</Text>
+            <Text style={styles.badgeText}>🐝 LV.{level}</Text>
           </View>
           <View style={[styles.badge, styles.pointBadge]}>
             <Text style={styles.badgeText}>🍀 {points}P</Text>
