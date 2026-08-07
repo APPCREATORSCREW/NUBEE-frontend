@@ -1,4 +1,4 @@
-import * as Notifications from "expo-notifications";
+/*import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
 const ANDROID_CHANNEL_ID = "default";
@@ -55,3 +55,4 @@ export const scheduleDailyStudyNotification = async (time: string) => {
     },
   });
 };
+*/
