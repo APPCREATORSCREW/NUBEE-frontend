@@ -10,7 +10,7 @@ import {
   Modal,
   Alert,
   Linking,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -41,7 +41,10 @@ interface NewsData {
 }
 
 export default function News() {
-  const { newsId, fromReview } = useLocalSearchParams<{ newsId?: string; fromReview?: string }>();
+  const { newsId, fromReview } = useLocalSearchParams<{
+    newsId?: string;
+    fromReview?: string;
+  }>();
   const activeNewsId = Number(newsId);
 
   const [news, setNews] = useState<NewsData | null>(null);
@@ -98,10 +101,10 @@ export default function News() {
     if (!news) return null;
     const lines = news.summary.split("\n");
     const parts: React.ReactNode[] = [];
-    
+
     // 키워드를 긴 순서대로 정렬 (겹치는 단어 방지)
     const keywords = [...news.related_keywords].sort(
-      (a, b) => b.word.length - a.word.length
+      (a, b) => b.word.length - a.word.length,
     );
 
     lines.forEach((line, lineIndex) => {
@@ -126,7 +129,7 @@ export default function News() {
             lineParts.push(
               <Text key={`text-${lineIndex}-${currentIndex}`}>
                 {line.slice(currentIndex)}
-              </Text>
+              </Text>,
             );
           }
           break;
@@ -136,34 +139,27 @@ export default function News() {
           lineParts.push(
             <Text key={`text-${lineIndex}-${currentIndex}`}>
               {line.slice(currentIndex, matchedIndex)}
-            </Text>
+            </Text>,
           );
         }
 
         lineParts.push(
           <Text
             key={`${matchedKeyword.id}-${lineIndex}-${matchedIndex}`}
-            style={[
-              styles.highlight,
-              isSubtitle && styles.subtitle,
-            ]}
+            style={[styles.highlight, isSubtitle && styles.subtitle]}
             onPress={() => {
               setSelectedWord(matchedKeyword!);
               setModalVisible(true);
             }}
           >
             {matchedKeyword.word}
-          </Text>
+          </Text>,
         );
         currentIndex = matchedIndex + matchedKeyword.word.length;
       }
 
       if (lineParts.length === 0 && line.length > 0) {
-        lineParts.push(
-          <Text key={`line-${lineIndex}`}>
-            {line}
-          </Text>
-        );
+        lineParts.push(<Text key={`line-${lineIndex}`}>{line}</Text>);
       }
 
       parts.push(
@@ -172,7 +168,7 @@ export default function News() {
           style={isSubtitle ? styles.subtitle : undefined}
         >
           {lineParts}
-        </Text>
+        </Text>,
       );
 
       if (lineIndex < lines.length - 1) {
@@ -204,21 +200,23 @@ export default function News() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         <Image source={{ uri: news.image_url }} style={styles.image} />
 
         <Text style={styles.title}>{news.title}</Text>
 
         <View style={styles.infoContainer}>
           <Text style={styles.info}>
-            {news.publisher}{"  "}
+            {news.publisher}
+            {"  "}
             {news.published_at.slice(0, 10).replace(/-/g, ".")}
           </Text>
         </View>
 
-        <View style={styles.section}>
-          {renderSummary()}
-        </View>
+        <View style={styles.section}>{renderSummary()}</View>
 
         {/* 원문 링크 */}
         {news.original_url && (
@@ -247,14 +245,17 @@ export default function News() {
           <View style={styles.modalCard}>
             <View style={styles.modalDot} />
             <Text style={styles.modalTitle}>{selectedWord?.word}</Text>
-            
+
             {/* 파싱된 설명 출력 */}
             <Text style={styles.modalDescription}>
               {getParsedExplanation(selectedWord)}
             </Text>
 
             <View style={styles.modalButtonRow}>
-              <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Pressable
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}
+              >
                 <Text style={styles.closeButtonText}>닫기</Text>
               </Pressable>
 
@@ -289,27 +290,126 @@ const styles = StyleSheet.create({
   center: { justifyContent: "center", alignItems: "center" },
   content: { paddingBottom: 20 },
   image: { width: "100%", height: 220, resizeMode: "cover" },
-  title: { paddingHorizontal: 20, marginTop: 24, fontFamily: fonts.family.bold, fontSize: 26, color: colors.black, lineHeight: 36 },
-  infoContainer: { alignItems: "flex-end", paddingHorizontal: 25, marginTop: 10, marginBottom: 10 },
+  title: {
+    paddingHorizontal: 20,
+    marginTop: 24,
+    fontFamily: fonts.family.bold,
+    fontSize: 26,
+    color: colors.black,
+    lineHeight: 36,
+  },
+  infoContainer: {
+    alignItems: "flex-end",
+    paddingHorizontal: 25,
+    marginTop: 10,
+    marginBottom: 10,
+  },
   info: { fontFamily: fonts.family.regular, fontSize: 13, color: colors.black },
   section: { paddingHorizontal: 20, marginBottom: 25 },
-  body: { fontFamily: fonts.family.regular, fontSize: 17, color: colors.black, lineHeight: 31 },
-  linkButton: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", marginLeft: 20, marginTop: 6, backgroundColor: "#FFF7DE", borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
-  linkText: { marginLeft: 6, fontFamily: fonts.family.bold, fontSize: 15, color: colors.black },
-  buttonContainer: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: colors.background, paddingHorizontal: 20, paddingTop: 16, paddingBottom: 32 },
-  modalBackground: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center" },
-  modalCard: { width: "84%", backgroundColor: "#fff", borderRadius: 24, paddingHorizontal: 24, paddingVertical: 24, elevation: 8 },
-  modalDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: "#F7D66E", marginBottom: 16 },
-  modalTitle: { textAlign: "center", fontFamily: fonts.family.bold, fontSize: 26, color: colors.black, marginBottom: 16 },
-  modalDescription: { textAlign: "center", fontFamily: fonts.family.regular, fontSize: 15, lineHeight: 24, color: colors.black },
+  body: {
+    fontFamily: fonts.family.regular,
+    fontSize: 18,
+    letterSpacing: 18 * 0.02,
+    color: colors.black,
+    lineHeight: 31,
+  },
+  linkButton: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 20,
+    marginTop: 6,
+    backgroundColor: colors.yellow100,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  linkText: {
+    marginLeft: 6,
+    fontFamily: fonts.family.bold,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+    color: colors.black,
+  },
+  buttonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 32,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalCard: {
+    width: "84%",
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 24,
+    elevation: 8,
+  },
+  modalDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#F7D66E",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    textAlign: "center",
+    fontFamily: fonts.family.bold,
+    fontSize: 26,
+    color: colors.black,
+    marginBottom: 16,
+  },
+  modalDescription: {
+    textAlign: "center",
+    fontFamily: fonts.family.regular,
+    fontSize: 15,
+    lineHeight: 24,
+    color: colors.black,
+  },
   modalButtonRow: { flexDirection: "row", marginTop: 24 },
-  closeButton: { flex: 1, borderWidth: 1.5, borderColor: "#F7D66E", borderRadius: 16, paddingVertical: 14, marginRight: 8 },
-  closeButtonText: { textAlign: "center", color: "#F7D66E", fontFamily: fonts.family.bold, fontSize: 16 },
-  saveButton: { flex: 1, backgroundColor: "#F7D66E", borderRadius: 16, paddingVertical: 14, marginLeft: 8 },
-  saveButtonText: { textAlign: "center", color: colors.black, fontFamily: fonts.family.bold, fontSize: 16 },
+  closeButton: {
+    flex: 1,
+    backgroundColor: colors.yellow100,
+    borderWidth: 1,
+    borderColor: colors.yellow400,
+    borderRadius: 16,
+    paddingVertical: 14,
+    marginRight: 8,
+  },
+  closeButtonText: {
+    textAlign: "center",
+    color: colors.black,
+    fontFamily: fonts.family.bold,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+  },
+  saveButton: {
+    flex: 1,
+    backgroundColor: colors.yellow400,
+    borderRadius: 16,
+    paddingVertical: 14,
+    marginLeft: 8,
+  },
+  saveButtonText: {
+    textAlign: "center",
+    color: colors.black,
+    fontFamily: fonts.family.bold,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+  },
   highlight: {
     fontFamily: fonts.family.bold,
-    backgroundColor: "#F7D66E",
+    backgroundColor: colors.yellow400,
     color: colors.black,
   },
   subtitle: {
