@@ -187,7 +187,6 @@ export default function News() {
     try {
       const data = await addWordToBook(selectedWord.id);
       if (data.isSuccess) {
-        Alert.alert("성공", "단어장에 추가되었습니다!");
         setModalVisible(false);
       }
     } catch (error: any) {
