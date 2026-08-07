@@ -41,7 +41,7 @@ export default function FlashCard() {
   const [step, setStep] = useState(1); // 몇 번째 카드를 풀고 있는지 나타내는 카운터 (1부터 시작)
   const [isFront, setIsFront] = useState(true);
   const [finished, setFinished] = useState(false);
-  
+
   const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
   const skin = getSkinById(selectedSkinId);
 
@@ -63,7 +63,10 @@ export default function FlashCard() {
           setTotalWords(mergedWords.length);
         }
       } catch (error: any) {
-        Alert.alert("오류", error.message || "단어 목록을 불러오지 못했습니다.");
+        Alert.alert(
+          "오류",
+          error.message || "단어 목록을 불러오지 못했습니다.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -113,7 +116,7 @@ export default function FlashCard() {
 
       if (data.isSuccess) {
         const updatedWords = words.filter(
-          (word) => word.userKeywordId !== current.userKeywordId
+          (word) => word.userKeywordId !== current.userKeywordId,
         );
 
         setWords(updatedWords);
@@ -163,9 +166,14 @@ export default function FlashCard() {
   if (finished) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <Pressable onPress={() => router.back()}><ArrowCircleLeft /></Pressable>
+            <Pressable onPress={() => router.back()}>
+              <ArrowCircleLeft />
+            </Pressable>
           </View>
           <View style={styles.progressRow}>
             <View style={styles.progressBackground}>
@@ -178,10 +186,16 @@ export default function FlashCard() {
           <View style={styles.finishCard}>
             <View style={{ height: 40 }} />
             <Image source={skin.image} style={styles.finishImage} />
-            <Text style={styles.finishTitle}>축하합니다{"\n"}학습이 끝났어요!</Text>
+            <Text style={styles.finishTitle}>
+              축하합니다{"\n"}학습이 끝났어요!
+            </Text>
           </View>
           <View style={{ paddingHorizontal: 0, marginTop: 20 }}>
-            <Button label="홈으로" variant="outlined" onPress={() => router.replace("/(tabs)/home")} />
+            <Button
+              label="홈으로"
+              variant="outlined"
+              onPress={() => router.replace("/(tabs)/home")}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -191,15 +205,26 @@ export default function FlashCard() {
   if (words.length === 0) {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
-            <Pressable onPress={() => router.back()}><ArrowCircleLeft /></Pressable>
+            <Pressable onPress={() => router.back()}>
+              <ArrowCircleLeft />
+            </Pressable>
           </View>
           <View style={styles.finishCard}>
-            <Text style={styles.finishTitle}>학습할 단어가 없어요!{"\n"}단어장에 단어를 추가해 주세요.</Text>
+            <Text style={styles.finishTitle}>
+              학습할 단어가 없어요!{"\n"}단어장에 단어를 추가해 주세요.
+            </Text>
           </View>
           <View style={{ paddingHorizontal: 0, marginTop: 20 }}>
-            <Button label="단어장으로 돌아가기" variant="outlined" onPress={() => router.back()} />
+            <Button
+              label="단어장으로 돌아가기"
+              variant="outlined"
+              onPress={() => router.back()}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -208,9 +233,14 @@ export default function FlashCard() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()}><ArrowCircleLeft /></Pressable>
+          <Pressable onPress={() => router.back()}>
+            <ArrowCircleLeft />
+          </Pressable>
         </View>
 
         {/* 프로그레스바 영역 */}
@@ -219,35 +249,37 @@ export default function FlashCard() {
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
           </View>
           {/* 어떤 버튼을 누르든 카드를 넘길 때마다 step이 1씩 증가하여 n/totalWords 형태로 표시 */}
-          <Text style={styles.progressText}>{step}/{totalWords}</Text>
+          <Text style={styles.progressText}>
+            {step}/{totalWords}
+          </Text>
         </View>
 
         {/* 카드 영역 */}
         <Pressable onPress={flipCard} style={styles.cardContainer}>
           {/* 앞면 카드 */}
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.card, 
+              styles.card,
               isFront ? styles.relativeCard : styles.absoluteCard,
-              { 
+              {
                 transform: [{ rotateY: frontRotate }],
                 opacity: frontOpacity,
-              }
+              },
             ]}
           >
             <Text style={styles.word}>{current?.word}</Text>
           </Animated.View>
 
           {/* 뒷면 카드 */}
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.card, 
+              styles.card,
               styles.backCard,
               !isFront ? styles.relativeCard : styles.absoluteCard,
-              { 
+              {
                 transform: [{ rotateY: backRotate }],
                 opacity: backOpacity,
-              }
+              },
             ]}
           >
             <Text style={styles.description}>{current?.explanation}</Text>
@@ -257,17 +289,28 @@ export default function FlashCard() {
         {/* 인디케이터 */}
         <View style={styles.indicatorRow}>
           {words.map((_, item) => (
-            <View key={item} style={[item === index ? styles.activeIndicator : styles.indicator]} />
+            <View
+              key={item}
+              style={[
+                item === index ? styles.activeIndicator : styles.indicator,
+              ]}
+            />
           ))}
         </View>
 
         {/* 하단 액션 버튼들 */}
         <View style={styles.buttonRow}>
-          <Pressable style={[styles.actionButton, styles.againButton]} onPress={handleNext}>
+          <Pressable
+            style={[styles.actionButton, styles.againButton]}
+            onPress={handleNext}
+          >
             <SentimentStressed />
             <Text style={styles.actionText}>다시 볼래요!</Text>
           </Pressable>
-          <Pressable style={[styles.actionButton, styles.knowButton]} onPress={handleKnowWord}>
+          <Pressable
+            style={[styles.actionButton, styles.knowButton]}
+            onPress={handleKnowWord}
+          >
             <SentimentSatisfied />
             <Text style={styles.actionText}>알아요!</Text>
           </Pressable>
@@ -281,18 +324,39 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F7D66E" },
   scrollContent: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 60 },
   center: { justifyContent: "center", alignItems: "center" },
-  header: { paddingLeft: 0, paddingTop: 10, height: 48, justifyContent: "center" },
-  
+  header: {
+    paddingLeft: 0,
+    paddingTop: 20,
+    height: 48,
+    justifyContent: "center",
+  },
+
   progressRow: { marginTop: 16, width: "100%", alignSelf: "center" },
-  progressBackground: { height: 10, borderRadius: 20, backgroundColor: "rgba(255,252,247,0.25)", overflow: "hidden" },
-  progressFill: { height: 10, borderRadius: 20, backgroundColor: "#FFFCF7" },
-  progressText: { alignSelf: "flex-end", marginTop: 8, fontFamily: fonts.family.bold, fontSize: 15, color: colors.black },
-  
+  progressBackground: {
+    height: 10,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,252,247,0.25)",
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 10,
+    borderRadius: 16,
+    backgroundColor: colors.background,
+  },
+  progressText: {
+    alignSelf: "flex-end",
+    marginTop: 8,
+    fontFamily: fonts.family.bold,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+    color: colors.black,
+  },
+
   cardContainer: { width: "100%", alignSelf: "center", marginTop: 24 },
-  
+
   card: {
-    backgroundColor: "#FFFCF7",
-    borderRadius: 28,
+    backgroundColor: colors.background,
+    borderRadius: 16,
     paddingHorizontal: 28,
     paddingVertical: 40,
     justifyContent: "center",
@@ -311,24 +375,91 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
-  backCard: { 
-    backgroundColor: "rgba(255,252,247,0.95)"
+  backCard: {
+    backgroundColor: colors.background,
   },
-  
-  word: { fontFamily: fonts.family.bold, fontSize: 38, color: colors.black, textAlign: "center" },
-  description: { fontFamily: fonts.family.regular, fontSize: 20, color: colors.black, textAlign: "center", lineHeight: 28 },
-  
-  indicatorRow: { flexDirection: "row", justifyContent: "center", marginTop: 28, marginBottom: 24 },
-  indicator: { width: 12, height: 12, borderRadius: 6, marginHorizontal: 6, backgroundColor: "rgba(255,252,247,0.35)" },
-  activeIndicator: { width: 42, height: 12, borderRadius: 20, marginHorizontal: 6, backgroundColor: "#FFFCF7" },
-  
-  buttonRow: { flexDirection: "row", justifyContent: "space-between", width: "100%", alignSelf: "center" },
-  actionButton: { width: "47%", height: 100, borderRadius: 28, justifyContent: "center", alignItems: "center", elevation: 6 },
-  againButton: { backgroundColor: "#FFEAF6" },
-  knowButton: { backgroundColor: "#EAF1D2" },
-  actionText: { marginTop: 2, fontFamily: fonts.family.bold, fontSize: 18, color: colors.black },
-  
-  finishCard: { marginTop: 30, marginBottom: 30, borderRadius: 30, backgroundColor: "#FFFCF7", justifyContent: "center", alignItems: "center", paddingHorizontal: 30, height: 360, width: "100%", alignSelf: "center" },
+
+  word: {
+    fontFamily: fonts.family.bold,
+    fontSize: 40,
+    letterSpacing: 40 * -0.02,
+    color: colors.black,
+    textAlign: "center",
+  },
+  description: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.title,
+    letterSpacing: fonts.letterSpacing.title,
+    color: colors.black,
+    textAlign: "center",
+    lineHeight: 28,
+  },
+
+  indicatorRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 28,
+    marginBottom: 24,
+  },
+  indicator: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginHorizontal: 6,
+    backgroundColor: "rgba(255,252,247,0.35)",
+  },
+  activeIndicator: {
+    width: 42,
+    height: 12,
+    borderRadius: 16,
+    marginHorizontal: 6,
+    backgroundColor: colors.background,
+  },
+
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    alignSelf: "center",
+  },
+  actionButton: {
+    width: "47%",
+    height: 100,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 6,
+  },
+  againButton: { backgroundColor: colors.pink100 },
+  knowButton: { backgroundColor: colors.green100 },
+  actionText: {
+    marginTop: 2,
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
+    color: colors.black,
+  },
+
+  finishCard: {
+    marginTop: 30,
+    marginBottom: 30,
+    borderRadius: 16,
+    backgroundColor: colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 30,
+    height: 360,
+    width: "100%",
+    alignSelf: "center",
+  },
   finishImage: { width: 150, height: 150, transform: [{ translateY: -30 }] },
-  finishTitle: { textAlign: "center", fontFamily: fonts.family.bold, fontSize: 26, color: colors.black, transform: [{ translateY: -20 }], lineHeight: 36 },
+  finishTitle: {
+    textAlign: "center",
+    fontFamily: fonts.family.bold,
+    fontSize: fonts.size.header,
+    letterSpacing: fonts.letterSpacing.header,
+    color: colors.black,
+    transform: [{ translateY: -20 }],
+    lineHeight: 36,
+  },
 });
