@@ -51,7 +51,10 @@ export default function Wordbook() {
     if (!item.explanation) return "";
 
     if (isMainKeyword(item)) {
-      const sections = item.explanation.split(/\r?\n\r?\n/).map((s) => s.trim()).filter(Boolean);
+      const sections = item.explanation
+        .split(/\r?\n\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
       return sections[0] || item.explanation;
     }
 
@@ -64,7 +67,12 @@ export default function Wordbook() {
     return (
       <View key={item.userKeywordId} style={styles.card}>
         <Text style={styles.word}>{item.word}</Text>
-        <Text style={[styles.description, isMain ? styles.textLeft : styles.textCenter]}>
+        <Text
+          style={[
+            styles.description,
+            isMain ? styles.textLeft : styles.textCenter,
+          ]}
+        >
           {getDisplayExplanation(item)}
         </Text>
       </View>
@@ -125,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.header,
     letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
-    paddingTop: 10,
+    paddingTop: 20,
     marginBottom: 20,
   },
   sectionTitle: {

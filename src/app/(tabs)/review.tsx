@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
 import { getCategories, getNewsHistory, NewsItem } from "../../apis/review";
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -12,7 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import { getErrorMessage } from "../../utils/getErrorMessage";
@@ -78,8 +77,12 @@ export default function ReviewScreen() {
   };
 
   const renderNewsCard = (item: NewsItem, index: number, array: NewsItem[]) => {
-    const month = item.viewedAt ? item.viewedAt.slice(0, 7).replace("-", ".") : "";
-    const date = item.viewedAt ? item.viewedAt.slice(0, 10).replace(/-/g, ".") : "";
+    const month = item.viewedAt
+      ? item.viewedAt.slice(0, 7).replace("-", ".")
+      : "";
+    const date = item.viewedAt
+      ? item.viewedAt.slice(0, 10).replace(/-/g, ".")
+      : "";
 
     const prevMonth =
       index > 0 && array[index - 1].viewedAt
@@ -117,10 +120,8 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
-            
-              
+
             <Text style={styles.newsDate}>{date}</Text>
-            
           </View>
         </Pressable>
       </View>
@@ -169,7 +170,6 @@ export default function ReviewScreen() {
                 ]}
               />
             </Pressable>
-
           ))}
         </View>
         {loading ? (
@@ -178,7 +178,7 @@ export default function ReviewScreen() {
           </View>
         ) : newsList.length > 0 ? (
           newsList.map((item, index, array) =>
-            renderNewsCard(item, index, array)
+            renderNewsCard(item, index, array),
           )
         ) : (
           renderEmpty()
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   selectedTabLine: {
     backgroundColor: colors.black,
   },
-  
+
   monthChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,
