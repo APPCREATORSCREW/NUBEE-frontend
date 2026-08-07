@@ -325,5 +325,6 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
+    
   },
 });

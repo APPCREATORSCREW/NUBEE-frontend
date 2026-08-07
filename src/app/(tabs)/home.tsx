@@ -45,12 +45,12 @@ const HomeScreen = () => {
       setIsLoading(true);
       try {
         const response = await KeywordsAPI();
-        console.log("오늘의 키워드 API 응답:", response);
+
         if (response.isSuccess) {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
-        console.log("키워드 API 에러:", error);
+     
         Alert.alert('Error', getErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -98,7 +98,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
         <View style={styles.topRow}>
           <View style={[styles.badge, styles.levelBadge]}>
-            <Text style={styles.badgeText}>🐝 LV.{level}</Text>
+            <Text style={styles.badgeText}>🐝 Lv.{level}</Text>
           </View>
           <View style={[styles.badge, styles.pointBadge]}>
             <Text style={styles.badgeText}>🍀 {points}P</Text>
