@@ -40,7 +40,7 @@ interface UserState {
   markKeywordVisited: (keyword: number) => void;
   answerQuiz: (keyword: number, result: KeywordSubmit) => void;
   answerNewsQuiz: (newsId: number, optionIndex: number) => void;
-  addPoints: (amount: number) => void;
+  setCurrentPoints: (points: number) => void;
   setAccessToken: (token: string) => void;
   setRefreshToken: (token: string) => void;
 }
@@ -127,7 +127,10 @@ export const useUserStore = create<UserState>()(
           state.quizAnswers[keyword] !== undefined
             ? state
             : {
-                quizAnswers: { ...state.quizAnswers, [keyword]: result.selected_answer },
+                quizAnswers: {
+                  ...state.quizAnswers,
+                  [keyword]: result.selected_answer,
+                },
                 quizResults: { ...state.quizResults, [keyword]: result },
               },
         ),
@@ -135,19 +138,18 @@ export const useUserStore = create<UserState>()(
         set((state) =>
           state.newsQuizAnswers[newsId] !== undefined
             ? state
-            : { newsQuizAnswers: { ...state.newsQuizAnswers, [newsId]: optionIndex } },
+            : {
+                newsQuizAnswers: {
+                  ...state.newsQuizAnswers,
+                  [newsId]: optionIndex,
+                },
+              },
         ),
-      addPoints: (amount) =>
-        set((state) => {
-          if (!state.user) return state;
-          let points = state.user.points + amount;
-          let level = state.user.level;
-          while (points >= POINTS_PER_LEVEL) {
-            points -= POINTS_PER_LEVEL;
-            level += 1;
-          }
-          return { user: { ...state.user, points, level } };
-        }),
+      // 서버가 반환한 현재 포인트를 그대로 저장
+      setCurrentPoints: (points) =>
+        set((state) => ({
+          user: state.user ? { ...state.user, points } : null,
+        })),
 
       setAccessToken: (token) => set({ accessToken: token }),
       setRefreshToken: (token) => set({ refreshToken: token }),
