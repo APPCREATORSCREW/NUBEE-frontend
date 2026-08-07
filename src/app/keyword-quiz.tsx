@@ -1,12 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { colors } from '../constants/colors';
-import { fonts } from '../constants/fonts';
-import Button from '../components/common/Button';
-import { useSkinStore, getSkinById } from '../store/useSkinStore';
-import { useUserStore } from '../store/useUserStore';
-import LoadingIndicator from '../components/common/LoadingIndicator';
+import { useState, useEffect } from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  Alert,
+} from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { colors } from "../constants/colors";
+import { fonts } from "../constants/fonts";
+import Button from "../components/common/Button";
+import { useSkinStore, getSkinById } from "../store/useSkinStore";
+import { useUserStore } from "../store/useUserStore";
+import LoadingIndicator from "../components/common/LoadingIndicator";
 import {
   KeywordExplanationAPI,
   KeywordQuizAPI,
@@ -15,8 +23,8 @@ import {
   KeywordQuiz,
   KeywordQuizOption,
   KeywordSubmit,
-} from '../apis/home';
-import { getErrorMessage } from '../utils/getErrorMessage';
+} from "../apis/home";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 // 제목 설정
 const hasFinalConsonant = (char: string): boolean => {
@@ -27,18 +35,23 @@ const hasFinalConsonant = (char: string): boolean => {
 
 const getTitleSuffix = (word: string): string => {
   const lastChar = word[word.length - 1];
-  return hasFinalConsonant(lastChar) ? '이란?' : '란?';
+  return hasFinalConsonant(lastChar) ? "이란?" : "란?";
 };
 
 // 문자열 파싱
 const parseExplanation = (explanation: string) => {
   const sections = explanation
-    .split('\n\n')
+    .split("\n\n")
     .map((section) => section.trim())
     .filter(Boolean);
 
   if (sections.length === 0) {
-    return { intro: '', paragraphs: [] as string[], summaryTitle: '', summaryPoints: [] as string[] };
+    return {
+      intro: "",
+      paragraphs: [] as string[],
+      summaryTitle: "",
+      summaryPoints: [] as string[],
+    };
   }
 
   const intro = sections[0];
@@ -46,11 +59,11 @@ const parseExplanation = (explanation: string) => {
   const paragraphs = hasSummary ? sections.slice(1, -1) : [];
   const summaryLines = hasSummary
     ? sections[sections.length - 1]
-        .split('\n')
+        .split("\n")
         .map((line) => line.trim())
         .filter(Boolean)
     : [];
-  const summaryTitle = summaryLines[0] ?? '';
+  const summaryTitle = summaryLines[0] ?? "";
   const summaryPoints = summaryLines.slice(1);
 
   return { intro, paragraphs, summaryTitle, summaryPoints };
@@ -61,13 +74,16 @@ const KeywordQuizScreen = () => {
   const selectedSkinId = useSkinStore((state) => state.selectedSkinId);
   const mascot = getSkinById(selectedSkinId).image;
   // news_id까지 넘기기
-  const { keyword_id, news_id } = useLocalSearchParams<{ keyword_id: string; news_id: string }>();
+  const { keyword_id, news_id } = useLocalSearchParams<{
+    keyword_id: string;
+    news_id: string;
+  }>();
   const keywordId = Number(keyword_id);
 
   const quizAnswers = useUserStore((state) => state.quizAnswers);
   const quizResults = useUserStore((state) => state.quizResults);
   const answerQuizStore = useUserStore((state) => state.answerQuiz);
-  const addPoints = useUserStore((state) => state.addPoints);
+  const setCurrentPoints = useUserStore((state) => state.setCurrentPoints);
 
   const [isLoading, setIsLoading] = useState(false);
   const [content, setContent] = useState<MainKeyword>();
@@ -77,7 +93,7 @@ const KeywordQuizScreen = () => {
     quizResults[keywordId],
   );
 
-  const [step, setStep] = useState<'explanation' | 'quiz'>('explanation');
+  const [step, setStep] = useState<"explanation" | "quiz">("explanation");
 
   // 설명 + 퀴즈 조회
   useEffect(() => {
@@ -95,7 +111,7 @@ const KeywordQuizScreen = () => {
           setQuiz(quizRes.result);
         }
       } catch (error) {
-        Alert.alert('오류', getErrorMessage(error));
+        Alert.alert("오류", getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -105,8 +121,8 @@ const KeywordQuizScreen = () => {
     }
   }, [keyword_id]);
 
-  const goToExplanation = () => setStep('explanation');
-  const goToQuiz = () => setStep('quiz');
+  const goToExplanation = () => setStep("explanation");
+  const goToQuiz = () => setStep("quiz");
 
   // 재방문 1회 제한
   const alreadyAnswered = quizAnswers[keywordId] !== undefined;
@@ -124,10 +140,10 @@ const KeywordQuizScreen = () => {
       if (response.isSuccess) {
         setSubmitResult(response.result);
         answerQuizStore(keywordId, response.result);
-        addPoints(response.result.point_result.earned_point);
+        setCurrentPoints(response.result.point_result.current_point);
       }
     } catch (error) {
-      Alert.alert('오류', getErrorMessage(error));
+      Alert.alert("오류", getErrorMessage(error));
     } finally {
       setIsLoading(false);
     }
@@ -135,26 +151,38 @@ const KeywordQuizScreen = () => {
 
   const getOptionStyle = (optionNumber: number) => {
     if (!submitResult) return styles.optionDefault;
-    if (optionNumber === submitResult.correct_answer) return styles.optionCorrect;
-    if (optionNumber === submitResult.selected_answer) return styles.optionWrong;
+    if (optionNumber === submitResult.correct_answer)
+      return styles.optionCorrect;
+    if (optionNumber === submitResult.selected_answer)
+      return styles.optionWrong;
     return styles.optionDefault;
   };
 
   const isOptionActive = (optionNumber: number) =>
     !!submitResult &&
-    (optionNumber === submitResult.correct_answer || optionNumber === submitResult.selected_answer);
+    (optionNumber === submitResult.correct_answer ||
+      optionNumber === submitResult.selected_answer);
 
-  const word = content?.word ?? '';
-  const titleSuffix = word ? getTitleSuffix(word) : '';
+  const word = content?.word ?? "";
+  const titleSuffix = word ? getTitleSuffix(word) : "";
   const { intro, paragraphs, summaryTitle, summaryPoints } = content
     ? parseExplanation(content.explanation)
-    : { intro: '', paragraphs: [] as string[], summaryTitle: '', summaryPoints: [] as string[] };
+    : {
+        intro: "",
+        paragraphs: [] as string[],
+        summaryTitle: "",
+        summaryPoints: [] as string[],
+      };
 
-  if (step === 'explanation') {
+  if (step === "explanation") {
     return (
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
         <View style={styles.mascotRow}>
-          <Image source={mascot} style={styles.mascotImage} resizeMode="contain" />
+          <Image
+            source={mascot}
+            style={styles.mascotImage}
+            resizeMode="contain"
+          />
           <View style={styles.titleBubble}>
             <View style={styles.highlightKeyword}>
               <Text style={styles.titleBubbleKeyword}>{word}</Text>
@@ -185,7 +213,11 @@ const KeywordQuizScreen = () => {
 
         <View style={styles.spacer} />
         <View style={styles.quizButtonWrap}>
-          <Button label="퀴즈 풀기" variant={quiz ? 'filled' : 'disabled'} onPress={goToQuiz} />
+          <Button
+            label="퀴즈 풀기"
+            variant={quiz ? "filled" : "disabled"}
+            onPress={goToQuiz}
+          />
         </View>
         {isLoading && <LoadingIndicator />}
       </ScrollView>
@@ -222,34 +254,45 @@ const KeywordQuizScreen = () => {
         <View
           style={[
             styles.feedbackBox,
-            submitResult.is_correct ? styles.feedbackBoxCorrect : styles.feedbackBoxWrong,
+            submitResult.is_correct
+              ? styles.feedbackBoxCorrect
+              : styles.feedbackBoxWrong,
           ]}
         >
           <Text style={styles.feedbackTitle}>
-            {submitResult.is_correct ? `🎉 정답이에요!` : '❌ 정답이 아니에요'}
+            {submitResult.is_correct ? `🎉 정답이에요!` : "❌ 정답이 아니에요"}
           </Text>
-          <Text style={styles.feedbackDescription}>{submitResult.explanation}</Text>
+          <Text style={styles.feedbackDescription}>
+            {submitResult.explanation}
+          </Text>
         </View>
       )}
 
       <View style={styles.spacer} />
       {answered && (
         <View style={styles.buttonGroup}>
-          <Button label="키워드 다시보기" variant="outlined" onPress={goToExplanation} />
-          <Button 
-            label="뉴스 보기" 
-            variant="filled" 
-            onPress={() => 
+          <Button
+            label="키워드 다시보기"
+            variant="outlined"
+            onPress={goToExplanation}
+          />
+          <Button
+            label="뉴스 보기"
+            variant="filled"
+            onPress={() =>
               router.push({
                 pathname: "/news",
                 params: {
                   newsId: news_id,
                 },
               })
-            } />
+            }
+          />
           <View style={styles.finishArea}>
             <Text style={styles.finishText}>
-              {submitResult?.is_correct? `학습 완료! +${submitResult.point_result.earned_point}P 📚 (현재 포인트: ${submitResult.point_result.current_point}P)` : "😢 아쉬워요!"}
+              {submitResult?.is_correct
+                ? `학습 완료! +${submitResult.point_result.earned_point}P 📚 (현재 포인트: ${submitResult.point_result.current_point}P)`
+                : "😢 아쉬워요!"}
             </Text>
           </View>
         </View>
@@ -272,8 +315,8 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   mascotRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 20,
     marginTop: 30,
     marginLeft: 10,
@@ -284,7 +327,7 @@ const styles = StyleSheet.create({
     height: 135,
   },
   titleBubble: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     paddingHorizontal: 50,
@@ -329,7 +372,7 @@ const styles = StyleSheet.create({
     lineHeight: 27,
   },
   summaryBox: {
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
     backgroundColor: colors.yellow400,
     paddingVertical: 0,
     paddingHorizontal: 6,
@@ -381,8 +424,8 @@ const styles = StyleSheet.create({
     height: 52,
     borderRadius: 16,
     borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 16,
   },
   optionDefault: {
@@ -448,6 +491,6 @@ const styles = StyleSheet.create({
   finishText: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.body,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

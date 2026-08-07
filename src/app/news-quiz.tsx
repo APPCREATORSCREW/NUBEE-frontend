@@ -38,6 +38,8 @@ const KeywordQuizScreen = () => {
   const router = useRouter();
   const { newsId } = useLocalSearchParams<{ newsId?: string }>();
   const activeNewsId = Number(newsId);
+  const answerNewsQuiz = useUserStore((state) => state.answerNewsQuiz);
+  const setCurrentPoints = useUserStore((state) => state.setCurrentPoints);
 
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,8 @@ const KeywordQuizScreen = () => {
       const data = await submitNewsQuiz(activeNewsId, quiz.id, optionNumber);
       if (data.isSuccess) {
         setQuizResult(data.result);
-        useUserStore.getState().answerNewsQuiz(activeNewsId, optionNumber);
+        answerNewsQuiz(activeNewsId, optionNumber);
+        setCurrentPoints(data.result.point_result.current_point);
       }
     } catch (error: any) {
       Alert.alert("알림", error.message);
