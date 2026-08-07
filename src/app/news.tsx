@@ -36,6 +36,7 @@ interface NewsData {
   image_url: string;
   original_url: string;
   published_at: string;
+  publisher: string;
   related_keywords: KeywordItem[];
 }
 
@@ -200,6 +201,7 @@ export default function News() {
 
         <View style={styles.infoContainer}>
           <Text style={styles.info}>
+            {news.publisher}{"   "}
             {news.published_at.slice(0, 10).replace(/-/g, ".")}
           </Text>
         </View>
