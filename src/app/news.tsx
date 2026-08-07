@@ -42,8 +42,6 @@ interface NewsData {
 
 export default function News() {
   const { newsId, fromReview } = useLocalSearchParams<{ newsId?: string; fromReview?: string }>();
-  console.log("newsId:", newsId);
-  console.log("fromReview:", fromReview);
   const activeNewsId = Number(newsId);
 
   const [news, setNews] = useState<NewsData | null>(null);
@@ -60,10 +58,6 @@ export default function News() {
     try {
       setLoading(true);
       const data = await getNewsDetail(activeNewsId);
-
-      console.log("응답 전체: ", data);
-      console.log("result: ", data.result);
-      console.log("related_keywords: ", data.result.related_keywords);
 
       if (data.isSuccess) {
         setNews(data.result);

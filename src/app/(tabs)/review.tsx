@@ -35,23 +35,18 @@ export default function ReviewScreen() {
   const initCategoriesAndNews = async () => {
     try {
       const categoryData = await getCategories();
-      console.log("복습 카테고리 API 응답:", categoryData);
 
       if (categoryData.isSuccess) {
         const categoryList = categoryData.result.categories;
-        console.log("카테고리 목록:", categoryList);
 
         setCategories(categoryList);
 
         if (categoryList.length > 0) {
-          console.log("첫 번째 카테고리 선택: ", categoryList[0]);
           setSelected(categoryList[0]);
         } else {
-          console.log("카테고리가 비어있음");
           setLoading(false);
         }
       } else {
-        console.log("카테고리 API 실패:", categoryData);
         setLoading(false);
       }
     } catch (error: any) {
@@ -68,16 +63,12 @@ export default function ReviewScreen() {
   const loadNews = async (category: string) => {
     try {
       setLoading(true);
-      console.log("뉴스 조회 요청 카테고리:", category);
 
       const data = await getNewsHistory(category);
-      console.log("뉴스 조회 API 응답:", data);
 
       if (data.isSuccess) {
-        console.log("뉴스 목록:", data.result.news);
         setNewsList(data.result.news);
       } else {
-        console.log("뉴스 조회 실패:", data);
         setNewsList([]);
       }
     } catch (error) {
@@ -111,7 +102,6 @@ export default function ReviewScreen() {
         <Pressable
           style={styles.newsCard}
           onPress={() => {
-            console.log("복습에서 뉴스 클릭:", item.newsId);
             router.push({
               pathname: "/news",
               params: {
