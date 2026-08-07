@@ -226,7 +226,7 @@ const KeywordQuizScreen = () => {
           ]}
         >
           <Text style={styles.feedbackTitle}>
-            {submitResult.is_correct ? '🎉 정답이에요!' : '❌ 정답이 아니에요'}
+            {submitResult.is_correct ? `🎉 정답이에요!` : '❌ 정답이 아니에요'}
           </Text>
           <Text style={styles.feedbackDescription}>{submitResult.explanation}</Text>
         </View>
@@ -247,6 +247,11 @@ const KeywordQuizScreen = () => {
                 },
               })
             } />
+          <View style={styles.finishArea}>
+            <Text style={styles.finishText}>
+              {submitResult?.is_correct? `학습 완료! +${submitResult.point_result.earned_point}P 📚 (현재 포인트: ${submitResult.point_result.current_point}P)` : "😢 아쉬워요!"}
+            </Text>
+          </View>
         </View>
       )}
       {isLoading && <LoadingIndicator />}
@@ -424,7 +429,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   feedbackDescription: {
-    fontFamily: fonts.family.bold,
+    fontFamily: fonts.family.regular,
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
@@ -436,5 +441,13 @@ const styles = StyleSheet.create({
   buttonGroup: {
     marginTop: 20,
     gap: 12,
+  },
+  finishArea: {
+    marginBottom: 20,
+  },
+  finishText: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.body,
+    textAlign: 'center',
   },
 });

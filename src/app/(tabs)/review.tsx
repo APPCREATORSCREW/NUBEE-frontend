@@ -10,10 +10,12 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 export default function ReviewScreen() {
   const [categories, setCategories] = useState<string[]>([]);
@@ -50,12 +52,7 @@ export default function ReviewScreen() {
         setLoading(false);
       }
     } catch (error: any) {
-      console.error(error);
-      console.log("카테고리 API 에러:", error);
-      console.log("상태 코드:", error?.response?.status);
-      console.log("요청 URL:", error?.config?.url);
-      console.log("요청 method:", error?.config?.method);
-      console.log("에러 전체:", error);
+      Alert.alert("카테고리 API 에러", getErrorMessage(error));
       setLoading(false);
     }
   };

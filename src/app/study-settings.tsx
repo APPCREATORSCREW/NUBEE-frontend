@@ -6,6 +6,7 @@ import {
   Pressable,
   Modal,
   Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker, {
@@ -27,6 +28,7 @@ import {
   getSettings,
   updateSettings as updateSettingsAPI,
 } from "../apis/settingsAPI";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 const KEYWORD_OPTIONS = [3, 4, 5, 6];
 const DEFAULT_NOTIFICATION_TIME = "17:30";
@@ -93,8 +95,7 @@ const StudySettings = () => {
           notificationTime: nextNotificationTime,
         });
       } catch (error) {
-        // TODO: 실패 시 에러 UI 처리, 지금은 로컬(스토어) 값 그대로 사용
-        console.error("학습 설정 조회 실패", error);
+        Alert.alert("오류", getErrorMessage(error));
       }
     };
 
@@ -148,8 +149,7 @@ const StudySettings = () => {
         notificationTime,
       });
     } catch (error) {
-      // TODO: 실패 시 에러 UI 처리, 지금은 로컬 상태만이라도 반영하고 진행
-      console.error("학습 설정 저장 실패", error);
+      Alert.alert("오류", getErrorMessage(error));
     }
 
     setSettings({
