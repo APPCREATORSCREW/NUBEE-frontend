@@ -266,8 +266,8 @@ export default function News() {
         </View>
       </Modal>
 
-      {fromReview !== "true" && (
-        <View style={styles.buttonContainer}>
+      <View style={styles.buttonContainer}>
+        {fromReview !== "true" ? (
           <Button
             label="퀴즈 풀기"
             variant="filled"
@@ -278,8 +278,19 @@ export default function News() {
               })
             }
           />
-        </View>
-      )}
+        ) : (
+          <Button
+          label="다른 뉴스 보기"
+          variant="filled"
+          onPress={() =>
+            router.push({
+              pathname: "../review"
+            })
+          }
+        />
+        )}
+      </View>
+
     </SafeAreaView>
   );
 }
