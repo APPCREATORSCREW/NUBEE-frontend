@@ -73,10 +73,6 @@ export const useUserStore = create<UserState>()(
           user: null,
           accessToken: null,
           isLoggedIn: false,
-          visitedKeywords: [],
-          quizAnswers: {},
-          quizResults: {},
-          newsQuizAnswers: {},
         });
       },
       setProfileImage: (uri) =>

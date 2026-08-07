@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: colors.yellow100,
     borderRadius: 16,
-    paddingHorizontal: 50,
+    paddingHorizontal: 14,
     paddingVertical: 13,
     marginBottom: 20,
   },
@@ -421,12 +421,13 @@ const styles = StyleSheet.create({
     gap: 18,
   },
   option: {
-    height: 52,
+    minHeight: 52,
     borderRadius: 16,
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 16,
+    paddingVertical: 12,
   },
   optionDefault: {
     backgroundColor: colors.background,

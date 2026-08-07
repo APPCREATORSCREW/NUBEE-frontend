@@ -30,7 +30,59 @@ interface WordItem {
   word: string;
   explanation: string;
   exampleSentence: string;
+  keywordType?: string;
+  keyword_type?: string;
 }
+
+interface ParsedExplanation {
+  intro: string;
+  paragraphs: string[];
+  summaryTitle: string;
+  summaryPoints: string[];
+}
+
+const parseExplanation = (explanation?: string): ParsedExplanation => {
+  if (!explanation) {
+    return { intro: "", paragraphs: [], summaryTitle: "", summaryPoints: [] };
+  }
+
+  const sections = explanation
+    .split(/\r?\n\r?\n/)
+    .map((section) => section.trim())
+    .filter(Boolean);
+
+  if (sections.length === 0) {
+    return { intro: "", paragraphs: [], summaryTitle: "", summaryPoints: [] };
+  }
+
+  let intro = "";
+  const paragraphs: string[] = [];
+  let summaryTitle = "";
+  const summaryPoints: string[] = [];
+
+  sections.forEach((section, index) => {
+    const lines = section.split("\n").map((line) => line.trim()).filter(Boolean);
+    const isBulletSection = lines.some((line) => /^[•\-\*\d+\.]/.test(line));
+
+    if (isBulletSection) {
+      lines.forEach((line) => {
+        if (/^[•\-\*\d+\.]/.test(line)) {
+          summaryPoints.push(line.replace(/^[•\-\*\d+\.]\s*/, ""));
+        } else {
+          summaryTitle = line;
+        }
+      });
+    } else {
+      if (index === 0) {
+        intro = section;
+      } else {
+        paragraphs.push(section);
+      }
+    }
+  });
+
+  return { intro, paragraphs, summaryTitle, summaryPoints };
+};
 
 export default function FlashCard() {
   const [words, setWords] = useState<WordItem[]>([]);
@@ -38,17 +90,15 @@ export default function FlashCard() {
   const [totalWords, setTotalWords] = useState(0);
 
   const [index, setIndex] = useState(0);
-  const [step, setStep] = useState(1); // 몇 번째 카드를 풀고 있는지 나타내는 카운터 (1부터 시작)
+  const [step, setStep] = useState(1);
   const [isFront, setIsFront] = useState(true);
   const [finished, setFinished] = useState(false);
 
   const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
   const skin = getSkinById(selectedSkinId);
 
-  // 애니메이션 값 (0: 앞면, 180: 뒷면)
   const flipAnim = useRef(new Animated.Value(0)).current;
 
-  // 서버에서 단어장 목록 API 호출
   useEffect(() => {
     const fetchWords = async () => {
       try {
@@ -84,7 +134,6 @@ export default function FlashCard() {
     setIsFront(!isFront);
   };
 
-  // 3D 회전 애니메이션 보간
   const frontRotate = flipAnim.interpolate({
     inputRange: [0, 180],
     outputRange: ["0deg", "180deg"],
@@ -94,7 +143,6 @@ export default function FlashCard() {
     outputRange: ["180deg", "360deg"],
   });
 
-  // 애니메이션 투명도 조절
   const frontOpacity = flipAnim.interpolate({
     inputRange: [89, 90],
     outputRange: [1, 0],
@@ -105,7 +153,6 @@ export default function FlashCard() {
   });
 
   const current = useMemo(() => words[index], [words, index]);
-  // 진행바 채워지는 비율은 step과 totalWords를 기준
   const progress = totalWords > 0 ? (step / totalWords) * 100 : 0;
 
   const handleKnowWord = async () => {
@@ -121,7 +168,6 @@ export default function FlashCard() {
 
         setWords(updatedWords);
 
-        // 진행 단계(step)를 1 증가시키고, 전체 개수를 넘어서면 완료 처리
         if (step >= totalWords || updatedWords.length === 0) {
           setFinished(true);
           return;
@@ -231,6 +277,8 @@ export default function FlashCard() {
     );
   }
 
+  const parsedExp = parseExplanation(current?.explanation);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView
@@ -248,7 +296,6 @@ export default function FlashCard() {
           <View style={styles.progressBackground}>
             <View style={[styles.progressFill, { width: `${progress}%` }]} />
           </View>
-          {/* 어떤 버튼을 누르든 카드를 넘길 때마다 step이 1씩 증가하여 n/totalWords 형태로 표시 */}
           <Text style={styles.progressText}>
             {step}/{totalWords}
           </Text>
@@ -282,7 +329,33 @@ export default function FlashCard() {
               },
             ]}
           >
-            <Text style={styles.description}>{current?.explanation}</Text>
+            <View style={styles.cardContent}>
+              {parsedExp.intro ? (
+                <Text style={styles.description}>{parsedExp.intro}</Text>
+              ) : null}
+
+              {parsedExp.paragraphs.map((paragraph, idx) => (
+                <Text key={idx} style={[styles.description, { marginTop: 8 }]}>
+                  {paragraph}
+                </Text>
+              ))}
+
+              {(parsedExp.summaryTitle || parsedExp.summaryPoints.length > 0) && (
+                <View style={styles.summaryContainer}>
+                  {parsedExp.summaryTitle ? (
+                    <Text style={styles.summaryTitle}>
+                      {parsedExp.summaryTitle}
+                    </Text>
+                  ) : null}
+                  {parsedExp.summaryPoints.map((point, idx) => (
+                    <View key={idx} style={styles.bulletRow}>
+                      <Text style={styles.bulletDot}>•</Text>
+                      <Text style={styles.bulletText}>{point}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
           </Animated.View>
         </Pressable>
 
@@ -357,8 +430,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.background,
     borderRadius: 16,
-    paddingHorizontal: 28,
-    paddingVertical: 40,
+    paddingHorizontal: 24,
+    paddingVertical: 32,
     justifyContent: "center",
     alignItems: "center",
     minHeight: 280,
@@ -377,6 +450,11 @@ const styles = StyleSheet.create({
   },
   backCard: {
     backgroundColor: colors.background,
+    alignItems: "flex-start",
+  },
+
+  cardContent: {
+    width: "100%",
   },
 
   word: {
@@ -388,11 +466,43 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: fonts.family.regular,
-    fontSize: fonts.size.title,
-    letterSpacing: fonts.letterSpacing.title,
+    fontSize: 20,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
+    lineHeight: 26,
     textAlign: "center",
-    lineHeight: 28,
+  },
+
+  summaryContainer: {
+    marginTop: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.gray100,
+    width: "100%",
+  },
+  summaryTitle: {
+    fontFamily: fonts.family.bold,
+    fontSize: 16,
+    color: colors.black,
+    marginBottom: 8,
+  },
+  bulletRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  bulletDot: {
+    fontSize: 16,
+    color: colors.black,
+    marginRight: 6,
+    lineHeight: 24,
+  },
+  bulletText: {
+    flex: 1,
+    fontFamily: fonts.family.regular,
+    fontSize: 15,
+    color: colors.black,
+    lineHeight: 22,
   },
 
   indicatorRow: {

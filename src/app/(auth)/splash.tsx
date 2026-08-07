@@ -1,4 +1,4 @@
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '../../constants/colors';
@@ -6,6 +6,7 @@ import { fonts } from '../../constants/fonts';
 import Button from '../../components/common/Button';
 import * as WebBrowser from "expo-web-browser";
 import { api } from "../../apis/client";
+import { getErrorMessage } from '../../utils/getErrorMessage';
 
 const mascot = require('../../../assets/skins/skin_origin.png');
 const kakaoLoginButton = require('../../../assets/icons/kakao_login_medium_wide.png');
@@ -18,7 +19,7 @@ const SplashScreen = () => {
         `${api.defaults.baseURL}/auth/kakao`
       );
     } catch (error) {
-      console.error(error);
+      Alert.alert("오류", getErrorMessage(error));
     }
   };
 

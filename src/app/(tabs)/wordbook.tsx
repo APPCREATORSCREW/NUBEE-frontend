@@ -13,6 +13,8 @@ interface WordItem {
   word: string;
   explanation: string;
   exampleSentence: string;
+  keywordType?: string;
+  keyword_type?: string;
 }
 
 export default function Wordbook() {
@@ -39,6 +41,36 @@ export default function Wordbook() {
     fetchWords();
   }, []);
 
+  // MAIN 키워드 여부 확인
+  const isMainKeyword = (item: WordItem) => {
+    return item.keywordType === "MAIN" || item.keyword_type === "MAIN";
+  };
+
+  // MAIN 키워드일 경우 \n\n 기준 첫 단락만 자르기
+  const getDisplayExplanation = (item: WordItem) => {
+    if (!item.explanation) return "";
+
+    if (isMainKeyword(item)) {
+      const sections = item.explanation.split(/\r?\n\r?\n/).map((s) => s.trim()).filter(Boolean);
+      return sections[0] || item.explanation;
+    }
+
+    return item.explanation;
+  };
+
+  const renderCard = (item: WordItem) => {
+    const isMain = isMainKeyword(item);
+
+    return (
+      <View key={item.userKeywordId} style={styles.card}>
+        <Text style={styles.word}>{item.word}</Text>
+        <Text style={[styles.description, isMain ? styles.textLeft : styles.textCenter]}>
+          {getDisplayExplanation(item)}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.flex}>
       <ScrollView
@@ -53,12 +85,7 @@ export default function Wordbook() {
         {todayWords.length === 0 && !isLoading ? (
           <Text style={styles.emptyText}>오늘 저장된 단어가 없어요.</Text>
         ) : (
-          todayWords.map((item) => (
-            <View key={item.userKeywordId} style={styles.card}>
-              <Text style={styles.word}>{item.word}</Text>
-              <Text style={styles.description}>{item.explanation}</Text>
-            </View>
-          ))
+          todayWords.map(renderCard)
         )}
 
         <Text style={styles.sectionTitle}>이전에 저장</Text>
@@ -66,12 +93,7 @@ export default function Wordbook() {
         {previousWords.length === 0 && !isLoading ? (
           <Text style={styles.emptyText}>이전에 저장된 단어가 없어요.</Text>
         ) : (
-          previousWords.map((item) => (
-            <View key={item.userKeywordId} style={styles.card}>
-              <Text style={styles.word}>{item.word}</Text>
-              <Text style={styles.description}>{item.explanation}</Text>
-            </View>
-          ))
+          previousWords.map(renderCard)
         )}
 
         <View style={{ height: 80 }} />
@@ -136,6 +158,12 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
     lineHeight: 28,
+  },
+  textLeft: {
+    textAlign: "left",
+  },
+  textCenter: {
+    textAlign: "center",
   },
   emptyText: {
     fontFamily: fonts.family.regular,
