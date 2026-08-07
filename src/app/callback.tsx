@@ -57,7 +57,6 @@ export default function CallbackScreen() {
 
 
       } catch (e) {
-        console.error(e);
 
         Alert.alert(
           "오류",

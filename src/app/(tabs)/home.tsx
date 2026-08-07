@@ -109,8 +109,7 @@ const HomeScreen = () => {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
-        console.log("키워드 API 에러:", error);
-        Alert.alert("Error", getErrorMessage(error));
+        Alert.alert('Error', getErrorMessage(error));
       } finally {
         setIsLoading(false);
       }
@@ -158,7 +157,7 @@ const HomeScreen = () => {
       <ScrollView style={styles.flex} contentContainerStyle={styles.container}>
         <View style={styles.topRow}>
           <View style={[styles.badge, styles.levelBadge]}>
-            <Text style={styles.badgeText}>🐝 LV.{level}</Text>
+            <Text style={styles.badgeText}>🐝 Lv.{level}</Text>
           </View>
           <View style={[styles.badge, styles.pointBadge]}>
             <Text style={styles.badgeText}>🍀 {points}P</Text>
@@ -195,12 +194,8 @@ const HomeScreen = () => {
             label="오늘의 학습을 부모님께 자랑해요"
             variant="filled"
             onPress={async () => {
-              try {
-                // 백엔드에서 오늘의 실제 학습 데이터 조회
+              try{
                 const response = await SendNewsAPI();
-
-                console.log("학습 데이터 공유 API 응답:", response);
-
                 if (response.isSuccess) {
                   const {
                     username,
@@ -232,7 +227,7 @@ const HomeScreen = () => {
                   });
                 }
               } catch (error) {
-                console.log("학습 데이터 공유 오류:", error);
+        
                 Alert.alert("오류", getErrorMessage(error));
               }
             }}

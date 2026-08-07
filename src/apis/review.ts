@@ -6,7 +6,6 @@ export interface NewsItem {
   title: string;
   imageUrl: string;
   viewedAt: string;
-  publisher: string;
 }
 
 export interface NewsHistoryResponse {

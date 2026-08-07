@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   textCenter: {
-    textAlign: "center",
+    textAlign: "left",
   },
   emptyText: {
     fontFamily: fonts.family.regular,
