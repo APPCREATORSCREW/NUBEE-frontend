@@ -6,7 +6,6 @@ export interface NewsItem {
   title: string;
   imageUrl: string;
   viewedAt: string;
-  publisher: string;
 }
 
 export interface NewsHistoryResponse {
@@ -37,6 +36,7 @@ export const getCategories = async (): Promise<CategoryResponse> => {
     return response.data;
   } catch (error: unknown) {
     const err = error as AxiosError<{ message?: string }>;
+
     throw new Error(
       err.response?.data?.message ??
       "카테고리를 불러오는데 실패했습니다."
@@ -60,6 +60,7 @@ export const getNewsHistory = async (
         },
       }
     );
+
     return response.data;
   } catch (error: unknown) {
     const err = error as AxiosError<{ message?: string }>;

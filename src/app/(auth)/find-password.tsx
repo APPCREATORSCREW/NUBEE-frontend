@@ -141,7 +141,7 @@ const FindPasswordScreen = () => {
     setIsLoading(true);
     try {
       const response = await PasswordResetConfirmAPI({ email, newPassword, newPasswordConfirm: confirmNewPassword });
-      console.log(response);
+
       router.replace('/login');
     } catch (error) {
       Alert.alert('catch', getErrorMessage(error));
