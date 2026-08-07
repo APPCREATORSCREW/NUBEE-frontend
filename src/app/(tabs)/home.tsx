@@ -188,7 +188,7 @@ const HomeScreen = () => {
         </View>
       </ScrollView>
 
-      {newsList.some((item) => newsQuizAnswers[item.id] !== undefined) && (
+      {newsList.some((item) => newsQuizAnswers[item.id] !== undefined || item.solved) && (
         <View style={styles.floatingButton}>
           <Button
             label="오늘의 학습을 부모님께 자랑해요"
