@@ -93,7 +93,6 @@ const SignupScreen = () => {
     } catch (error) {
       Alert.alert("오류", getErrorMessage(error));
     }
-    router.push({ pathname: "/birth-date" });
   };
 
   return (
@@ -228,6 +227,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.caption,
+    letterSpacing: fonts.letterSpacing.caption,
     color: colors.red400,
   },
 });

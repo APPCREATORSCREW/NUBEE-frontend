@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Alert, Modal } from "react-native";
+import { useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, Alert } from "react-native";
 import { colors } from "../../constants/colors";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import { StarShine } from "../../components/icons";
@@ -12,12 +12,10 @@ import ProgressBar from "../../components/profile/ProgressBar";
 import { useUserStore, POINTS_PER_LEVEL } from "../../store/useUserStore";
 import { syncProfile } from "../../utils/syncProfile";
 import { getErrorMessage } from "../../utils/getErrorMessage";
-import LevelUp from "../../components/common/LevelUp";
 
 const Profile = () => {
   const points = useUserStore((state) => state.user?.points ?? 0);
   const level = useUserStore((state) => state.user?.level ?? 0);
-  const [levelUpVisible, setLevelUpVisible] = useState(true);
 
   // 프로필 화면 진입 시 GET /api/users/profile 호출해서 최신 정보로 갱신
   useEffect(() => {
@@ -62,10 +60,6 @@ const Profile = () => {
         {/* 메뉴 리스트 */}
         <MenuList />
       </ScrollView>
-      <LevelUp
-        visible={levelUpVisible}
-        onClose={() => setLevelUpVisible(false)}
-      />
     </SafeAreaView>
   );
 };

@@ -29,17 +29,14 @@ export interface CategoryResponse {
 
 export const getCategories = async (): Promise<CategoryResponse> => {
   try {
-    const response = await api.get<CategoryResponse>(
-      "/api/news/categories"
-    );
+    const response = await api.get<CategoryResponse>("/api/news/categories");
 
     return response.data;
   } catch (error: unknown) {
     const err = error as AxiosError<{ message?: string }>;
 
     throw new Error(
-      err.response?.data?.message ??
-      "카테고리를 불러오는데 실패했습니다."
+      err.response?.data?.message ?? "카테고리를 불러오는데 실패했습니다.",
     );
   }
 };
@@ -47,19 +44,16 @@ export const getCategories = async (): Promise<CategoryResponse> => {
 export const getNewsHistory = async (
   category: string,
   page = 0,
-  size = 20
+  size = 20,
 ): Promise<NewsHistoryResponse> => {
   try {
-    const response = await api.get<NewsHistoryResponse>(
-      "/api/news/history",
-      {
-        params: {
-          category,
-          page,
-          size,
-        },
-      }
-    );
+    const response = await api.get<NewsHistoryResponse>("/api/news/history", {
+      params: {
+        category,
+        page,
+        size,
+      },
+    });
 
     return response.data;
   } catch (error: unknown) {
@@ -71,8 +65,7 @@ export const getNewsHistory = async (
     }
 
     throw new Error(
-      err.response?.data?.message ??
-        "복습 목록을 불러오는데 실패했습니다."
+      err.response?.data?.message ?? "복습 목록을 불러오는데 실패했습니다.",
     );
   }
 };
