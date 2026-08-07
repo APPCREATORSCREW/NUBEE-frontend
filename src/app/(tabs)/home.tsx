@@ -1,4 +1,4 @@
-import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, Text, View, Alert, Share, } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../constants/colors';
 import { fonts } from '../../constants/fonts';
@@ -45,10 +45,12 @@ const HomeScreen = () => {
       setIsLoading(true);
       try {
         const response = await KeywordsAPI();
+        console.log("오늘의 키워드 API 응답:", response);
         if (response.isSuccess) {
           setNewsList(response.result.news_list);
         }
       } catch (error) {
+        console.log("키워드 API 에러:", error);
         Alert.alert('Error', getErrorMessage(error));
       } finally {
         setIsLoading(false);
@@ -133,19 +135,45 @@ const HomeScreen = () => {
             label="오늘의 학습을 부모님께 자랑해요"
             variant="filled"
             onPress={async () => {
-              try{
+              try {
+                // 백엔드에서 오늘의 실제 학습 데이터 조회
                 const response = await SendNewsAPI();
+
+                console.log("학습 데이터 공유 API 응답:", response);
+
                 if (response.isSuccess) {
-                  Alert.alert(
-                    "전송 완료",
-                    "부모님께 오늘의 학습 결과를 전달했어요!"
-                  );
+                  const {
+                    username,
+                    learnedKeywords,
+                    keywordQuizAccuracy,
+                    newsQuizAccuracy,
+                  } = response.result;
+
+                  // 학습한 키워드 목록 만들기
+                  const keywordText =
+                    learnedKeywords.length > 0
+                      ? learnedKeywords
+                          .map(
+                            (item: { word: string; originalUrl: string }) =>
+                              `• ${item.word}\n  🔗 ${item.originalUrl}`
+                          )
+                          .join("\n")
+                      : "학습한 키워드가 없어요.";
+
+                  // 공유창 띄우기
+                  await Share.share({
+                    message:
+                      `📚 ${username}님의 오늘의 학습\n\n` +
+                      `오늘 배운 키워드\n\n` +
+                      `${keywordText}\n\n` +
+                      `📝 키워드 퀴즈 정답률: ${keywordQuizAccuracy}%\n` +
+                      `📰 뉴스 퀴즈 정답률: ${newsQuizAccuracy}%\n\n` +
+                      `오늘도 열심히 공부했어요! 🎉`,
+                  });
                 }
               } catch (error) {
-                Alert.alert(
-                  "오류",
-                  getErrorMessage(error)
-                );
+                console.log("학습 데이터 공유 오류:", error);
+                Alert.alert("오류", getErrorMessage(error));
               }
             }}
           />

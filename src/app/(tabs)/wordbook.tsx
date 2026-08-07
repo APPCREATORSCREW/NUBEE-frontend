@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fonts.family.bold,
-    fontSize: 30,
+    fontSize: fonts.size.header,
     color: colors.black,
-    paddingTop: 45,
+    paddingTop: 10,
     marginBottom: 15,
   },
   sectionTitle: {
