@@ -3,7 +3,7 @@ import {
   SafeAreaView,
   ScrollView,
   View,
-  Text, 
+  Text,
   StyleSheet,
   Image,
   Pressable,
@@ -69,6 +69,22 @@ export default function News() {
     }
   };
 
+  // MAIN 키워드일 경우 \n\n 기준 첫 단락만 반환하는 파싱 함수
+  const getParsedExplanation = (keyword: KeywordItem | null) => {
+    if (!keyword || !keyword.explanation) return "";
+
+    if (keyword.keyword_type === "MAIN") {
+      const sections = keyword.explanation
+        .split(/\r?\n\r?\n/)
+        .map((section) => section.trim())
+        .filter(Boolean);
+
+      return sections[0] || keyword.explanation;
+    }
+
+    return keyword.explanation;
+  };
+
   const handleKeywordPress = (wordText: string) => {
     if (!news) return;
     const found = news.related_keywords.find((k) => k.word === wordText);
@@ -78,92 +94,93 @@ export default function News() {
     }
   };
 
-  const renderSummary = () => { 
-    if (!news) return null; 
-    const lines = news.summary.split("\n"); 
-    const parts: React.ReactNode[] = []; 
-    // 키워드를 긴 순서대로 정렬 (겹치는 단어 방지) 
-    const keywords = [...news.related_keywords].sort( 
-      (a, b) => b.word.length - a.word.length ); 
-      lines.forEach((line, lineIndex) => { 
-        // 이모티콘으로 시작하는 줄인지 확인 
-        // // 예: ⚖️ 법을 지키는 든든한 가이드 
-        // // 🏢 로펌으로 가는 노동 전문가들 
-        const isSubtitle = /^[^\w\s가-힣]/u.test(line.trim()); 
-        let currentIndex = 0; 
-        const lineParts: React.ReactNode[] = []; 
-        while (currentIndex < line.length) { 
-          let matchedKeyword: KeywordItem | undefined = undefined; 
-          let matchedIndex = Infinity; 
-          // 현재 위치 이후 가장 먼저 나오는 키워드 찾기 
-          for (const keyword of keywords) { 
-            const idx = line.indexOf(keyword.word, currentIndex); 
-            if (idx !== -1 && idx < matchedIndex) { 
-              matchedIndex = idx; 
-              matchedKeyword = keyword; 
-            } 
-          } 
-          // 더 이상 키워드가 없으면 나머지 출력 
-          if (!matchedKeyword) { 
-            if (currentIndex < line.length) { 
-              lineParts.push( 
-                <Text key={`text-${lineIndex}-${currentIndex}`}> 
-                  {line.slice(currentIndex)} 
-                </Text> 
-              ); 
-            } 
-            break; 
-          } 
-          // 키워드 전 텍스트 
-          if (matchedIndex > currentIndex) { 
-            lineParts.push( 
-              <Text key={`text-${lineIndex}-${currentIndex}`}> 
-                {line.slice(currentIndex, matchedIndex)} 
-              </Text> 
-            ); 
-          } 
-          // 키워드 
-          lineParts.push( 
-            <Text 
-              key={`${matchedKeyword.id}-${lineIndex}-${matchedIndex}`} 
-              style={[ 
-                styles.highlight, 
-                isSubtitle && styles.subtitle, 
-              ]} 
-              onPress={() => { 
-                setSelectedWord(matchedKeyword!); 
-                setModalVisible(true); 
-              }} 
-            >
-             {matchedKeyword.word} 
-            </Text> 
-          ); 
-          currentIndex = matchedIndex + matchedKeyword.word.length; 
-        } 
-        // 키워드가 하나도 없는 줄 
-        if (lineParts.length === 0 && line.length > 0) { 
-          lineParts.push( 
-            <Text key={`line-${lineIndex}`}> 
-              {line} 
-            </Text> 
-          ); 
-        } 
-        // 줄 전체를 Text로 감싸서 소제목이면 볼드 처리 
-        parts.push( 
-          <Text 
-            key={`line-${lineIndex}`} 
-            style={isSubtitle ? styles.subtitle : undefined} 
-          > 
-            {lineParts} 
-          </Text> 
-        ); 
-        // 줄바꿈 유지 
-        if (lineIndex < lines.length - 1) { 
-          parts.push("\n"); 
-        } 
-      }); 
-      return <Text style={styles.body}>{parts}</Text>; 
-    };
+  const renderSummary = () => {
+    if (!news) return null;
+    const lines = news.summary.split("\n");
+    const parts: React.ReactNode[] = [];
+    
+    // 키워드를 긴 순서대로 정렬 (겹치는 단어 방지)
+    const keywords = [...news.related_keywords].sort(
+      (a, b) => b.word.length - a.word.length
+    );
+
+    lines.forEach((line, lineIndex) => {
+      const isSubtitle = /^[^\w\s가-힣]/u.test(line.trim());
+      let currentIndex = 0;
+      const lineParts: React.ReactNode[] = [];
+
+      while (currentIndex < line.length) {
+        let matchedKeyword: KeywordItem | undefined = undefined;
+        let matchedIndex = Infinity;
+
+        for (const keyword of keywords) {
+          const idx = line.indexOf(keyword.word, currentIndex);
+          if (idx !== -1 && idx < matchedIndex) {
+            matchedIndex = idx;
+            matchedKeyword = keyword;
+          }
+        }
+
+        if (!matchedKeyword) {
+          if (currentIndex < line.length) {
+            lineParts.push(
+              <Text key={`text-${lineIndex}-${currentIndex}`}>
+                {line.slice(currentIndex)}
+              </Text>
+            );
+          }
+          break;
+        }
+
+        if (matchedIndex > currentIndex) {
+          lineParts.push(
+            <Text key={`text-${lineIndex}-${currentIndex}`}>
+              {line.slice(currentIndex, matchedIndex)}
+            </Text>
+          );
+        }
+
+        lineParts.push(
+          <Text
+            key={`${matchedKeyword.id}-${lineIndex}-${matchedIndex}`}
+            style={[
+              styles.highlight,
+              isSubtitle && styles.subtitle,
+            ]}
+            onPress={() => {
+              setSelectedWord(matchedKeyword!);
+              setModalVisible(true);
+            }}
+          >
+            {matchedKeyword.word}
+          </Text>
+        );
+        currentIndex = matchedIndex + matchedKeyword.word.length;
+      }
+
+      if (lineParts.length === 0 && line.length > 0) {
+        lineParts.push(
+          <Text key={`line-${lineIndex}`}>
+            {line}
+          </Text>
+        );
+      }
+
+      parts.push(
+        <Text
+          key={`line-${lineIndex}`}
+          style={isSubtitle ? styles.subtitle : undefined}
+        >
+          {lineParts}
+        </Text>
+      );
+
+      if (lineIndex < lines.length - 1) {
+        parts.push("\n");
+      }
+    });
+    return <Text style={styles.body}>{parts}</Text>;
+  };
 
   const handleSaveWord = async () => {
     if (!selectedWord) return;
@@ -195,19 +212,18 @@ export default function News() {
 
         <View style={styles.infoContainer}>
           <Text style={styles.info}>
-            {news.publisher}{"   "}
+            {news.publisher}{"  "}
             {news.published_at.slice(0, 10).replace(/-/g, ".")}
           </Text>
         </View>
 
-        
         <View style={styles.section}>
           {renderSummary()}
         </View>
 
         {/* 원문 링크 */}
         {news.original_url && (
-         <Pressable
+          <Pressable
             style={styles.linkButton}
             onPress={async () => {
               try {
@@ -232,7 +248,11 @@ export default function News() {
           <View style={styles.modalCard}>
             <View style={styles.modalDot} />
             <Text style={styles.modalTitle}>{selectedWord?.word}</Text>
-            <Text style={styles.modalDescription}>{selectedWord?.explanation}</Text>
+            
+            {/* 파싱된 설명 출력 */}
+            <Text style={styles.modalDescription}>
+              {getParsedExplanation(selectedWord)}
+            </Text>
 
             <View style={styles.modalButtonRow}>
               <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
