@@ -6,7 +6,6 @@ export interface NewsItem {
   title: string;
   imageUrl: string;
   viewedAt: string;
-  publisher: string;
 }
 
 export interface NewsHistoryResponse {
@@ -37,11 +36,6 @@ export const getCategories = async (): Promise<CategoryResponse> => {
     return response.data;
   } catch (error: unknown) {
     const err = error as AxiosError<{ message?: string }>;
-    console.log("카테고리 API 에러");
-    console.log("status:", err.response?.status);
-    console.log("url:", err.config?.url);
-    console.log("method:", err.config?.method);
-    console.log("message:", err.response?.data?.message);
 
     throw new Error(
       err.response?.data?.message ??
@@ -66,9 +60,6 @@ export const getNewsHistory = async (
         },
       }
     );
-
-    console.log("복습 뉴스 실제 응답:", response.data);
-    console.log("복습 뉴스 목록:", response.data.result.news);
 
     return response.data;
   } catch (error: unknown) {

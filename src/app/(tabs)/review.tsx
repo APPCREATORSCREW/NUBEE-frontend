@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useRouter } from "expo-router";
-import { getCategories, getNewsHistory, NewsItem } from "../../apis/review";
+import { getNewsHistory, NewsItem } from "../../apis/review";
 import {
   SafeAreaView,
   View,
@@ -22,7 +21,6 @@ export default function ReviewScreen() {
   const [selected, setSelected] = useState<string>("");
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     initCategoriesAndNews();
@@ -36,20 +34,25 @@ export default function ReviewScreen() {
 
   const initCategoriesAndNews = async () => {
     try {
-      const categoryData = await getCategories();
+      setLoading(true);
 
-      if (categoryData.isSuccess) {
-        const categoryList = categoryData.result.categories;
+      const initialCategory = "경제"; 
+      const data = await getNewsHistory(initialCategory);
 
-        setCategories(categoryList);
-
-        if (categoryList.length > 0) {
-          setSelected(categoryList[0]);
-        } else {
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
+      if (data.isSuccess) {
+        
+        const fetchedNews = data.result.news || [];
+        setNewsList(fetchedNews);
+        
+      
+        const activeCategory = data.result.category || initialCategory;
+        
+        const dynamicCategories = Array.from(
+          new Set([activeCategory, "경제", "사회", "과학", "세계"])
+        );
+        
+        setCategories(dynamicCategories);
+        setSelected(activeCategory);
       }
     } catch (error: any) {
       Alert.alert("카테고리 API 에러", getErrorMessage(error));
@@ -60,7 +63,6 @@ export default function ReviewScreen() {
   const loadNews = async (category: string) => {
     try {
       setLoading(true);
-
       const data = await getNewsHistory(category);
 
       if (data.isSuccess) {
@@ -69,8 +71,7 @@ export default function ReviewScreen() {
         setNewsList([]);
       }
     } catch (error) {
-      console.error(error);
-      console.log("뉴스 조회 에러:", error);
+      Alert.alert("오류", getErrorMessage(error));
       setNewsList([]);
     } finally {
       setLoading(false);
@@ -96,18 +97,7 @@ export default function ReviewScreen() {
           </View>
         )}
 
-        <Pressable
-          style={styles.newsCard}
-          onPress={() => {
-            router.push({
-              pathname: "/news",
-              params: {
-                newsId: item.newsId,
-                fromReview: "true",
-              },
-            });
-          }}
-        >
+        <View style={styles.newsCard}>
           <Image
             source={{ uri: item.imageUrl }}
             style={styles.thumbnail}
@@ -117,12 +107,9 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
-            
-              
             <Text style={styles.newsDate}>{date}</Text>
-            
           </View>
-        </Pressable>
+        </View>
       </View>
     );
   };
@@ -139,39 +126,38 @@ export default function ReviewScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.flex}>
-      <ScrollView
-        style={styles.flex}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={styles.title}>복습하기</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>복습하기</Text>
 
-        <View style={styles.tabRow}>
-          {categories.map((category) => (
-            <Pressable
-              key={category}
-              style={styles.tab}
-              onPress={() => setSelected(category)}
+      <View style={styles.tabRow}>
+        {categories.map((category) => (
+          <Pressable
+            key={category}
+            style={styles.tab}
+            onPress={() => setSelected(category)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                selected === category && styles.selectedTabText,
+              ]}
             >
-              <Text
-                style={[
-                  styles.tabText,
-                  selected === category && styles.selectedTabText,
-                ]}
-              >
-                {category}
-              </Text>
-              <View
-                style={[
-                  styles.tabLine,
-                  selected === category && styles.selectedTabLine,
-                ]}
-              />
-            </Pressable>
+              {category}
+            </Text>
+            <View
+              style={[
+                styles.tabLine,
+                selected === category && styles.selectedTabLine,
+              ]}
+            />
+          </Pressable>
+        ))}
+      </View>
 
-          ))}
-        </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {loading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={colors.black} />
@@ -189,15 +175,11 @@ export default function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: {
+  container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-
-  content: {
+    paddingTop: 30,
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 80,
   },
   title: {
     fontFamily: fonts.family.bold,
@@ -235,7 +217,11 @@ const styles = StyleSheet.create({
   selectedTabLine: {
     backgroundColor: colors.black,
   },
-  
+  scrollContent: {
+    paddingHorizontal: 0,
+    paddingBottom: 20,
+    flexGrow: 1,
+  },
   monthChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,
@@ -257,7 +243,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 15,
+    marginBottom: 22,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.12,
@@ -266,7 +252,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: 120,
+    width: 90,
     height: 90,
     borderRadius: 14,
     backgroundColor: "#D9D9D9",
@@ -282,26 +268,13 @@ const styles = StyleSheet.create({
     color: colors.black,
     lineHeight: 24,
   },
-  /*newsMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-  },
-
-  newsPublisher: {
-    fontFamily: fonts.family.regular,
-    fontSize: fonts.size.label,
-    letterSpacing: fonts.letterSpacing.label,
-    color: colors.black,
-    marginRight: 24,
-  },*/
-
   newsDate: {
+    marginTop: 12,
+    alignSelf: "flex-end",
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
-    alignSelf: "flex-end",
   },
   centerContainer: {
     flex: 1,

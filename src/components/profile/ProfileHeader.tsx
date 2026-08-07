@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, Pressable } from "react-native";
+import { View, Text, Image, StyleSheet, Pressable, Alert } from "react-native";
 import React from "react";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
@@ -7,6 +7,7 @@ import Edit from "../icons/Edit";
 import { useUserStore } from "../../store/useUserStore";
 import { updateProfileImage } from "../../apis/profileAPI";
 import { getPresignedUrl, uploadToS3 } from "../../apis/s3API";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const ProfileHeader = () => {
   const user = useUserStore((state) => state.user);
@@ -53,11 +54,9 @@ const ProfileHeader = () => {
         // 같은 파일명으로 재업로드하면 URL이 동일해서 RN Image 캐시가 새 이미지로
         // 안 바뀔 수 있음 - 로컬 표시용으로만 캐시 무효화 쿼리스트링을 붙임
         const displayUrl = `${fileUrl}?t=${Date.now()}`;
-        console.log("설정할 profileImage:", displayUrl); // 임시
         setProfileImage(displayUrl);
       } catch (error) {
-        // TODO: 실패 시 에러 UI 처리
-        console.error("프로필 이미지 업로드 실패", error);
+        Alert.alert("오류", getErrorMessage(error));
       }
     }
   };

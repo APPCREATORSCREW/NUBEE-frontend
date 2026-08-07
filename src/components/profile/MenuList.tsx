@@ -1,4 +1,4 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
@@ -6,6 +6,7 @@ import MenuArrow from "../icons/MenuArrow";
 import { useUserStore } from "../../store/useUserStore";
 import { tokenStorage } from "../../utils/tokenStorage";
 import { logoutAPI } from "../../apis/profileAPI";
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const MENUS = [
   { label: "비밀번호 변경", route: "/change-password" },
@@ -27,8 +28,7 @@ const MenuList = () => {
       const refreshToken = await tokenStorage.getRefreshToken();
       if (refreshToken) await logoutAPI({ refreshToken });
     } catch (error) {
-      // 서버 로그아웃 실패해도 로컬 정리는 계속 진행
-      console.error("로그아웃 API 실패", error);
+      Alert.alert("Error", getErrorMessage(error));
     }
     await logout(); // 로컬 정리 (SecureStore + zustand 상태 초기화)
     router.replace("/splash");
