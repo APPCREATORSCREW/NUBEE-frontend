@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getNewsHistory, NewsItem } from "../../apis/review";
+import { useRouter } from "expo-router";
+import { getCategories, getNewsHistory, NewsItem } from "../../apis/review";
 import {
   SafeAreaView,
   View,
@@ -21,6 +22,7 @@ export default function ReviewScreen() {
   const [selected, setSelected] = useState<string>("");
   const [newsList, setNewsList] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     initCategoriesAndNews();
@@ -34,25 +36,20 @@ export default function ReviewScreen() {
 
   const initCategoriesAndNews = async () => {
     try {
-      setLoading(true);
+      const categoryData = await getCategories();
 
-      const initialCategory = "경제"; 
-      const data = await getNewsHistory(initialCategory);
+      if (categoryData.isSuccess) {
+        const categoryList = categoryData.result.categories;
 
-      if (data.isSuccess) {
-        
-        const fetchedNews = data.result.news || [];
-        setNewsList(fetchedNews);
-        
-      
-        const activeCategory = data.result.category || initialCategory;
-        
-        const dynamicCategories = Array.from(
-          new Set([activeCategory, "경제", "사회", "과학", "세계"])
-        );
-        
-        setCategories(dynamicCategories);
-        setSelected(activeCategory);
+        setCategories(categoryList);
+
+        if (categoryList.length > 0) {
+          setSelected(categoryList[0]);
+        } else {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
       }
     } catch (error: any) {
       Alert.alert("카테고리 API 에러", getErrorMessage(error));
@@ -63,6 +60,7 @@ export default function ReviewScreen() {
   const loadNews = async (category: string) => {
     try {
       setLoading(true);
+
       const data = await getNewsHistory(category);
 
       if (data.isSuccess) {
@@ -71,7 +69,8 @@ export default function ReviewScreen() {
         setNewsList([]);
       }
     } catch (error) {
-      Alert.alert("오류", getErrorMessage(error));
+      console.error(error);
+      console.log("뉴스 조회 에러:", error);
       setNewsList([]);
     } finally {
       setLoading(false);
@@ -97,7 +96,18 @@ export default function ReviewScreen() {
           </View>
         )}
 
-        <View style={styles.newsCard}>
+        <Pressable
+          style={styles.newsCard}
+          onPress={() => {
+            router.push({
+              pathname: "/news",
+              params: {
+                newsId: item.newsId,
+                fromReview: "true",
+              },
+            });
+          }}
+        >
           <Image
             source={{ uri: item.imageUrl }}
             style={styles.thumbnail}
@@ -107,9 +117,12 @@ export default function ReviewScreen() {
             <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title}
             </Text>
+            
+              
             <Text style={styles.newsDate}>{date}</Text>
+            
           </View>
-        </View>
+        </Pressable>
       </View>
     );
   };
@@ -126,38 +139,39 @@ export default function ReviewScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>복습하기</Text>
-
-      <View style={styles.tabRow}>
-        {categories.map((category) => (
-          <Pressable
-            key={category}
-            style={styles.tab}
-            onPress={() => setSelected(category)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                selected === category && styles.selectedTabText,
-              ]}
-            >
-              {category}
-            </Text>
-            <View
-              style={[
-                styles.tabLine,
-                selected === category && styles.selectedTabLine,
-              ]}
-            />
-          </Pressable>
-        ))}
-      </View>
-
+    <SafeAreaView style={styles.flex}>
       <ScrollView
+        style={styles.flex}
+        contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
       >
+        <Text style={styles.title}>복습하기</Text>
+
+        <View style={styles.tabRow}>
+          {categories.map((category) => (
+            <Pressable
+              key={category}
+              style={styles.tab}
+              onPress={() => setSelected(category)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  selected === category && styles.selectedTabText,
+                ]}
+              >
+                {category}
+              </Text>
+              <View
+                style={[
+                  styles.tabLine,
+                  selected === category && styles.selectedTabLine,
+                ]}
+              />
+            </Pressable>
+
+          ))}
+        </View>
         {loading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={colors.black} />
@@ -175,11 +189,15 @@ export default function ReviewScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
     backgroundColor: colors.background,
-    paddingTop: 30,
+  },
+
+  content: {
     paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 80,
   },
   title: {
     fontFamily: fonts.family.bold,
@@ -217,11 +235,7 @@ const styles = StyleSheet.create({
   selectedTabLine: {
     backgroundColor: colors.black,
   },
-  scrollContent: {
-    paddingHorizontal: 0,
-    paddingBottom: 20,
-    flexGrow: 1,
-  },
+  
   monthChip: {
     alignSelf: "flex-start",
     paddingHorizontal: 14,
@@ -243,7 +257,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.yellow100,
     borderRadius: 16,
     padding: 16,
-    marginBottom: 22,
+    marginBottom: 15,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.12,
@@ -252,7 +266,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   thumbnail: {
-    width: 90,
+    width: 120,
     height: 90,
     borderRadius: 14,
     backgroundColor: "#D9D9D9",
@@ -268,13 +282,26 @@ const styles = StyleSheet.create({
     color: colors.black,
     lineHeight: 24,
   },
-  newsDate: {
+  /*newsMeta: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 12,
-    alignSelf: "flex-end",
+  },
+
+  newsPublisher: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.label,
     letterSpacing: fonts.letterSpacing.label,
     color: colors.black,
+    marginRight: 24,
+  },*/
+
+  newsDate: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
+    color: colors.black,
+    alignSelf: "flex-end",
   },
   centerContainer: {
     flex: 1,
@@ -298,6 +325,5 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
-    
   },
 });
