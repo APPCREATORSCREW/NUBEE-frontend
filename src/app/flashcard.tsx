@@ -403,12 +403,12 @@ const styles = StyleSheet.create({
   center: { justifyContent: "center", alignItems: "center" },
   header: {
     paddingLeft: 0,
-    paddingTop: 20,
+    paddingTop: 0,
     height: 48,
     justifyContent: "center",
   },
 
-  progressRow: { marginTop: 16, width: "100%", alignSelf: "center" },
+  progressRow: { marginTop: 18, width: "100%", alignSelf: "center" },
   progressBackground: {
     height: 10,
     borderRadius: 16,
