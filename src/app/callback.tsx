@@ -12,7 +12,6 @@ export default function CallbackScreen() {
 
   const access_token = params.access_token as string;
   const refresh_token = params.refresh_token as string;
-  const is_new = params.is_new as string;
   const error = params.error as string;
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export default function CallbackScreen() {
         await tokenStorage.saveRefreshToken(refresh_token);
 
         
-        router.replace("/(tabs)/home");
+        router.replace("//home");
        
       } catch (e) {
         Alert.alert("오류", "로그인 처리 중 문제가 발생했습니다.");
