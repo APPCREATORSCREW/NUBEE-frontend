@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
     marginBottom: 50,
-    marginTop: 60,
+    marginTop: 40,
   },
   fieldContainer: {
     marginBottom: 24,

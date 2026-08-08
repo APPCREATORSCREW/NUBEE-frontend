@@ -198,7 +198,7 @@ const TutorialScreen = () => {
           pointerEvents="box-none"
         >
           <LinearGradient
-            colors={['rgba(255,252,247,0.3)', 'rgba(255,252,247,0.5)', colors.background]}
+            colors={['rgba(255,252,247,0.3)', 'rgba(255,252,247,0.7)', colors.background]}
             locations={[0, 0.5, 1]}
             style={styles.blurBackdrop}
             pointerEvents="none"
@@ -331,5 +331,6 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     bottom: 40,
+    paddingBottom: 40,
   },
 });
