@@ -352,10 +352,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors.background,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 32,
+    backgroundColor: "transparent",
   },
   modalBackground: {
     flex: 1,
@@ -427,8 +424,11 @@ const styles = StyleSheet.create({
   },
   highlight: {
     fontFamily: fonts.family.bold,
-    backgroundColor: colors.yellow400,
     color: colors.black,
+    textDecorationLine: "underline",
+    textDecorationColor: colors.black,
+    textDecorationStyle: "solid",
+    // backgroundColor: colors.yellow100,
   },
   subtitle: {
     fontFamily: fonts.family.bold,

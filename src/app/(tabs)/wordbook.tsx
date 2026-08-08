@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontFamily: fonts.family.regular,
-    fontSize: 16,
+    fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     color: colors.gray400,
     textAlign: "center",
     marginTop: 25,
