@@ -1,5 +1,6 @@
 {
   "expo": {
+    "icon": "./assets/icons/app-icon.png",
     "name": "nubee",
     "slug": "nubee",
     "scheme": "nubee",
@@ -8,6 +9,7 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
+      "icon": "./assets/icons/app-icon.png",
       "supportsTablet": true,
       "bundleIdentifier": "com.anonymous.nubee",
       "infoPlist": {
@@ -15,6 +17,10 @@
       }
     },
     "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#F7D66E"
+      },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.nubee",
@@ -26,7 +32,16 @@
       "@react-native-community/datetimepicker",
       "expo-notifications",
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon/nubee-icon.png",
+          "imageWidth": 150,
+          "resizeMode": "contain",
+          "backgroundColor": "#F7D66E"
+        }
+      ]
     ],
     "extra": {
       "router": {},
