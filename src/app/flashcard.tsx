@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   View,
   Text,
@@ -23,6 +22,7 @@ import ArrowCircleLeft from "../components/icons/ArrowCircleLeft";
 import SentimentSatisfied from "../components/icons/SentimentSatisfied";
 import SentimentStressed from "../components/icons/SentimentStressed";
 import Button from "../components/common/Button";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface WordItem {
   userKeywordId: number;
@@ -61,7 +61,10 @@ const parseExplanation = (explanation?: string): ParsedExplanation => {
   const summaryPoints: string[] = [];
 
   sections.forEach((section, index) => {
-    const lines = section.split("\n").map((line) => line.trim()).filter(Boolean);
+    const lines = section
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
     const isBulletSection = lines.some((line) => /^[•\-\*\d+\.]/.test(line));
 
     if (isBulletSection) {
@@ -340,7 +343,8 @@ export default function FlashCard() {
                 </Text>
               ))}
 
-              {(parsedExp.summaryTitle || parsedExp.summaryPoints.length > 0) && (
+              {(parsedExp.summaryTitle ||
+                parsedExp.summaryPoints.length > 0) && (
                 <View style={styles.summaryContainer}>
                   {parsedExp.summaryTitle ? (
                     <Text style={styles.summaryTitle}>

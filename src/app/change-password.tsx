@@ -74,9 +74,7 @@ const ChangePassword = () => {
         newPasswordConfirm: confirmNewPassword,
       });
       router.back();
-    } catch (error) {
-      
-    }
+    } catch (error) {}
   };
 
   return (

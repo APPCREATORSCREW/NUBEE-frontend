@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  SafeAreaView,
   ScrollView,
   View,
   Text,
@@ -20,6 +19,7 @@ import { colors } from "../constants/colors";
 import { fonts } from "../constants/fonts";
 import { getNewsDetail } from "../apis/newsApi";
 import { addWordToBook } from "../apis/wordApi";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface KeywordItem {
   id: number;
@@ -281,17 +281,16 @@ export default function News() {
           />
         ) : (
           <Button
-          label="다른 뉴스 보기"
-          variant="filled"
-          onPress={() =>
-            router.push({
-              pathname: "../review"
-            })
-          }
-        />
+            label="다른 뉴스 보기"
+            variant="filled"
+            onPress={() =>
+              router.push({
+                pathname: "../review",
+              })
+            }
+          />
         )}
       </View>
-
     </SafeAreaView>
   );
 }
@@ -305,7 +304,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 24,
     fontFamily: fonts.family.bold,
-    fontSize: 26,
+    fontSize: fonts.size.newsTitle,
+    letterSpacing: fonts.letterSpacing.newsTitle,
     color: colors.black,
     lineHeight: 36,
   },
@@ -315,12 +315,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
-  info: { fontFamily: fonts.family.regular, fontSize: 13, color: colors.black },
+  info: {
+    fontFamily: fonts.family.regular,
+    fontSize: fonts.size.label,
+    letterSpacing: fonts.letterSpacing.label,
+    color: colors.black,
+  },
   section: { paddingHorizontal: 20, marginBottom: 25 },
   body: {
     fontFamily: fonts.family.regular,
-    fontSize: 18,
-    letterSpacing: 18 * 0.02,
+    fontSize: fonts.size.description,
+    letterSpacing: fonts.letterSpacing.description,
     color: colors.black,
     lineHeight: 31,
   },
@@ -337,7 +342,7 @@ const styles = StyleSheet.create({
   },
   linkText: {
     marginLeft: 6,
-    fontFamily: fonts.family.bold,
+    fontFamily: fonts.family.regular,
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
@@ -370,21 +375,23 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: "#F7D66E",
+    backgroundColor: colors.yellow400,
     marginBottom: 16,
   },
   modalTitle: {
     textAlign: "center",
     fontFamily: fonts.family.bold,
-    fontSize: 26,
+    fontSize: fonts.size.header,
+    letterSpacing: fonts.letterSpacing.header,
     color: colors.black,
     marginBottom: 16,
   },
   modalDescription: {
     textAlign: "center",
     fontFamily: fonts.family.regular,
-    fontSize: 15,
-    lineHeight: 24,
+    fontSize: fonts.size.description,
+    letterSpacing: fonts.letterSpacing.description,
+    lineHeight: 22,
     color: colors.black,
   },
   modalButtonRow: { flexDirection: "row", marginTop: 24 },

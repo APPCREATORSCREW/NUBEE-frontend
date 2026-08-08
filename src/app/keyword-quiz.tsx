@@ -365,8 +365,8 @@ const styles = StyleSheet.create({
   },
   paragraphText: {
     fontFamily: fonts.family.regular,
-    fontSize: 18,
-    letterSpacing: 18 * 0.02,
+    fontSize: fonts.size.description,
+    letterSpacing: fonts.letterSpacing.description,
     color: colors.black,
     marginBottom: 16,
     lineHeight: 28,
@@ -380,14 +380,14 @@ const styles = StyleSheet.create({
   },
   summaryTitle: {
     fontFamily: fonts.family.bold,
-    fontSize: 18,
-    letterSpacing: 18 * 0.02,
+    fontSize: fonts.size.description,
+    letterSpacing: fonts.letterSpacing.description,
     color: colors.black,
   },
   summaryPoint: {
     fontFamily: fonts.family.bold,
-    fontSize: 18,
-    letterSpacing: 18 * 0.02,
+    fontSize: fonts.size.description,
+    letterSpacing: fonts.letterSpacing.description,
     color: colors.black,
     lineHeight: 22,
     marginBottom: 4,
@@ -416,6 +416,7 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.title,
     color: colors.black,
     marginBottom: 30,
+    lineHeight: 28,
   },
   optionList: {
     gap: 18,
@@ -446,6 +447,7 @@ const styles = StyleSheet.create({
     fontSize: fonts.size.body,
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
+    lineHeight: 22,
   },
   optionTextActive: {
     color: colors.background,
@@ -466,8 +468,8 @@ const styles = StyleSheet.create({
   },
   feedbackTitle: {
     fontFamily: fonts.family.bold,
-    fontSize: fonts.size.body,
-    letterSpacing: fonts.letterSpacing.body,
+    fontSize: fonts.size.answer,
+    letterSpacing: fonts.letterSpacing.answer,
     color: colors.black,
     marginTop: 6,
     marginBottom: 6,
@@ -478,6 +480,7 @@ const styles = StyleSheet.create({
     letterSpacing: fonts.letterSpacing.body,
     color: colors.black,
     marginBottom: 6,
+    lineHeight: 22,
   },
   spacer: {
     flex: 1,
@@ -492,6 +495,7 @@ const styles = StyleSheet.create({
   finishText: {
     fontFamily: fonts.family.regular,
     fontSize: fonts.size.body,
+    letterSpacing: fonts.letterSpacing.body,
     textAlign: "center",
   },
 });
