@@ -428,10 +428,7 @@ const styles = StyleSheet.create({
   highlight: {
     fontFamily: fonts.family.bold,
     color: colors.black,
-    textDecorationLine: "underline",
-    textDecorationColor: colors.black,
-    textDecorationStyle: "solid",
-    // backgroundColor: colors.yellow100,
+    backgroundColor: colors.yellow400,
   },
   subtitle: {
     fontFamily: fonts.family.bold,
