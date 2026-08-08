@@ -34,11 +34,9 @@ export default function CallbackScreen() {
 
         await tokenStorage.saveRefreshToken(refresh_token);
 
-        if (is_new === "true") {
-          router.replace("/onboarding");
-        } else {
-          router.replace("/(tabs)/home");
-        }
+        
+        router.replace("/(tabs)/home");
+       
       } catch (e) {
         Alert.alert("오류", "로그인 처리 중 문제가 발생했습니다.");
 
