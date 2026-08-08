@@ -9,6 +9,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +19,7 @@ import Button from "../components/common/Button";
 import { CircleLeft, VisibilityOn, VisibilityOff } from "../components/icons";
 import { Shadow } from "react-native-shadow-2";
 import { changePassword as changePasswordAPI } from "../apis/profileAPI";
+import { getErrorMessage } from "../utils/getErrorMessage";
 
 // 영어, 숫자, 특수문자 포함 10자 이상
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{10,}$/;
@@ -74,7 +76,9 @@ const ChangePassword = () => {
         newPasswordConfirm: confirmNewPassword,
       });
       router.back();
-    } catch (error) {}
+    } catch (error) {
+      Alert.alert("오류", getErrorMessage(error));
+    }
   };
 
   return (
@@ -196,6 +200,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 10,
     marginBottom: 38,
+    marginLeft: 2,
   },
   iconRadius: {
     borderRadius: 23,

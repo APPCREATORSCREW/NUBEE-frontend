@@ -12,6 +12,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../constants/colors";
 import { fonts } from "../../constants/fonts";
 import Button from "../../components/common/Button";
@@ -176,142 +177,144 @@ const FindPasswordScreen = () => {
       style={styles.flex}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <ScrollView
-        style={styles.flex}
-        contentContainerStyle={styles.container}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.header}>
-          <Pressable onPress={handleBack}>
-            <Shadow distance={2} startColor="#00000020">
-              <View style={styles.iconRadius}>
-                <CircleLeft />
-              </View>
-            </Shadow>
-          </Pressable>
-          <Text style={styles.headerTitle}>비밀번호 찾기</Text>
-          <View style={styles.headerSpacer} />
-        </View>
+      <SafeAreaView style={styles.safeArea} edges={["top"]}>
+        <ScrollView
+          style={styles.flex}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <Pressable onPress={handleBack}>
+              <Shadow distance={2} startColor="#00000020">
+                <View style={styles.iconRadius}>
+                  <CircleLeft />
+                </View>
+              </Shadow>
+            </Pressable>
+            <Text style={styles.headerTitle}>비밀번호 찾기</Text>
+            <View style={styles.headerSpacer} />
+          </View>
 
-        {step === "verify" ? (
-          <>
-            <Field label="이름" value={name} onChangeText={setName} />
+          {step === "verify" ? (
+            <>
+              <Field label="이름" value={name} onChangeText={setName} />
 
-            <Field
-              label="이메일"
-              placeholder="nubee@example.com"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              rightElement={
-                <Pressable
-                  style={[
-                    styles.pillButton,
-                    !emailValid && styles.pillButtonDisabled,
-                  ]}
-                  onPress={handleSendEmail}
-                  disabled={!emailValid}
-                >
-                  <Text style={styles.pillButtonLabel}>
-                    {emailTimer.expired ? "재전송" : "전송"}
-                  </Text>
-                </Pressable>
-              }
-            />
-            {emailSent && (
-              <Text style={styles.helperText}>
-                인증번호가 이메일로 전송되었습니다.
-              </Text>
-            )}
-
-            {emailSent && (
-              <>
-                <Field
-                  label="인증번호"
-                  placeholder="인증번호를 입력해주세요"
-                  value={authCode}
-                  onChangeText={setAuthCode}
-                  rightElement={
-                    <Pressable
-                      style={[
-                        styles.pillButton,
-                        !authCode && styles.pillButtonDisabled,
-                      ]}
-                      onPress={handleVerifyCode}
-                      disabled={!authCode}
-                    >
-                      <Text style={styles.pillButtonLabel}>확인</Text>
-                    </Pressable>
-                  }
-                />
-                <Text
-                  style={
-                    emailTimer.expired
-                      ? styles.timerTextExpired
-                      : styles.helperText
-                  }
-                >
-                  {emailTimer.expired
-                    ? "인증번호가 만료되었어요. 재전송해주세요."
-                    : `남은 시간 ${emailTimer.label}`}
+              <Field
+                label="이메일"
+                placeholder="nubee@example.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                rightElement={
+                  <Pressable
+                    style={[
+                      styles.pillButton,
+                      !emailValid && styles.pillButtonDisabled,
+                    ]}
+                    onPress={handleSendEmail}
+                    disabled={!emailValid}
+                  >
+                    <Text style={styles.pillButtonLabel}>
+                      {emailTimer.expired ? "재전송" : "전송"}
+                    </Text>
+                  </Pressable>
+                }
+              />
+              {emailSent && (
+                <Text style={styles.helperText}>
+                  인증번호가 이메일로 전송되었습니다.
                 </Text>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <Field
-              label="새 비밀번호"
-              placeholder="영어, 숫자, 특수문자 포함 10자 이상"
-              value={newPassword}
-              onChangeText={setNewPassword}
-              onBlur={markTouched("newPassword")}
-              secureTextEntry={!showNewPassword}
-              autoCapitalize="none"
-              error={
-                touched.newPassword && !newPasswordValid
-                  ? "올바른 비밀번호 형식이 아닙니다."
-                  : undefined
-              }
-              rightElement={
-                <Pressable onPress={() => setShowNewPassword((prev) => !prev)}>
-                  {showNewPassword ? <VisibilityOn /> : <VisibilityOff />}
-                </Pressable>
-              }
-            />
+              )}
 
-            <Field
-              key="confirmNewPassword"
-              label="새 비밀번호 확인"
-              value={confirmNewPassword}
-              placeholder="새 비밀번호를 다시 입력해주세요"
-              onChangeText={setConfirmNewPassword}
-              onBlur={markTouched("confirmNewPassword")}
-              secureTextEntry={!showConfirmNewPassword}
-              autoCapitalize="none"
-              importantForAutofill="no"
-              textContentType="none"
-              error={
-                touched.confirmNewPassword && !confirmNewPasswordValid
-                  ? "비밀번호가 일치하지 않습니다."
-                  : undefined
-              }
-              rightElement={
-                <Pressable
-                  onPress={() => setShowConfirmNewPassword((prev) => !prev)}
-                >
-                  {showConfirmNewPassword ? (
-                    <VisibilityOn />
-                  ) : (
-                    <VisibilityOff />
-                  )}
-                </Pressable>
-              }
-            />
-          </>
-        )}
-      </ScrollView>
+              {emailSent && (
+                <>
+                  <Field
+                    label="인증번호"
+                    placeholder="인증번호를 입력해주세요"
+                    value={authCode}
+                    onChangeText={setAuthCode}
+                    rightElement={
+                      <Pressable
+                        style={[
+                          styles.pillButton,
+                          !authCode && styles.pillButtonDisabled,
+                        ]}
+                        onPress={handleVerifyCode}
+                        disabled={!authCode}
+                      >
+                        <Text style={styles.pillButtonLabel}>확인</Text>
+                      </Pressable>
+                    }
+                  />
+                  <Text
+                    style={
+                      emailTimer.expired
+                        ? styles.timerTextExpired
+                        : styles.helperText
+                    }
+                  >
+                    {emailTimer.expired
+                      ? "인증번호가 만료되었어요. 재전송해주세요."
+                      : `남은 시간 ${emailTimer.label}`}
+                  </Text>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Field
+                label="새 비밀번호"
+                placeholder="영어, 숫자, 특수문자 포함 10자 이상"
+                value={newPassword}
+                onChangeText={setNewPassword}
+                onBlur={markTouched("newPassword")}
+                secureTextEntry={!showNewPassword}
+                autoCapitalize="none"
+                error={
+                  touched.newPassword && !newPasswordValid
+                    ? "올바른 비밀번호 형식이 아닙니다."
+                    : undefined
+                }
+                rightElement={
+                  <Pressable onPress={() => setShowNewPassword((prev) => !prev)}>
+                    {showNewPassword ? <VisibilityOn /> : <VisibilityOff />}
+                  </Pressable>
+                }
+              />
+
+              <Field
+                key="confirmNewPassword"
+                label="새 비밀번호 확인"
+                value={confirmNewPassword}
+                placeholder="새 비밀번호를 다시 입력해주세요"
+                onChangeText={setConfirmNewPassword}
+                onBlur={markTouched("confirmNewPassword")}
+                secureTextEntry={!showConfirmNewPassword}
+                autoCapitalize="none"
+                importantForAutofill="no"
+                textContentType="none"
+                error={
+                  touched.confirmNewPassword && !confirmNewPasswordValid
+                    ? "비밀번호가 일치하지 않습니다."
+                    : undefined
+                }
+                rightElement={
+                  <Pressable
+                    onPress={() => setShowConfirmNewPassword((prev) => !prev)}
+                  >
+                    {showConfirmNewPassword ? (
+                      <VisibilityOn />
+                    ) : (
+                      <VisibilityOff />
+                    )}
+                  </Pressable>
+                }
+              />
+            </>
+          )}
+        </ScrollView>
+      </SafeAreaView>
 
       {step === "reset" && (
         <View style={styles.buttonContainer}>
@@ -339,8 +342,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+  },
   container: {
-    padding: 20,
     backgroundColor: colors.background,
   },
   header: {
@@ -349,6 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 10,
     marginBottom: 40,
+    marginLeft: 2,
   },
   headerTitle: {
     fontFamily: fonts.family.bold,
@@ -362,6 +370,8 @@ const styles = StyleSheet.create({
   },
   iconRadius: {
     borderRadius: 23,
+    justifyContent: "center",
+    alignItems: "center",
   },
   fieldContainer: {
     marginBottom: 24,
