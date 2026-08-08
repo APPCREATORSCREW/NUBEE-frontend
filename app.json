@@ -1,7 +1,7 @@
 {
   "expo": {
     "icon": "./assets/icons/app-icon.png",
-    "name": "nubee",
+    "name": "누비",
     "slug": "nubee",
     "scheme": "nubee",
     "version": "1.0.0",
